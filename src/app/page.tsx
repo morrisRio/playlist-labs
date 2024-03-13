@@ -1,18 +1,16 @@
-import Image from "next/image";
-import Sidebar from "./components/Sidebar";
+import Sidebar from "@/components/Sidebar";
+import Center from "@/components/Dashboard";
 
-export default function Home() {
+export default async function Home() {
     return (
-        <div className="min-h-screen flex-col">
-            <main className="flex row overflow-hidden">
-                {/* sidebar */}
+        <div className="h-full">
+            <div className="flex">
                 <Sidebar></Sidebar>
-                {/* playlist */}
-                <h1>this is de main surface</h1>
-            </main>
+                <Center></Center>
+            </div>
+
             <div>
-                {/* control */}
-                <h1>this is da control</h1>
+                <h2 className="bg-slate-600">this is da control</h2>
             </div>
         </div>
     );
