@@ -23,7 +23,7 @@ const useSession = {
 };
 
 //all data that is returned from the next-auth signIn
-const JWTcallBackData = {
+const JWTcallBackDataAll = {
     token: {
         token: {
             name: "karate_morris",
@@ -116,7 +116,6 @@ const refreshedToken = {
 };
 
 //session callback data:
-
 const sessionCallbackData = {
     session: {
         user: {

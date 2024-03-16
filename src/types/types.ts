@@ -13,6 +13,7 @@ interface AuthUser {
 
 export interface AuthSession extends Omit<DefaultSession, "user"> {
     accessToken: AuthUser;
+    user: AuthUser;
 }
 //Spotify Types================================================================
 
@@ -23,11 +24,16 @@ interface Image {
 }
 
 export interface Playlist {
-    description?: string;
-    id: string;
+    collaborative?: boolean;
+    description?: string | null;
+    external_urls: {
+        spotify: string;
+    };
     followers: {
         total: number;
     };
+    href: string;
+    id: string;
     images: Image[];
     name: string;
     owner: {

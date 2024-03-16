@@ -1,11 +1,10 @@
 "use client";
 import { signOut, useSession } from "next-auth/react";
-import { AuthSession } from "@/types/types";
 
 const Profile = () => {
-    const { data } = useSession();
-    const session = data as AuthSession;
-    //attention: session changes after session callback in nextauth/rotes ran.
+    const { data: session } = useSession();
+
+    // console.log("session on clientComponent: ", session);
 
     return (
         <header>

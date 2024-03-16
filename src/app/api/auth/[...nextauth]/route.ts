@@ -83,9 +83,9 @@ export const authOptions: NextAuthOptions = {
     },
     callbacks: {
         // // da kommt viel raus was man nicht sieht:
-        // async jwt(data) {
-        //   console.log(data);
-        //   return data;
+        // async jwt(all) {
+        //   console.log(all);
+        //   return all;
         // },
 
         async jwt({ token, account }) {
