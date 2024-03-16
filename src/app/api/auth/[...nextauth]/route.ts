@@ -1,4 +1,4 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth, { NextAuthOptions, Account } from "next-auth";
 import SpotifyProvider from "next-auth/providers/spotify";
 import { JWT } from "next-auth/jwt";
 
@@ -87,7 +87,7 @@ export const authOptions: NextAuthOptions = {
         //   console.log(all);
         //   return all;
         // },
-
+        //@ts-ignore
         async jwt({ token, account }) {
             //on first sign in add the tokens from account to jwt
             if (account) {

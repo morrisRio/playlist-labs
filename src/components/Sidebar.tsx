@@ -1,3 +1,4 @@
+"use client";
 // import {
 //     MdOutlineHome,
 //     MdOutlineAdd,
@@ -6,26 +7,39 @@
 //     MdOutlineLibraryMusic,
 // } from "react-icons/md";
 import Profile from "@/components/Profile";
+import { Playlist } from "@/types/spotify";
 import { getUserPlaylist } from "@/lib/spotifyActions";
 import { getAuthSession } from "@/lib/serverUtils";
 import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const Sidebar = async () => {
     const session = await getAuthSession();
-    console.log("session in Sidebar (server-component):", session);
     if (!session) {
         redirect("api/auth/signin");
     }
 
-    const playlists = await getUserPlaylist(session);
-    // console.log("playlists", playlists);
+    // const [playlists, setPlaylists] = useState<Playlist[]>([
+    //     //@ts-ignore
+    //     { name: "no playlists found", id: "0" },
+    // ]);
+
+    // useEffect(() => {
+    //     const fetchPlaylists = async () => {
+    //         const playlists = await getUserPlaylist(session);
+    //         setPlaylists(playlists);
+    //     };
+    //     fetchPlaylists();
+    // }, []);
+    // setPlaylists(await getUserPlaylist(session));
+
     return (
         <div className=" text-neutral-300 border border-neutral-700 flex flex-col gap-4 p-4 overflow-y-auto scrollbar-hide">
             <Profile />
 
             <h3>
                 {/* Playlists from {session ? session?.user?.name : "Unknown User"} */}
-                Playlists
+                Playlist
             </h3>
             {playlists?.map((playlist) => {
                 return <p key={playlist.id}>{playlist.name}</p>;
