@@ -1,8 +1,9 @@
 "use server";
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { AuthSession } from "@/types/types";
+import { AuthSession } from "@/types/spotify";
 import { getServerSession } from "next-auth/next";
+import { NextResponse } from "next/server";
 
 export const getAuthSession = async () => {
     "use server";
@@ -37,26 +38,30 @@ export const customGet = async (url: string, session: AuthSession) => {
     return res;
 };
 
-export const customPost = async (url: string, body: object) => {
+/* this is a function */
+export const customPost = async (
+    url: string,
+    body: object,
+    token: string
+): Promise<NextResponse> => {
     "use server";
-    const session = await getAuthSession();
-
-    if (!session) {
-        console.error("No session found");
-        return null;
-    }
 
     const res = await fetch(url, {
         method: "POST",
         headers: {
-            Authorization: `Bearer ${session.accessToken}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
     })
         .then((res) => {
             if (!res.ok) {
-                throw new Error("Network response was not ok");
+                throw new Error(
+                    "Network response was not ok " +
+                        res.status +
+                        " " +
+                        res.statusText
+                );
             }
             return res.json();
         })
@@ -64,6 +69,7 @@ export const customPost = async (url: string, body: object) => {
             console.error("Error creating Playlist:", error);
             return null;
         });
+
     return res;
 };
 

@@ -1,13 +1,14 @@
 "use client";
 
-import { createPlaylist } from "@/lib/spotifyActions";
-
 function Button() {
-    const newPlaylist = async (formdata: any) => {
-        await createPlaylist(
-            formdata.get("playlistname"),
-            "created by playlistLabs"
-        );
+    const newPlaylist = async (formdata: FormData) => {
+        console.log("fetching create-playlist with fromdata: ", formdata);
+        await fetch("/api/spotify/create-playlist", {
+            method: "POST",
+            body: JSON.stringify({
+                name: formdata.get("playlistname"),
+            }),
+        });
     };
 
     return (

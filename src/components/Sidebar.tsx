@@ -14,10 +14,11 @@ import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const Sidebar = async () => {
-    const session = await getAuthSession();
-    if (!session) {
-        redirect("api/auth/signin");
-    }
+    // const session = await getAuthSession();
+
+    // if (!session) {
+    //     redirect("api/auth/signin");
+    // }
 
     // const [playlists, setPlaylists] = useState<Playlist[]>([
     //     //@ts-ignore
@@ -41,9 +42,9 @@ const Sidebar = async () => {
                 {/* Playlists from {session ? session?.user?.name : "Unknown User"} */}
                 Playlist
             </h3>
-            {playlists?.map((playlist) => {
+            {/* {playlists?.map((playlist) => {
                 return <p key={playlist.id}>{playlist.name}</p>;
-            })}
+            })} */}
         </div>
     );
 };

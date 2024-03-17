@@ -1,6 +1,6 @@
 import { Playlist, Track } from "@/types/types";
 import { customGet, customPost } from "./serverUtils";
-import { AuthSession } from "@/types/types";
+import { AuthSession } from "@/types/spotify";
 
 //CREATE ==============================================================================
 export const createPlaylist = async (

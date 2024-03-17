@@ -95,7 +95,7 @@ export const authOptions: NextAuthOptions = {
                     ...token,
                     accessToken: account.access_token,
                     refreshToken: account.refresh_token,
-                    username: account.providerAccountId,
+                    userId: account.providerAccountId,
                     accessTokenExpires: account.expires_at,
                 };
             }
@@ -116,7 +116,7 @@ export const authOptions: NextAuthOptions = {
 
         async session({ session, token }) {
             //add the token to the session so the user can tap into it and use it for requests
-            session.accessToken = token.accessToken;
+            // session.accessToken = token.accessToken;
             session.expires_in = token.accessTokenExpires
                 ? ((token.accessTokenExpires - Date.now()) / 60000).toFixed(1) +
                   "min"
