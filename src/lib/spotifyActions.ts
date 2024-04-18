@@ -3,6 +3,8 @@ import { customGet, customPost } from "./serverUtils";
 import { AuthSession } from "@/types/spotify";
 
 //CREATE ==============================================================================
+
+//this is deprecated. now with custom api call
 export const createPlaylist = async (
     playlistName: string,
     description: string

@@ -24,16 +24,17 @@ export const getAuthSession = async () => {
     return session;
 };
 
-export const customGet = async (url: string, session: AuthSession) => {
+export const customGet = async (
+    url: string,
+    token: string
+): Promise<NextResponse> => {
     "use server";
-    if (!session) {
-        return null;
-    }
     const res = await fetch(url, {
         headers: {
-            Authorization: `Bearer ${session.accessToken}`,
+            Authorization: `Bearer ${token}`,
         },
     }).then((res) => res.json());
+    console.log("res:", res);
 
     return res;
 };

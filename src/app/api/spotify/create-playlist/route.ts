@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { customPost } from "@/lib/serverUtils";
 import { getToken } from "next-auth/jwt";
-import { log } from "console";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
     const data = await req.json();

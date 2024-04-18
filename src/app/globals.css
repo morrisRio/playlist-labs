@@ -15,6 +15,14 @@
     h4 {
         @apply text-lg;
     }
+    input.hide-arrows[type="number"]::-webkit-outer-spin-button,
+    input.hide-arrows[type="number"]::-webkit-inner-spin-button,
+    input.hide-arrows[type="number"] {
+        text-align: center;
+        -webkit-appearance: none;
+        margin: 0;
+        -moz-appearance: textfield !important;
+    }
 }
 
 :root {
