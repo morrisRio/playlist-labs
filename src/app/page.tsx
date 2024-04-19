@@ -1,4 +1,4 @@
-import PlaylistCreator from "@/components/PlaylistCreator";
+import PlaylistCreator from "@/components/PlaylistCreator/PlaylistCreator";
 import Profile from "@/components/Profile";
 // import Center from "@/components/Dashboard";
 

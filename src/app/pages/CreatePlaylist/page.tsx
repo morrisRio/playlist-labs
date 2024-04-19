@@ -5,7 +5,7 @@ import { getUserLikedSongs, createPlaylist } from "@/lib/spotifyActions";
 import { getAuthSession } from "@/lib/serverUtils";
 import { redirect } from "next/navigation";
 import Profile from "@/components/Profile";
-import PlaylistCreator from "@/components/PlaylistCreator";
+import PlaylistCreator from "@/components/PlaylistCreator/PlaylistCreator";
 import { useEffect } from "react";
 
 const CreatePlaylist = () => {
@@ -27,7 +27,6 @@ const CreatePlaylist = () => {
     return (
         <div>
             <Profile />
-            <h1>Create Playlist</h1>
             {/* {session && <p>Logged in as {session.user.name}</p>} */}
             {/* <button onClick={helloWorld}>Hi</button> */}
             <PlaylistCreator />

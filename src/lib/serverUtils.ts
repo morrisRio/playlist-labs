@@ -34,7 +34,7 @@ export const customGet = async (
             Authorization: `Bearer ${token}`,
         },
     }).then((res) => res.json());
-    console.log("res:", res);
+    console.log("customGet():", url);
 
     return res;
 };
