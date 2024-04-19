@@ -73,8 +73,26 @@ const getThumbnail = (item: any) => {
     return "";
 };
 
+const useDebounce = (value: any, delay: number) => {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [value, delay]);
+
+    return debouncedValue;
+};
+
 function SeedModal({ onAdd, onClose, seeds }: SeedModalProps) {
-    const [search, setSearch] = useState("Search for an artist or track");
+    const [search, setSearch] = useState("");
+    const [showSearch, setShowSearch] = useState(false);
+    const [searchResults, setSearchResults] = useState<Seed[]>([]);
     const [results, setResults] = useState<Results>({
         results: [],
         seedTypes: ["artist", "track"],
@@ -82,6 +100,7 @@ function SeedModal({ onAdd, onClose, seeds }: SeedModalProps) {
         selectedType: "artist",
         selectedRange: "short_term",
     });
+    const debouncedSearch = useDebounce(search, 1000);
 
     useEffect(() => {
         const fetchResults = async () => {
@@ -116,6 +135,37 @@ function SeedModal({ onAdd, onClose, seeds }: SeedModalProps) {
         fetchResults();
     }, [results.selectedType, results.selectedRange]);
 
+    useEffect(() => {
+        if (!search) {
+            setShowSearch(false);
+            return;
+        }
+        setShowSearch(true);
+        const fetchSearch = async () => {
+            const response = await fetch(`/api/spotify/search?q=${search}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            const { data } = await response.json();
+            console.log(data);
+            const seeds = data.artists.items.map((item: any) => {
+                const seed: Seed = {
+                    spotify: item.external_urls.spotify,
+                    id: item.id,
+                    title: item.name,
+                    description: getDescription(item),
+                    type: item.type,
+                    thumbnail: getThumbnail(item),
+                };
+                return seed;
+            });
+            // console.log("found: ", seeds);
+            setSearchResults(seeds);
+        };
+        fetchSearch();
+    }, [debouncedSearch]);
     const changeFilter = (
         e:
             | React.MouseEvent<HTMLButtonElement>
@@ -140,50 +190,73 @@ function SeedModal({ onAdd, onClose, seeds }: SeedModalProps) {
                     {seeds?.length} /5 used
                 </h3>
             </header>
-            <div id="filters" className="mt-4 mb-6 gap-4">
-                <div className="flex justify-between">
-                    {results.seedTypes.map((type) => (
-                        <button
-                            type="button"
-                            name="selectedType"
-                            value={type}
-                            key={type}
-                            onClick={changeFilter}
-                        >
-                            <h4
-                                className={`font-bold ${
-                                    results.selectedType == type
-                                        ? "text-white"
-                                        : "text-zinc-500"
-                                }`}
-                            >
-                                Top {type[0].toUpperCase() + type.slice(1)}s
-                            </h4>
-                        </button>
+            <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search"
+                className="w-full mt-6 pb-2 bg-transparent border-b border-b-zinc-500 focus:outline-none focus:border-b-white placeholder-zinc-500 text-xl"
+            ></input>
+            {showSearch ? (
+                <div className="flex flex-col mt-4">
+                    {searchResults.map((seed, index) => (
+                        <SeedEntry
+                            seedObj={seed}
+                            index={index}
+                            onAdd={onAdd}
+                            key={seed.id}
+                        />
                     ))}
-                    <select
-                        name="selectedRange"
-                        onChange={changeFilter}
-                        className="block mt-1 p-2 rounded-md bg-zinc-800 focus:outline-none focus:ring focus:border-blue-300"
-                    >
-                        {results.rangeTypes.map((duration) => (
-                            <option key={duration} value={duration}>
-                                {duration}
-                            </option>
-                        ))}
-                    </select>
                 </div>
-            </div>
-            <div className=" flex flex-col">
-                {results.results.map((seed, index) => (
-                    <SeedEntry
-                        seedObj={seed}
-                        index={index}
-                        onAdd={onAdd}
-                        key={seed.id}
-                    />
-                ))}
-            </div>
+            ) : (
+                <>
+                    <div id="filters" className="mt-4 mb-6 gap-4">
+                        <div className="flex justify-between">
+                            {results.seedTypes.map((type) => (
+                                <button
+                                    type="button"
+                                    name="selectedType"
+                                    value={type}
+                                    key={type}
+                                    onClick={changeFilter}
+                                >
+                                    <h4
+                                        className={`font-bold ${
+                                            results.selectedType == type
+                                                ? "text-white"
+                                                : "text-zinc-500"
+                                        }`}
+                                    >
+                                        Top{" "}
+                                        {type[0].toUpperCase() + type.slice(1)}s
+                                    </h4>
+                                </button>
+                            ))}
+                            <select
+                                name="selectedRange"
+                                onChange={changeFilter}
+                                className="block mt-1 p-2 rounded-md bg-zinc-800 focus:outline-none focus:ring focus:border-blue-300"
+                            >
+                                {results.rangeTypes.map((duration) => (
+                                    <option key={duration} value={duration}>
+                                        {duration}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                    <div className=" flex flex-col">
+                        {results.results.map((seed, index) => (
+                            <SeedEntry
+                                seedObj={seed}
+                                index={index}
+                                onAdd={onAdd}
+                                key={seed.id}
+                            />
+                        ))}
+                    </div>
+                </>
+            )}
         </div>
     );
 }

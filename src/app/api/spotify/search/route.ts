@@ -5,12 +5,11 @@ import { getToken } from "next-auth/jwt";
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: { type: string } }
+    { params }: { params: { q: string } }
 ): Promise<NextResponse> {
-    const type = params.type;
-    const time_range = req.nextUrl.searchParams.get("time_range");
+    const q = req.nextUrl.searchParams.get("q");
 
-    console.log("GETTING TOP ITEMS: ", type, time_range);
+    console.log("GETTING SEARCH ITEMS: ", q);
     //add the token to the request for the api call
     const token = await getToken({ req });
     if (!token) {
@@ -20,13 +19,13 @@ export async function GET(
 
     const accessToken = token?.accessToken || "no token found";
 
-    // make the api call to get top items
+    // make the api call to search for tracks and artists
     const data = await customGet(
-        `https://api.spotify.com/v1/me/top/${type}/?time_range=${time_range}`,
+        `https://api.spotify.com/v1/search?q=${q}&type=track%2Cartist&limit=25&offset=0`,
         accessToken
     );
     //@ts-ignore
-    console.log("received data: ", data.items?.length + " items");
+    console.log("received data: ", data);
 
     return NextResponse.json({ data });
 }
