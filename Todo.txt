@@ -1,2 +1,5 @@
+catch errors and show them in the interface
+
+
 Creating playlsit covers with canvas and node.js
 https://blog.logrocket.com/creating-saving-images-node-canvas/

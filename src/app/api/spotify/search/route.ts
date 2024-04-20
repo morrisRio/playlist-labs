@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { customGet } from "@/lib/serverUtils";
 import { getToken } from "next-auth/jwt";
-import { getSeedsFromItems } from "@/lib/spotifyActions";
+import { getSeedsFromItems, genres } from "@/lib/spotifyActions";
 import { Seed } from "@/types/spotify";
 import { Track, Artist } from "@/types/spotify";
-import { get } from "http";
+import { levenshteinDistance } from "@/lib/mathUtils";
 
 interface SearchResults {
     artists: { items: Artist[] };
@@ -28,6 +28,26 @@ export async function GET(
 
     const accessToken = token?.accessToken || "no token found";
 
+    let foundGenres: string[] = [];
+
+    if (q) {
+        foundGenres = genres.filter((genre) => {
+            return levenshteinDistance(genre.substring(0, q.length), q) < 3;
+        });
+    }
+
+    const foundGenreItems = foundGenres.map((genre) => {
+        const genreItem = {
+            title: genre,
+            type: "genre",
+        };
+        return genreItem;
+    });
+
+    const genreSeeds: Seed[] = getSeedsFromItems(foundGenreItems);
+
+    console.log("FOUND GENRES", genreSeeds);
+
     // make the api call to search for tracks and artists
     const data = (await customGet(
         `https://api.spotify.com/v1/search?q=${q}&type=track%2Cartist&limit=25&offset=0`,
@@ -37,15 +57,41 @@ export async function GET(
     //@ts-ignore
 
     const { artists, tracks } = data;
-
+    // console.log(artists);
     const artistSeeds: Seed[] = getSeedsFromItems(artists.items);
     const trackSeeds: Seed[] = getSeedsFromItems(tracks.items);
 
-    //do this for tracks as well
-    //then make one big array of all the seeds plus genres
     //sort them with the lehvenstein distance algorithm according to the search query
+    const results = [...genreSeeds, ...artistSeeds, ...trackSeeds];
+    console.log("got Seeds: ", results);
 
-    // console.log("found: ", artistSeeds);
+    //this seems to crash/ take huge amount of time
+    // TODO: remember to check for timeout
+    if (q) {
+        console.log("SORTING...");
+        let i = 0;
+        results.sort((a, b) => {
+            console.log("sorting...", i);
+            i++;
+            return (
+                levenshteinDistance(
+                    a.title.toLowerCase().substring(0, q.length),
+                    q.toLowerCase()
+                ) -
+                levenshteinDistance(
+                    b.title.toLowerCase().substring(0, q.length),
+                    q.toLowerCase()
+                )
+            );
+        });
+    }
 
-    return NextResponse.json({ artistSeeds });
+    console.log("sorting done");
+
+    // console.log("sorted: ", results);
+    //results.sort(function(a, b) {
+    //     return a.score - b.score;
+    // });
+
+    return NextResponse.json(results);
 }

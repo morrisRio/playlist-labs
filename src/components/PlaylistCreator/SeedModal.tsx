@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { MdOutlineArrowBackIos } from "react-icons/md";
 import { SeedEntry } from "./Seed";
 import { Seed } from "@/types/spotify";
-import { getDescription, getThumbnail } from "@/lib/spotifyActions";
+import { getSeedsFromItems } from "@/lib/spotifyActions";
 
 interface SeedModalProps {
     onAdd: (seed: Seed) => void;
@@ -80,7 +80,6 @@ function SeedModal({ onAdd, onClose, seeds }: SeedModalProps) {
         selectedRange: "short_term",
     });
     const debouncedSearch = useDebounce(search, 1000);
-
     useEffect(() => {
         const fetchResults = async () => {
             const response = await fetch(
@@ -94,17 +93,7 @@ function SeedModal({ onAdd, onClose, seeds }: SeedModalProps) {
             );
             const { data } = await response.json();
             console.log(data.items);
-            const seeds = data.items.map((item: any) => {
-                const seed: Seed = {
-                    spotify: item.external_urls.spotify,
-                    id: item.id,
-                    title: item.name,
-                    description: getDescription(item),
-                    type: item.type,
-                    thumbnail: getThumbnail(item),
-                };
-                return seed;
-            });
+            const seeds = getSeedsFromItems(data.items);
             console.log(seeds);
             setResults((prevState) => ({
                 ...prevState,
@@ -127,9 +116,9 @@ function SeedModal({ onAdd, onClose, seeds }: SeedModalProps) {
                     "Content-Type": "application/json",
                 },
             });
-            const { artistSeeds } = await response.json();
-            // console.log("found: ", seeds);
-            setSearchResults(artistSeeds);
+            const data = await response.json();
+            // console.log("found: ", data);
+            setSearchResults(data);
         };
         fetchSearch();
     }, [debouncedSearch]);

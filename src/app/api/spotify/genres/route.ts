@@ -1,10 +1,12 @@
+//TODO: delete endpoint as ill just store the genre array
+
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { customGet } from "@/lib/serverUtils";
 import { getToken } from "next-auth/jwt";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
-    console.log("getting genre seeds");
+    console.log("GETTING GENRES");
 
     //add the token to the request for the api call
     const token = await getToken({ req });
@@ -20,8 +22,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         `https://api.spotify.com/v1/recommendations/available-genre-seeds`,
         accessToken
     );
-    console.log("res: ", res);
-    return res;
+    //@ts-ignore
+    const { genres } = res;
+
+    return NextResponse.json(genres);
 }
 
 // function for including the genres into the search endpoint with lehvenstein distance
