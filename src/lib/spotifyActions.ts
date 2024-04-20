@@ -1,63 +1,189 @@
-import { Playlist, Track } from "@/types/types";
-import { customGet, customPost } from "./serverUtils";
-import { AuthSession } from "@/types/spotify";
+import formatter from "numbuffix";
+import { Seed } from "@/types/spotify";
 
 //CREATE ==============================================================================
 
-//this is deprecated. now with custom api call
-export const createPlaylist = async (
-    playlistName: string,
-    description: string
-): Promise<Playlist> => {
-    const body = {
-        name: playlistName,
-        description: description,
-        public: false,
-    };
-
-    //TODO: get userId from session
-    const data = await customPost(
-        `https://api.spotify.com/v1/users/karate_morris/playlists`,
-        body
-    );
-    console.log("Playlist created: ", data);
-    return data;
-};
-
 //GET =================================================================================
-export const getUserPlaylist = async (
-    session: AuthSession
-): Promise<Playlist[]> => {
-    const data = await customGet(
-        `https://api.spotify.com/v1/me/playlists`,
-        session
-    );
-    return data.items;
-};
 
-type LikedSongs = { total: number; items: Track[] };
-
-export const getUserLikedSongs = async (
-    session: AuthSession
-): Promise<LikedSongs> => {
-    const data = await customGet(
-        `https://api.spotify.com/v1/me/tracks?limit=50`,
-        session
-    );
-
-    const finalData = { total: data.total, items: data.items };
-    let limit = 50;
-    let currUrl = data.next;
-
-    while (currUrl !== null) {
-        const nextData = await customGet(currUrl, session);
-        finalData.items.push(...nextData.items);
-        limit += 50;
-        currUrl = nextData.next;
+export const getDescription = (item: any) => {
+    if (item.type === "artist") {
+        return `${item.genres.join(", ")} · ${formatter(
+            item.followers.total,
+            ""
+        )} followers`;
+    } else {
+        // @ts-ignore
+        return item.artists.map((artist) => artist.name).join(", ");
     }
-
-    return {
-        total: data.total,
-        items: data.items.map((item: any) => item.track),
-    };
 };
+
+export const getThumbnail = (item: any) => {
+    let thumbnail = "";
+    if (item.type === "artist") {
+        thumbnail =
+            item.images[0] && item.images[0].url ? item.images[0].url : "";
+    } else if (item.type === "track") {
+        thumbnail =
+            item.album.images[0] && item.album.images[0].url
+                ? item.album.images[0].url
+                : "";
+    }
+    //genre
+    return thumbnail;
+};
+
+export const getSeedsFromItems = (items: any[]): Seed[] => {
+    const seeds = items.map((item: any) => {
+        if (item.type === "genre") {
+            const seed: Seed = {
+                spotify: "todo: find genre links",
+                id: item.title,
+                title: item.title,
+                description: item.type,
+                type: item.type,
+                thumbnail: "",
+            };
+            return seed;
+        }
+
+        const seed: Seed = {
+            spotify: item.external_urls.spotify,
+            id: item.id,
+            title: item.name,
+            description: getDescription(item),
+            type: item.type,
+            thumbnail: getThumbnail(item),
+        };
+        return seed;
+    });
+    return seeds;
+};
+
+export const genres: string[] = [
+    "acoustic",
+    "afrobeat",
+    "alt-rock",
+    "alternative",
+    "ambient",
+    "anime",
+    "black-metal",
+    "bluegrass",
+    "blues",
+    "bossanova",
+    "brazil",
+    "breakbeat",
+    "british",
+    "cantopop",
+    "chicago-house",
+    "children",
+    "chill",
+    "classical",
+    "club",
+    "comedy",
+    "country",
+    "dance",
+    "dancehall",
+    "death-metal",
+    "deep-house",
+    "detroit-techno",
+    "disco",
+    "disney",
+    "drum-and-bass",
+    "dub",
+    "dubstep",
+    "edm",
+    "electro",
+    "electronic",
+    "emo",
+    "folk",
+    "forro",
+    "french",
+    "funk",
+    "garage",
+    "german",
+    "gospel",
+    "goth",
+    "grindcore",
+    "groove",
+    "grunge",
+    "guitar",
+    "happy",
+    "hard-rock",
+    "hardcore",
+    "hardstyle",
+    "heavy-metal",
+    "hip-hop",
+    "holidays",
+    "honky-tonk",
+    "house",
+    "idm",
+    "indian",
+    "indie",
+    "indie-pop",
+    "industrial",
+    "iranian",
+    "j-dance",
+    "j-idol",
+    "j-pop",
+    "j-rock",
+    "jazz",
+    "k-pop",
+    "kids",
+    "latin",
+    "latino",
+    "malay",
+    "mandopop",
+    "metal",
+    "metal-misc",
+    "metalcore",
+    "minimal-techno",
+    "movies",
+    "mpb",
+    "new-age",
+    "new-release",
+    "opera",
+    "pagode",
+    "party",
+    "philippines-opm",
+    "piano",
+    "pop",
+    "pop-film",
+    "post-dubstep",
+    "power-pop",
+    "progressive-house",
+    "psych-rock",
+    "punk",
+    "punk-rock",
+    "r-n-b",
+    "rainy-day",
+    "reggae",
+    "reggaeton",
+    "road-trip",
+    "rock",
+    "rock-n-roll",
+    "rockabilly",
+    "romance",
+    "sad",
+    "salsa",
+    "samba",
+    "sertanejo",
+    "show-tunes",
+    "singer-songwriter",
+    "ska",
+    "sleep",
+    "songwriter",
+    "soul",
+    "soundtracks",
+    "spanish",
+    "study",
+    "summer",
+    "swedish",
+    "synth-pop",
+    "tango",
+    "techno",
+    "trance",
+    "trip-hop",
+    "turkish",
+    "work-out",
+    "world-music",
+];

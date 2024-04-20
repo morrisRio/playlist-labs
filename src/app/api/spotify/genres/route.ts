@@ -20,10 +20,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         `https://api.spotify.com/v1/recommendations/available-genre-seeds`,
         accessToken
     );
-    res.genres.forEach((element) => {
-        element[0].toLowerCase() == "o" ? console.log(element) : null;
-    });
-
+    console.log("res: ", res);
     return res;
 }
 

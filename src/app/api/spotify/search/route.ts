@@ -2,6 +2,15 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { customGet } from "@/lib/serverUtils";
 import { getToken } from "next-auth/jwt";
+import { getSeedsFromItems } from "@/lib/spotifyActions";
+import { Seed } from "@/types/spotify";
+import { Track, Artist } from "@/types/spotify";
+import { get } from "http";
+
+interface SearchResults {
+    artists: { items: Artist[] };
+    tracks: { items: Track[] };
+}
 
 export async function GET(
     req: NextRequest,
@@ -20,12 +29,23 @@ export async function GET(
     const accessToken = token?.accessToken || "no token found";
 
     // make the api call to search for tracks and artists
-    const data = await customGet(
+    const data = (await customGet(
         `https://api.spotify.com/v1/search?q=${q}&type=track%2Cartist&limit=25&offset=0`,
         accessToken
-    );
-    //@ts-ignore
-    console.log("received data: ", data);
+    )) as unknown as SearchResults;
 
-    return NextResponse.json({ data });
+    //@ts-ignore
+
+    const { artists, tracks } = data;
+
+    const artistSeeds: Seed[] = getSeedsFromItems(artists.items);
+    const trackSeeds: Seed[] = getSeedsFromItems(tracks.items);
+
+    //do this for tracks as well
+    //then make one big array of all the seeds plus genres
+    //sort them with the lehvenstein distance algorithm according to the search query
+
+    // console.log("found: ", artistSeeds);
+
+    return NextResponse.json({ artistSeeds });
 }

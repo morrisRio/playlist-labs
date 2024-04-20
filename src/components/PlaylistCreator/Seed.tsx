@@ -1,14 +1,9 @@
 import { MdRemoveCircleOutline, MdAddCircleOutline } from "react-icons/md";
 import Marquee from "react-fast-marquee";
+import { Seed } from "@/types/spotify";
 
-export interface Seed {
-    spotify: string;
-    type: string;
-    id: string;
-    title: string;
-    description: string;
-    thumbnail: string;
-}
+//using marquee. Docs:
+//https://www.react-fast-marquee.com/documentation
 
 type SeedEntryProps = {
     seedObj: Seed;
@@ -72,4 +67,4 @@ export function SeedEntry({
     );
 }
 
-export default Seed;
+export default SeedEntry;

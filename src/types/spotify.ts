@@ -63,20 +63,34 @@ export interface Album {
 }
 
 export interface Artist {
+    external_urls: { spotify: string };
+    followers: { total: number };
+    genres: string[];
+    href: string;
     id: string;
+    images: { height: number; url: string; width: number }[];
     name: string;
-    images: Image[];
-    followers?: {
-        total: number;
-    };
-    genres?: string[];
+    popularity: number;
+    type: string;
+    uri: string;
 }
 
 export interface Track {
+    album: {
+        images: { height: number; url: string; width: number }[];
+    };
+    artists: { name: string }[];
+    external_urls: { spotify: string };
     id: string;
     name: string;
-    album: Album;
-    artists: Artist[];
-    duration_ms: number;
-    preview_url: string;
+    type: string;
+}
+
+export interface Seed {
+    spotify: string;
+    type: string;
+    id: string;
+    title: string;
+    description: string;
+    thumbnail: string;
 }

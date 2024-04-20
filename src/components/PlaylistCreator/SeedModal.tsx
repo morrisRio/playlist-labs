@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { MdOutlineArrowBackIos } from "react-icons/md";
-import { SeedEntry, Seed } from "./Seed";
-import formatter from "numbuffix";
+import { SeedEntry } from "./Seed";
+import { Seed } from "@/types/spotify";
+import { getDescription, getThumbnail } from "@/lib/spotifyActions";
 
 interface SeedModalProps {
     onAdd: (seed: Seed) => void;
@@ -50,28 +51,6 @@ interface Results {
     selectedType: "artist" | "track";
     selectedRange: "short_term" | "medium_term" | "long_term";
 }
-
-const getDescription = (item: any) => {
-    if (item.type === "artist") {
-        return `${item.genres.join(", ")} · ${formatter(
-            item.followers.total,
-            ""
-        )} followers`;
-    } else {
-        // @ts-ignore
-        return item.artists.map((artist) => artist.name).join(", ");
-    }
-};
-
-const getThumbnail = (item: any) => {
-    if (item.type === "artist") {
-        return item.images[0].url;
-    } else {
-        // @ts-ignore
-        return item.album.images[0].url;
-    }
-    return "";
-};
 
 const useDebounce = (value: any, delay: number) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -148,21 +127,9 @@ function SeedModal({ onAdd, onClose, seeds }: SeedModalProps) {
                     "Content-Type": "application/json",
                 },
             });
-            const { data } = await response.json();
-            console.log(data);
-            const seeds = data.artists.items.map((item: any) => {
-                const seed: Seed = {
-                    spotify: item.external_urls.spotify,
-                    id: item.id,
-                    title: item.name,
-                    description: getDescription(item),
-                    type: item.type,
-                    thumbnail: getThumbnail(item),
-                };
-                return seed;
-            });
+            const { artistSeeds } = await response.json();
             // console.log("found: ", seeds);
-            setSearchResults(seeds);
+            setSearchResults(artistSeeds);
         };
         fetchSearch();
     }, [debouncedSearch]);
