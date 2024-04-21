@@ -18,7 +18,9 @@ export async function GET(
 ): Promise<NextResponse> {
     const q = req.nextUrl.searchParams.get("q");
 
-    console.log("GETTING TOKEN");
+    const debug = false;
+
+    debug ? console.log("GETTING TOKEN") : {};
     //add the token to the request for the api call
     const token = await getToken({ req });
     if (!token) {
@@ -33,13 +35,13 @@ export async function GET(
     //TODO: this sometimes takes ages and crashes
     //DO THIS FIRST THEN FILTER OUT
     // mostly with a long search query
-    console.log("SEARCHING GENRES");
+    debug ? console.log("SEARCHING GENRES") : {};
     if (q) {
         foundGenres = genres.filter((genre) => {
             return distance(genre.substring(0, q.length), q) < 2;
         });
     }
-    console.log("FORMATTING GENRES");
+    debug ? console.log("FORMATTING GENRES") : {};
     const foundGenreItems = foundGenres.map((genre) => {
         const genreItem = {
             title: genre,
@@ -50,8 +52,7 @@ export async function GET(
 
     const genreSeeds: Seed[] = getSeedsFromItems(foundGenreItems);
 
-    console.log("FOUND GENRES", genreSeeds);
-    console.log("GETTING THE ITEMS");
+    debug ? console.log("GETTING THE ITEMS") : {};
 
     // make the api call to search for tracks and artists
     const data = (await customGet(
@@ -65,9 +66,13 @@ export async function GET(
     // console.log(artists);
     const artistSeeds: Seed[] = getSeedsFromItems(artists.items);
     const trackSeeds: Seed[] = getSeedsFromItems(tracks.items);
-    console.log("GOT" + artistSeeds.length + trackSeeds.length + "ITEMS");
+
+    debug
+        ? console.log("GOT" + artistSeeds.length + trackSeeds.length + "ITEMS")
+        : {};
+
     //sort them with the lehvenstein distance algorithm according to the search query
-    const results = [...genreSeeds, ...artistSeeds, ...trackSeeds];
+    const results = [...genreSeeds, ...trackSeeds, ...artistSeeds];
 
     // TODO: remember to check for timeout
     const resultsRanked = results.map((item: any) => {
@@ -79,21 +84,16 @@ export async function GET(
 
     //this seems to crash/ take huge amount of time
     if (q) {
-        console.log("SORTING...");
+        debug ? console.log("SORTING...") : {};
         let i = 0;
         resultsRanked.sort((a, b) => {
-            console.log("sorting...", i);
+            debug ? console.log("sorting...", i) : {};
             i++;
             return a.distance - b.distance;
         });
     }
 
-    console.log("SORTING DONE, returning");
-
-    // console.log("sorted: ", results);
-    //results.sort(function(a, b) {
-    //     return a.score - b.score;
-    // });
+    debug ? console.log("SORTING DONE, returning") : {};
 
     return NextResponse.json(resultsRanked);
 }
