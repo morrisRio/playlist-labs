@@ -143,3 +143,23 @@ const getSeedsFromItems = (items) => {
 };
 
 console.log(getSeedsFromItems(genres));
+
+const erfahrung = [
+    {
+        role: "Supervisor - MedialabSupervisor - Medialab",
+        company: "Hochschule für Gestaltung Schwäbisch Gmünd · Vollzeit ",
+        duration: "Sept. 2021-Sept. 2023 · 2 Jahre 1 Monat",
+        experiences: `<ul>
+                <li>Lecturing Programming Languages, fundamentals of component based web development with svelte</li>
+                <li>Suppporting and advising students on technical and design related issues in their projects</li>
+                <li>Managing the hardware-library for student projects</li>
+                `,
+    },
+];
+
+// Supervisor - MedialabSupervisor - Medialab
+// Hochschule für Gestaltung Schwäbisch Gmünd · VollzeitHochschule für Gestaltung Schwäbisch Gmünd · Vollzeit Sept. 2021–Sept. 2023 · 2 Jahre 1 MonatSept. 2021–Sept. 2023 · 2 Jahre 1 Monat Schwäbisch Gmünd, Baden-Württemberg, Deutschland · Vor OrtSchwäbisch Gmünd, Baden-Württemberg, Deutschland · Vor Ort
+
+//         - Lecturing Programming Languages, fundamentals of component based web development with svelte
+//         - Suppporting and advising students on technical and design related issues in their projects
+//         - Managing the hardware-library for student projects

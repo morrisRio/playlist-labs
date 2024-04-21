@@ -5,7 +5,7 @@ import { getToken } from "next-auth/jwt";
 import { getSeedsFromItems, genres } from "@/lib/spotifyActions";
 import { Seed } from "@/types/spotify";
 import { Track, Artist } from "@/types/spotify";
-import { levenshteinDistance } from "@/lib/mathUtils";
+import { distance } from "fastest-levenshtein";
 
 interface SearchResults {
     artists: { items: Artist[] };
@@ -18,7 +18,7 @@ export async function GET(
 ): Promise<NextResponse> {
     const q = req.nextUrl.searchParams.get("q");
 
-    console.log("GETTING SEARCH ITEMS: ", q);
+    console.log("GETTING TOKEN");
     //add the token to the request for the api call
     const token = await getToken({ req });
     if (!token) {
@@ -30,12 +30,16 @@ export async function GET(
 
     let foundGenres: string[] = [];
 
+    //TODO: this sometimes takes ages and crashes
+    //DO THIS FIRST THEN FILTER OUT
+    // mostly with a long search query
+    console.log("SEARCHING GENRES");
     if (q) {
         foundGenres = genres.filter((genre) => {
-            return levenshteinDistance(genre.substring(0, q.length), q) < 3;
+            return distance(genre.substring(0, q.length), q) < 2;
         });
     }
-
+    console.log("FORMATTING GENRES");
     const foundGenreItems = foundGenres.map((genre) => {
         const genreItem = {
             title: genre,
@@ -47,6 +51,7 @@ export async function GET(
     const genreSeeds: Seed[] = getSeedsFromItems(foundGenreItems);
 
     console.log("FOUND GENRES", genreSeeds);
+    console.log("GETTING THE ITEMS");
 
     // make the api call to search for tracks and artists
     const data = (await customGet(
@@ -60,38 +65,35 @@ export async function GET(
     // console.log(artists);
     const artistSeeds: Seed[] = getSeedsFromItems(artists.items);
     const trackSeeds: Seed[] = getSeedsFromItems(tracks.items);
-
+    console.log("GOT" + artistSeeds.length + trackSeeds.length + "ITEMS");
     //sort them with the lehvenstein distance algorithm according to the search query
     const results = [...genreSeeds, ...artistSeeds, ...trackSeeds];
-    console.log("got Seeds: ", results);
+
+    // TODO: remember to check for timeout
+    const resultsRanked = results.map((item: any) => {
+        return {
+            ...item,
+            distance: distance(item.title, q ? q : ""),
+        };
+    });
 
     //this seems to crash/ take huge amount of time
-    // TODO: remember to check for timeout
     if (q) {
         console.log("SORTING...");
         let i = 0;
-        results.sort((a, b) => {
+        resultsRanked.sort((a, b) => {
             console.log("sorting...", i);
             i++;
-            return (
-                levenshteinDistance(
-                    a.title.toLowerCase().substring(0, q.length),
-                    q.toLowerCase()
-                ) -
-                levenshteinDistance(
-                    b.title.toLowerCase().substring(0, q.length),
-                    q.toLowerCase()
-                )
-            );
+            return a.distance - b.distance;
         });
     }
 
-    console.log("sorting done");
+    console.log("SORTING DONE, returning");
 
     // console.log("sorted: ", results);
     //results.sort(function(a, b) {
     //     return a.score - b.score;
     // });
 
-    return NextResponse.json(results);
+    return NextResponse.json(resultsRanked);
 }

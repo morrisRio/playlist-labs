@@ -21,10 +21,10 @@ export const getThumbnail = (item: any) => {
     let thumbnail = "";
     if (item.type === "artist") {
         thumbnail =
-            item.images[0] && item.images[0].url ? item.images[0].url : "";
+            item.images[2] && item.images[2].url ? item.images[2].url : "";
     } else if (item.type === "track") {
         thumbnail =
-            item.album.images[0] && item.album.images[0].url
+            item.album.images[2] && item.album.images[2].url
                 ? item.album.images[0].url
                 : "";
     }

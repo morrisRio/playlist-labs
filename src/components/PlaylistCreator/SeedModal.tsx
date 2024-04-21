@@ -79,7 +79,7 @@ function SeedModal({ onAdd, onClose, seeds }: SeedModalProps) {
         selectedType: "artist",
         selectedRange: "short_term",
     });
-    const debouncedSearch = useDebounce(search, 1000);
+    const debouncedSearch = useDebounce(search, 400);
     useEffect(() => {
         const fetchResults = async () => {
             const response = await fetch(
