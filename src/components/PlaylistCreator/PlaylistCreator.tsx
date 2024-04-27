@@ -1,8 +1,10 @@
 "use client";
 import { useState, FormEvent } from "react";
 import PreferencesForm from "./PreferencesForm";
-import Seeds from "./Seeds";
-import { Seed } from "./Seed";
+import Rules from "./RulesForm/Rules";
+import Seeds from "./SeedsForm/Seeds";
+import { Seed } from "@/types/spotify";
+import { Rule } from "@/types/spotify";
 
 interface Preferences {
     frequency: string;
@@ -10,43 +12,13 @@ interface Preferences {
     description?: string;
 }
 
-interface Rule {
-    type: string;
-    value: number;
-}
-
 function PlaylistForm() {
+    //Preferences ______________________________________________________________________________________________
     const [preferences, setPreferences] = useState<Preferences>({
         frequency: "daily",
         amount: 25,
         description: "",
     });
-    //should all these be in a separate file?
-    const [seeds, setSeeds] = useState<Seed[]>([
-        {
-            spotify: "https://open.spotify.com/artist/1Xyo4u8uXC1ZmMpatF05PJ",
-            type: "artist",
-            id: "pl1",
-            title: "Some example seed title",
-            description: "minimum 1 seed required",
-            thumbnail: "",
-        },
-        {
-            spotify: "https://open.spotify.com/artist/1Xyo4u8uXC1ZmMpatF05PJ",
-            type: "track",
-            id: "pl2",
-            title: "Some example seed title 2",
-            description: "minimum 1 seed required",
-            thumbnail: "",
-        },
-    ]);
-    const [rules, setRules] = useState<Rule[]>([
-        {
-            type: "placeholder",
-            value: 0,
-        },
-    ]);
-
     const handlePrefChange = (
         e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
     ) => {
@@ -59,18 +31,119 @@ function PlaylistForm() {
         }));
     };
 
+    //Seeds ______________________________________________________________________________________________
+    const [seeds, setSeeds] = useState<Seed[]>([
+        {
+            spotify: "https://open.spotify.com/track/2gcpea4r4aH9Hm0Ty0kmNt",
+            id: "2gcpea4r4aH9Hm0Ty0kmNt",
+            title: "Fruchtsaft",
+            description: "LAYLA",
+            type: "track",
+            thumbnail:
+                "https://i.scdn.co/image/ab67616d00001e02785f9cdda48d87d8b3757ae7",
+        },
+        {
+            spotify: "todo: find genre links",
+            id: "hip-hop",
+            title: "hip-hop",
+            description: "genre",
+            type: "genre",
+            thumbnail: "",
+        },
+        {
+            spotify: "https://open.spotify.com/artist/4XvKzACpcdk5iiZbWNvfbq",
+            id: "4XvKzACpcdk5iiZbWNvfbq",
+            title: "Monolake",
+            description:
+                "abstract, ambient, ambient dub, ambient techno, dub techno, intelligent dance music, microhouse, minimal techno · 41.2 k followers",
+            type: "artist",
+            thumbnail:
+                "https://i.scdn.co/image/a2a0779f11ef5a1b566fde579a3a9676f60a37ac",
+        },
+    ]);
     const addSeed = (seed: Seed) => {
         console.log(seed);
+
+        if (seeds.length < 5) {
+            setSeeds((prevState) => {
+                return [...prevState, seed];
+            });
+        } else {
+            //TODO: show a toast or something
+            alert("You can only add 5 seeds");
+        }
+    };
+
+    const removeSeed = (id: string) => {
         setSeeds((prevState) => {
-            return [...prevState, seed];
+            const newSeeds = [...prevState];
+            const i = newSeeds.findIndex((seed) => seed.id === id);
+            newSeeds.splice(i, 1);
+            return newSeeds;
         });
     };
 
-    const removeSeed = (i: number) => {
-        setSeeds((prevState) => {
-            const newSeeds = [...prevState];
-            newSeeds.splice(i, 1);
-            return newSeeds;
+    //Rules ______________________________________________________________________________________________
+    const [rules, setRules] = useState<Rule[]>([
+        {
+            name: "Mood",
+            type: "axis",
+            value: [50, 50],
+            description: "placeholder",
+            range: [
+                ["low", "high"],
+                ["low", "high"],
+            ],
+        },
+    ]);
+
+    const handleRuleChange = (
+        e:
+            | React.ChangeEvent<HTMLInputElement>
+            | React.MouseEvent<HTMLButtonElement>
+    ) => {
+        console.log("event: ", e);
+        //differentiate between mood and the rest
+        // if (e.target.type === "mood") {
+        //     console.log("mood change");
+        //     const { name, value } = e.target;
+        // } else {
+        const { name, value, type } = e.target;
+        console.log(e.target);
+        setRules((prevState) => {
+            const newRules = [...prevState];
+            const i = newRules.findIndex((r) => r.name === name);
+            //parse the value to the correct type
+            //if the type is range, parse it to a float
+            //if the type is boolean, parse it to a boolean
+            const valueParsed =
+                type === "range"
+                    ? parseFloat(value)
+                    : type === "axis"
+                    ? value
+                    : value === "true"
+                    ? true
+                    : false;
+
+            newRules[i].value = valueParsed;
+            console.log("newRules", newRules);
+            return newRules;
+        });
+        // }
+    };
+
+    const addRule = (rule: any) => {
+        setRules((prevState) => {
+            return [...prevState, rule];
+        });
+    };
+
+    const removeRule = (name: string) => {
+        setRules((prevState) => {
+            const newRules = [...prevState];
+            const i = newRules.findIndex((rule) => rule.type === name);
+            newRules.splice(i, 1);
+            return newRules;
         });
     };
 
@@ -100,19 +173,20 @@ function PlaylistForm() {
         // console.log(seeds); // You can replace this with your actual form action
     };
     return (
-        <div className="flex justify-center bg-zinc-950 text-white">
-            <form
-                className="w-full p-8 flex flex-col gap-4"
-                onSubmit={handleSubmit}
-            >
+        <div className="flex justify-center text-white">
+            <form className="w-full p-4 flex flex-col" onSubmit={handleSubmit}>
                 <h1>Create Playlist</h1>
-                <h2>Preferences</h2>
                 <PreferencesForm
                     preferences={preferences}
                     onChange={handlePrefChange}
                 />
-                <h2>Seeds</h2>
                 <Seeds seeds={seeds} onRemove={removeSeed} onAdd={addSeed} />
+                <Rules
+                    rules={rules}
+                    onAdd={addRule}
+                    onRemove={removeRule}
+                    onChange={handleRuleChange}
+                ></Rules>
                 <button
                     type="submit"
                     className={`block w-full p-2 rounded-md bg-blue-500 text-white ${

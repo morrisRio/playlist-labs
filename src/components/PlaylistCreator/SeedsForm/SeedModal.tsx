@@ -1,11 +1,16 @@
-import { useState, useEffect, use } from "react";
-import { MdOutlineArrowBackIos } from "react-icons/md";
+import { useState, useEffect, useRef } from "react";
+import {
+    MdOutlineArrowBackIos,
+    MdOutlineSearch,
+    MdClose,
+} from "react-icons/md";
 import { SeedEntry } from "./Seed";
 import { Seed } from "@/types/spotify";
 import { getSeedsFromItems } from "@/lib/spotifyActions";
 
 interface SeedModalProps {
     onAdd: (seed: Seed) => void;
+    onRemove: (id: string) => void;
     onClose: () => void;
     seeds: Seed[];
 }
@@ -68,18 +73,18 @@ const useDebounce = (value: any, delay: number) => {
     return debouncedValue;
 };
 
-function SeedModal({ onAdd, onClose, seeds }: SeedModalProps) {
+function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
     const [search, setSearch] = useState("");
     const [showSearch, setShowSearch] = useState(false);
     const [searchResults, setSearchResults] = useState<Seed[]>([]);
     const [results, setResults] = useState<Results>({
         results: [],
-        seedTypes: ["artist", "track"],
+        seedTypes: ["track", "artist"],
         rangeTypes: ["short_term", "medium_term", "long_term"],
-        selectedType: "artist",
+        selectedType: "track",
         selectedRange: "short_term",
     });
-    const debouncedSearch = useDebounce(search, 400);
+    const debouncedSearch = useDebounce(search, 300);
     useEffect(() => {
         const fetchResults = async () => {
             const response = await fetch(
@@ -122,6 +127,8 @@ function SeedModal({ onAdd, onClose, seeds }: SeedModalProps) {
         };
         fetchSearch();
     }, [debouncedSearch]);
+
+    const inputRef = useRef(null);
     const changeFilter = (
         e:
             | React.MouseEvent<HTMLButtonElement>
@@ -135,32 +142,62 @@ function SeedModal({ onAdd, onClose, seeds }: SeedModalProps) {
         }));
     };
 
+    const isAdded = (id: string): boolean => {
+        return seeds.some((seed) => seed.id === id);
+    };
+
     return (
-        <div className="absolute h-full w-full bg-zinc-950 top-0 left-0 p-8">
+        <div className="absolute h-full w-full bg-gradient top-0 left-0 p-4 z-10">
             <header className="flex items-center gap-4">
                 <button onClick={onClose}>
                     <MdOutlineArrowBackIos size="2em" />
                 </button>
-                <h1>Add Seed</h1>
+                <h2>Add Seed</h2>
                 <h3 className="text-zinc-500 text-right flex-grow self-end">
                     {seeds?.length} /5 used
                 </h3>
             </header>
-            <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search"
-                className="w-full mt-6 pb-2 bg-transparent border-b border-b-zinc-500 focus:outline-none focus:border-b-white placeholder-zinc-500 text-xl"
-            ></input>
+            <div className="relative mt-8">
+                <input
+                    ref={inputRef}
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search"
+                    className="w-full pb-2 bg-transparent border-b border-b-zinc-500 focus:outline-none focus:border-b-white placeholder-zinc-500 text-lg"
+                />
+                <div className="absolute inset-y-0 right-0 flex items-center pb-2">
+                    {showSearch ? (
+                        <MdClose
+                            onClick={() => {
+                                setSearch("");
+                                setShowSearch(false);
+                            }}
+                            size="2em"
+                            className="cursor-pointer"
+                        ></MdClose>
+                    ) : (
+                        <MdOutlineSearch
+                            size="2em"
+                            onClick={() => {
+                                if (inputRef.current !== null)
+                                    //@ts-ignore
+                                    inputRef.current.focus();
+                            }}
+                            className="cursor-pointer"
+                        ></MdOutlineSearch>
+                    )}
+                </div>
+            </div>
             {showSearch ? (
-                <div className="flex flex-col mt-4">
-                    {searchResults.map((seed, index) => (
+                <div className="flex flex-col mt-6">
+                    {searchResults.map((seed) => (
                         <SeedEntry
                             seedObj={seed}
-                            index={index}
                             onAdd={onAdd}
+                            onRemove={onRemove}
                             key={seed.id}
+                            added={isAdded(seed.id)}
                         />
                     ))}
                 </div>
@@ -176,22 +213,22 @@ function SeedModal({ onAdd, onClose, seeds }: SeedModalProps) {
                                     key={type}
                                     onClick={changeFilter}
                                 >
-                                    <h4
+                                    <p
                                         className={`font-bold ${
                                             results.selectedType == type
                                                 ? "text-white"
-                                                : "text-zinc-500"
+                                                : "text-zinc-400"
                                         }`}
                                     >
                                         Top{" "}
                                         {type[0].toUpperCase() + type.slice(1)}s
-                                    </h4>
+                                    </p>
                                 </button>
                             ))}
                             <select
                                 name="selectedRange"
                                 onChange={changeFilter}
-                                className="block mt-1 p-2 rounded-md bg-zinc-800 focus:outline-none focus:ring focus:border-blue-300"
+                                className="block mt-1 p-2 rounded-md bg-zinc-800 text-zinc-300 focus:outline-none focus:ring focus:border-blue-300 text-xs"
                             >
                                 {results.rangeTypes.map((duration) => (
                                     <option key={duration} value={duration}>
@@ -202,13 +239,15 @@ function SeedModal({ onAdd, onClose, seeds }: SeedModalProps) {
                         </div>
                     </div>
                     <div className=" flex flex-col">
-                        {results.results.map((seed, index) => (
+                        {results.results.map((seed) => (
                             <SeedEntry
                                 seedObj={seed}
-                                index={index}
                                 onAdd={onAdd}
+                                onRemove={onRemove}
+                                added={isAdded(seed.id)}
                                 key={seed.id}
                             />
+                            // delete deltes index not seed itself => refactor
                         ))}
                     </div>
                 </>

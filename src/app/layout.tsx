@@ -55,7 +55,9 @@ export default async function RootLayout({
     // console.log("layout-session:", session);
     return (
         <html lang="en">
-            <body className={`${ibmPlexSans.variable} font-ibm antialiased`}>
+            <body
+                className={`${ibmPlexSans.variable} font-ibm antialiased bg-zinc-950`}
+            >
                 <SessionProvider session={session}>
                     <main className="min-h-screen">{children}</main>
                 </SessionProvider>

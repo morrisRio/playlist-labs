@@ -16,11 +16,12 @@ export default function PreferencesForm({
     onChange,
 }: PreferencesProps) {
     return (
-        <>
-            <label className="flex mb-4 space-between items-center justify-between">
+        <div className="flex flex-col gap-2 mt-8">
+            <h3>Preferences</h3>
+            <label className="flex mb-4 space-between items-center justify-between text-base">
                 Update Frequency
                 <select
-                    className="block mt-1 p-2 rounded-md bg-zinc-800 focus:outline-none focus:ring focus:border-blue-300"
+                    className="block mt-1 p-2 rounded-md bg-zinc-800 focus:outline-none focus:ring focus:border-blue-300 text-sm"
                     name="frequency"
                     value={preferences.frequency}
                     onChange={onChange}
@@ -34,12 +35,12 @@ export default function PreferencesForm({
             <div>
                 <label
                     htmlFor="amount"
-                    className="flex items-center justify-between"
+                    className="flex items-center justify-between text-base"
                 >
                     Number of Tracks
                     <input
                         type="number"
-                        className="hide-arrows p-2 rounded-md bg-zinc-800 focus:outline-none focus:ring focus:border-blue-300 max-w-12"
+                        className="text-sm hide-arrows p-2 rounded-md bg-zinc-800 focus:outline-none focus:ring focus:border-blue-300 max-w-12"
                         name="amount"
                         value={preferences.amount}
                         min="5"
@@ -68,6 +69,6 @@ export default function PreferencesForm({
                 onChange={onChange}
                 placeholder="Description (optional)"
             />
-        </>
+        </div>
     );
 }

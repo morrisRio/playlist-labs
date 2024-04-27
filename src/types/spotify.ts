@@ -94,3 +94,11 @@ export interface Seed {
     description: string;
     thumbnail: string;
 }
+
+export interface Rule {
+    name: string;
+    type: "boolean" | "axis" | "range";
+    value: number | boolean | number[];
+    range: string[] | boolean[] | string[][];
+    description: string;
+}

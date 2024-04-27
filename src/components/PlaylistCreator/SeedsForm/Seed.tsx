@@ -7,25 +7,26 @@ import { Seed } from "@/types/spotify";
 
 type SeedEntryProps = {
     seedObj: Seed;
-    index: number;
-    onRemove?: (index: number) => void;
+    onRemove: (id: string) => void;
     onAdd?: (seed: Seed) => void;
     small?: boolean;
+    added?: boolean;
 };
 
 export function SeedEntry({
     seedObj,
-    index,
     onRemove,
     onAdd,
     small = false,
+    added = false,
 }: SeedEntryProps): JSX.Element {
-    const imgSize = small ? "size-10" : "w-16 h-16";
+    const imgSize = small ? "size-8" : "size-14";
     const imgRound = seedObj.type === "artist" ? "rounded-full" : "rounded-md";
     const imgClass = `${imgSize} ${imgRound}`;
 
     const gapSize = small ? "mb-3" : "mb-6";
-    const fontSize = small ? "text-base" : "text-lg";
+    const fontSize = small ? "text-sm" : "text-base";
+    const removeColor = small ? "white" : "lightgreen";
 
     return (
         <div className={`flex gap-4 items-center justify-between ${gapSize}`}>
@@ -45,22 +46,27 @@ export function SeedEntry({
                         play={seedObj.description.length > 60 ? true : false}
                         speed={30}
                     >
-                        <p className={`text-zinc-500 ${fontSize}`}>
+                        <p className={`text-zinc-400 ${fontSize}`}>
                             {seedObj.description}
                         </p>
                     </Marquee>
                 ) : (
-                    <p className="text-zinc-500">{seedObj.type}</p>
+                    <p className={`text-zinc-500 ${fontSize}`}>
+                        {seedObj.type[0].toUpperCase() + seedObj.type.slice(1)}
+                    </p>
                 )}
             </div>
-            {onRemove && (
-                <button className="justify-end" onClick={() => onRemove(index)}>
-                    <MdRemoveCircleOutline size={small ? "1rem" : "2rem"} />
+            {added && (
+                <button
+                    className="justify-end"
+                    onClick={() => onRemove(seedObj.id)}
+                >
+                    <MdRemoveCircleOutline size="1.5rem" color={removeColor} />
                 </button>
             )}
-            {onAdd && (
+            {!added && onAdd && (
                 <button className="justify-end" onClick={() => onAdd(seedObj)}>
-                    <MdAddCircleOutline size={small ? "1rem" : "1.4rem"} />
+                    <MdAddCircleOutline size="1.5rem" />
                 </button>
             )}
         </div>

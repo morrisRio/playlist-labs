@@ -15,6 +15,9 @@
     h4 {
         @apply text-lg;
     }
+    p {
+        @apply text-base;
+    }
     input.hide-arrows[type="number"]::-webkit-outer-spin-button,
     input.hide-arrows[type="number"]::-webkit-inner-spin-button,
     input.hide-arrows[type="number"] {
@@ -23,6 +26,29 @@
         margin: 0;
         -moz-appearance: textfield !important;
     }
+
+    .bg-gradient {
+        background: radial-gradient(
+            circle at 50% 30%,
+            hsl(0, 0%, 8%) 0%,
+            hsl(0, 0%, 7.9%) 9.6%,
+            hsl(0, 0%, 7.61%) 18.2%,
+            hsl(0, 0%, 7.17%) 26%,
+            hsl(0, 0%, 6.6%) 32.9%,
+            hsl(0, 0%, 5.93%) 39.3%,
+            hsl(0, 0%, 5.18%) 45.1%,
+            hsl(0, 0%, 4.4%) 50.7%,
+            hsl(0, 0%, 3.6%) 56%,
+            hsl(0, 0%, 2.82%) 61.3%,
+            hsl(0, 0%, 2.07%) 66.7%,
+            hsl(0, 0%, 1.4%) 72.4%,
+            hsl(0, 0%, 0.83%) 78.4%,
+            hsl(0, 0%, 0.39%) 84.9%,
+            hsl(0, 0%, 0.1%) 92%,
+            hsl(0, 0%, 0%) 100%
+        );
+        background-attachment: fixed;
+    }
 }
 
 :root {
@@ -30,8 +56,8 @@
     --background-start-rgb: 0, 0, 0;
     --background-end-rgb: 255, 255, 255;
 }
-
-@media (prefers-color-scheme: dark) {
+/* TODO: make radial gradient background */
+/* @media (prefers-color-scheme: dark) {
     :root {
         --foreground-rgb: 255, 255, 255;
         --background-start-rgb: 0, 0, 0;
@@ -47,6 +73,86 @@ body {
             rgb(var(--background-end-rgb))
         )
         rgb(var(--background-start-rgb));
+} */
+body {
+    color: white;
+    background: radial-gradient(
+        circle at 50% 30%,
+        hsl(0, 0%, 8%) 0%,
+        hsl(0, 0%, 7.9%) 9.6%,
+        hsl(0, 0%, 7.61%) 18.2%,
+        hsl(0, 0%, 7.17%) 26%,
+        hsl(0, 0%, 6.6%) 32.9%,
+        hsl(0, 0%, 5.93%) 39.3%,
+        hsl(0, 0%, 5.18%) 45.1%,
+        hsl(0, 0%, 4.4%) 50.7%,
+        hsl(0, 0%, 3.6%) 56%,
+        hsl(0, 0%, 2.82%) 61.3%,
+        hsl(0, 0%, 2.07%) 66.7%,
+        hsl(0, 0%, 1.4%) 72.4%,
+        hsl(0, 0%, 0.83%) 78.4%,
+        hsl(0, 0%, 0.39%) 84.9%,
+        hsl(0, 0%, 0.1%) 92%,
+        hsl(0, 0%, 0%) 100%
+    );
+    background-attachment: fixed;
+    /* background-size: 100% 150%; */
+}
+
+/* .custom-thumb::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    background-color: #4caf50;
+    cursor: pointer;
+    border-radius: 50%;
+} */
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 24px;
+    border-radius: 1000px;
+    border: 4px solid rgb(39, 39, 42);
+    background-color: rgb(39, 39, 42);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 14px;
+    width: 14px;
+    background-color: transparent;
+    border: 3px solid rgb(219, 219, 219);
+    cursor: pointer;
+    border-radius: 100%;
+}
+input[type="range"]::-moz-range-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 14px;
+    width: 14px;
+    background-color: black;
+    border: 3px solid rgb(219, 219, 219);
+    box-shadow: -2000px 0 0 1990px rgb(219, 219, 219);
+    cursor: pointer;
+    border-radius: 100%;
+}
+
+input[type="range"]::-moz-range-progress {
+    appearance: none;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    input[type="range"] {
+        overflow: hidden;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+        box-shadow: -2000px 0 0 1994px rgb(82 82 91);
+        position: relative;
+    }
 }
 
 @layer utilities {
