@@ -103,8 +103,24 @@ export const TwoAxisSlider = ({ rule, onChange }: TwoAxisSliderProps): any => {
             onPointerDown={handlePointerDown}
             style={{ touchAction: "none" }}
         >
+            <hr className="relative top-1/2 border-zinc-700" />
+            <div className="relative h-full w-1 border-l border-l-zinc-700 left-1/2"></div>
+            <span className="absolute top-0 p-2 left-1/2 -translate-x-1/2 text-zinc-600 bg-zinc-800 text-xs">
+                {rule.range[0][1]}
+            </span>
+            <span className="absolute bottom-0 p-2 left-1/2 -translate-x-1/2 text-zinc-600 bg-zinc-800 text-xs">
+                {rule.range[0][0]}
+            </span>
+            <span className="absolute p-2 top-1/2 -translate-y-1/2  text-zinc-600 bg-zinc-800 text-xs">
+                {rule.range[1][1]}
+            </span>
+            <span className="absolute right-0 p-2 top-1/2 translate-x-1/1 -translate-y-1/2  text-zinc-600 bg-zinc-800 text-xs">
+                {rule.range[1][0]}
+            </span>
             <div
-                className="customThumb"
+                className={`customThumb ${
+                    dragging ? "!border-zinc-700" : "!border-zinc-200"
+                }`}
                 style={{
                     position: "absolute",
                     left: `${rule.value[0]}%`,

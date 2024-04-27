@@ -88,12 +88,13 @@ function PlaylistForm() {
         {
             name: "Mood",
             type: "axis",
-            value: [50, 50],
-            description: "placeholder",
+            value: [0.5, 0.5],
             range: [
-                ["low", "high"],
-                ["low", "high"],
+                ["negative", "positive"],
+                ["intense", "mild"],
             ],
+            description:
+                "Choose the Mood according to the Arousal-Valence model of emotions (Amount of Arousal and Valence of a Track).",
         },
     ]);
 

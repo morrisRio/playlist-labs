@@ -26,7 +26,7 @@ function RuleModal({ onAdd, onRemove, onClose, rules }: RuleModalProps) {
             value: [0.5, 0.5],
             range: [
                 ["negative", "positive"],
-                ["low arousal", "high arousal"],
+                ["intense", "mild"],
             ],
             description:
                 "Choose the Mood according to the Arousal-Valence model of emotions (Amount of Arousal and Valence of a Track).",

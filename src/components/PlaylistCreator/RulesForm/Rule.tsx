@@ -73,6 +73,14 @@ export function RuleEntry({
                                 value={rule.value}
                                 onChange={onChange}
                             />
+                            <div className="flex justify-between mt-1">
+                                <span className="text-zinc-500 text-sm">
+                                    {rule.range[0]}
+                                </span>
+                                <span className="text-zinc-500 text-sm">
+                                    {rule.range[1]}
+                                </span>
+                            </div>
                         </div>
                     ) : typeof rule.value === "boolean" ? (
                         <div className="relative flex justify-between bg-zinc-800 rounded-md shadow-lg">
