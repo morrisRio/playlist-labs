@@ -62,7 +62,7 @@ function PlaylistForm() {
         },
     ]);
     const addSeed = (seed: Seed) => {
-        console.log(seed);
+        // console.log(seed);
 
         if (seeds.length < 5) {
             setSeeds((prevState) => {
@@ -102,14 +102,7 @@ function PlaylistForm() {
             | React.ChangeEvent<HTMLInputElement>
             | React.MouseEvent<HTMLButtonElement>
     ) => {
-        console.log("event: ", e);
-        //differentiate between mood and the rest
-        // if (e.target.type === "mood") {
-        //     console.log("mood change");
-        //     const { name, value } = e.target;
-        // } else {
         const { name, value, type } = e.target;
-        console.log(e.target);
         setRules((prevState) => {
             const newRules = [...prevState];
             const i = newRules.findIndex((r) => r.name === name);
@@ -126,7 +119,6 @@ function PlaylistForm() {
                     : false;
 
             newRules[i].value = valueParsed;
-            console.log("newRules", newRules);
             return newRules;
         });
         // }

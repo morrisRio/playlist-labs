@@ -23,8 +23,9 @@ export const TwoAxisSlider = ({ rule, onChange }: TwoAxisSliderProps): any => {
         // Clean up the event listeners when component unmounts
         return () => {
             // console.log("cleanup");
-            document.removeEventListener("mousemove", handleMouseMove);
-            document.removeEventListener("mouseup", handleMouseUp);
+            document.removeEventListener("pointermove", handlePointerMove);
+            document.removeEventListener("pointerleave", handlePointerLeave);
+            document.removeEventListener("pointerup", handlePointerUp);
         };
     }, []);
 
@@ -64,45 +65,51 @@ export const TwoAxisSlider = ({ rule, onChange }: TwoAxisSliderProps): any => {
     };
 
     // Event handlers for mouse events _______________________________________________________
-    const handleMouseMove = (moveEvent: MouseEvent) => {
+    const handlePointerMove = (moveEvent: PointerEvent) => {
         // console.log("mouseMove", moveEvent.clientX, moveEvent.clientY);
 
         calculateValues(moveEvent.clientX, moveEvent.clientY);
     };
 
-    const handleMouseUp = () => {
+    const handlePointerUp = () => {
         // console.log("mouseUp");
         setDragging(false);
-        document.removeEventListener("mousemove", handleMouseMove);
-        document.removeEventListener("mouseup", handleMouseUp);
+        document.removeEventListener("pointermove", handlePointerMove);
+        document.removeEventListener("pointerleave", handlePointerLeave);
+        document.removeEventListener("pointerup", handlePointerUp);
     };
 
-    const handleMouseDown = (e: React.MouseEvent) => {
-        // console.log("mouseDown", e);
+    const handlePointerLeave = () => {
+        if (dragging) {
+            handlePointerUp();
+        }
+    };
+
+    const handlePointerDown = (e: React.PointerEvent) => {
+        console.log("mouseDown", e);
         e.preventDefault();
         calculateValues(e.clientX, e.clientY);
         setDragging(true);
 
-        document.addEventListener("mousemove", handleMouseMove);
-        document.addEventListener("mouseup", handleMouseUp);
+        document.addEventListener("pointermove", handlePointerMove);
+        document.addEventListener("pointerup", handlePointerUp);
+        document.addEventListener("pointerleave", handlePointerLeave);
     };
 
     return (
         <div
             ref={containerRef}
             className="relative w-full h-44 bg-zinc-800 rounded-md"
-            onMouseDown={handleMouseDown}
+            onPointerDown={handlePointerDown}
+            style={{ touchAction: "none" }}
         >
             <div
+                className="customThumb"
                 style={{
                     position: "absolute",
                     left: `${rule.value[0]}%`,
                     top: `${rule.value[1]}%`,
                     transform: "translate(-50%, -50%)",
-                    width: "20px",
-                    height: "20px",
-                    background: "blue",
-                    borderRadius: "50%",
                 }}
             />
         </div>
