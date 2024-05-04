@@ -26,6 +26,7 @@ const Profile = () => {
                     <button
                         className=" text-neutral-500 text-left hover:text-neutral-400"
                         onClick={() => signOut()}
+                        type="button"
                     >
                         Sign out
                     </button>

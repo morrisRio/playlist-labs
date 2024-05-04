@@ -24,12 +24,14 @@ export function SeedEntry({
     const imgRound = seedObj.type === "artist" ? "rounded-full" : "rounded-md";
     const imgClass = `${imgSize} ${imgRound}`;
 
-    const gapSize = small ? "mb-3" : "mb-6";
+    const seedCard = small
+        ? "mb-3 bg-zinc-950/60 px-4 py-3 rounded-xl"
+        : "mb-6";
     const fontSize = small ? "text-sm" : "text-base";
     const removeColor = small ? "white" : "lightgreen";
 
     return (
-        <div className={`flex gap-4 items-center justify-between ${gapSize}`}>
+        <div className={`flex gap-4 items-center justify-between ${seedCard}`}>
             {seedObj.thumbnail ? (
                 <img
                     className={`${imgClass} flex-none object-cover`}
@@ -60,13 +62,18 @@ export function SeedEntry({
                 <button
                     className="justify-end"
                     onClick={() => onRemove(seedObj.id)}
+                    type="button"
                 >
-                    <MdRemoveCircleOutline size="1.5rem" color={removeColor} />
+                    <MdRemoveCircleOutline size="1.2rem" color={removeColor} />
                 </button>
             )}
             {!added && onAdd && (
-                <button className="justify-end" onClick={() => onAdd(seedObj)}>
-                    <MdAddCircleOutline size="1.5rem" />
+                <button
+                    className="justify-end"
+                    onClick={() => onAdd(seedObj)}
+                    type="button"
+                >
+                    <MdAddCircleOutline size="1.2rem" />
                 </button>
             )}
         </div>

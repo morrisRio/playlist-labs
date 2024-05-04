@@ -1,24 +1,34 @@
 "use client";
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import PreferencesForm from "./PreferencesForm";
 import Rules from "./RulesForm/Rules";
 import Seeds from "./SeedsForm/Seeds";
-import { Seed } from "@/types/spotify";
-import { Rule } from "@/types/spotify";
+import NameModal from "./NameModal";
+import { Seed, Rule, Preferences } from "@/types/spotify";
+import { MdModeEdit } from "react-icons/md";
+import InfoModal from "./InfoModal";
 
-interface Preferences {
-    frequency: string;
-    amount: number;
-    description?: string;
+interface SubmitErrorTypes {
+    name?: string;
+    frequency?: string;
+    amount?: string;
+    seeds?: string;
 }
 
 function PlaylistForm() {
+    const [showNameModal, setShowNameModal] = useState(false);
+
+    const [showSubmitErrors, setShowSubmittErrors] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [submitErrors, setSubmitErrors] = useState<SubmitErrorTypes>({});
+
     //Preferences ______________________________________________________________________________________________
     const [preferences, setPreferences] = useState<Preferences>({
+        name: "Playlist Name",
         frequency: "daily",
         amount: 25,
-        description: "",
     });
+
     const handlePrefChange = (
         e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
     ) => {
@@ -88,13 +98,28 @@ function PlaylistForm() {
         {
             name: "Mood",
             type: "axis",
-            value: [0.5, 0.5],
+            value: [50, 50],
             range: [
                 ["negative", "positive"],
                 ["intense", "mild"],
             ],
             description:
                 "Choose the Mood according to the Arousal-Valence model of emotions (Amount of Arousal and Valence of a Track).",
+        },
+        {
+            name: "Danceability",
+            type: "range",
+            value: 50,
+            range: ["Not Dancable", "Danceable"],
+            description:
+                "How suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity.",
+        },
+        {
+            name: "Mode",
+            type: "boolean",
+            value: false,
+            range: ["Minor", "Major"],
+            description: "Choose between Tracks using Minor or Major mode.",
         },
     ]);
 
@@ -109,7 +134,9 @@ function PlaylistForm() {
             const i = newRules.findIndex((r) => r.name === name);
             //parse the value to the correct type
             //if the type is range, parse it to a float
-            //if the type is boolean, parse it to a boolean
+            //if the type is "axis" (manually set), keep it (value is an array)
+            //now it can only be boolean
+            //if the type is boolean (value is true), return true, else return false
             const valueParsed =
                 type === "range"
                     ? parseFloat(value)
@@ -134,17 +161,38 @@ function PlaylistForm() {
     const removeRule = (name: string) => {
         setRules((prevState) => {
             const newRules = [...prevState];
-            const i = newRules.findIndex((rule) => rule.type === name);
+            const i = newRules.findIndex((rule) => rule.name === name);
             newRules.splice(i, 1);
             return newRules;
         });
     };
 
-    const isFormValid =
-        preferences.frequency &&
-        preferences.amount >= 5 &&
-        preferences.amount <= 50;
+    //Form Validation ______________________________________________________________________________________________
 
+    const validateForm = (preferences, seeds) => {
+        let errors: any = {};
+        //check if the form is valid
+        //check if the preferences are valid
+        if (preferences.name.length < 1)
+            errors.name = "Your Playlist should have a name";
+        if (
+            (typeof preferences.amount !== "number" &&
+                preferences.amount < 5) ||
+            preferences.amount > 50
+        )
+            errors.amount = "The amount of tracks should be between 5 and 50";
+        if (
+            preferences.frequency !== "daily" &&
+            preferences.frequency !== "weekly" &&
+            preferences.frequency !== "monthly"
+        )
+            errors.frequency = "Invalid frequency";
+        if (seeds.length < 1)
+            errors.seeds = "You need to add at least one seed";
+        if (seeds.length > 5) errors.seeds = "You can only add 5 seeds";
+        console.log(errors);
+        return errors;
+    };
     // const newPlaylist = async (e: FormEvent, formdata: FormData) => {
     //     //create a new playlist
     //     e.preventDefault();
@@ -162,13 +210,75 @@ function PlaylistForm() {
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        console.log("handleSubmit triggered");
+
+        const errors = validateForm(preferences, seeds);
+        if (Object.keys(errors).length > 0) {
+            setSubmitErrors(errors);
+            setShowSubmittErrors(true);
+            return;
+        }
+        setSubmitting(true);
+        finishSubmit();
         // console.log(preferences); // You can replace this with your actual form action
         // console.log(seeds); // You can replace this with your actual form action
     };
+
+    const finishSubmit = () => {
+        console.log("finishSubmit");
+        const newPlaylist = async () => {
+            //create a new playlist
+            console.log("fetching create-playlist with fromdata: ", {
+                preferences,
+                seeds,
+                rules,
+            });
+
+            await fetch("/api/spotify/create-playlist", {
+                method: "POST",
+                body: JSON.stringify({
+                    preferences,
+                    seeds,
+                    rules,
+                }),
+            });
+            //get recommendations with the parameters from formdata
+
+            //add the tracks to the playlist
+        };
+
+        newPlaylist();
+        setSubmitting(false);
+    };
+
     return (
         <div className="flex justify-center text-white">
-            <form className="w-full p-4 flex flex-col" onSubmit={handleSubmit}>
+            <form
+                className="w-full p-3 flex flex-col gap-8"
+                onSubmit={handleSubmit}
+            >
+                {showSubmitErrors && (
+                    <InfoModal
+                        title="Failed to create the Playlist"
+                        body={Object.values(submitErrors).join("\n")}
+                        onClose={() => setShowSubmittErrors(false)}
+                    ></InfoModal>
+                )}
                 <h1>Create Playlist</h1>
+                <div className="flex justify-between">
+                    <h3>{preferences.name}</h3>
+                    <MdModeEdit
+                        size="1.5em"
+                        onClick={() => setShowNameModal(true)}
+                    />
+                    {showNameModal && (
+                        <NameModal
+                            name={preferences.name}
+                            onClose={() => setShowNameModal(false)}
+                            onChange={handlePrefChange}
+                        />
+                    )}
+                </div>
                 <PreferencesForm
                     preferences={preferences}
                     onChange={handlePrefChange}
@@ -182,10 +292,7 @@ function PlaylistForm() {
                 ></Rules>
                 <button
                     type="submit"
-                    className={`block w-full p-2 rounded-md bg-blue-500 text-white ${
-                        !isFormValid && "opacity-50 cursor-not-allowed"
-                    }`}
-                    disabled={!isFormValid}
+                    className={`p-2 px-8 rounded-md text-black bg-white self-end`}
                 >
                     Create Playlist
                 </button>

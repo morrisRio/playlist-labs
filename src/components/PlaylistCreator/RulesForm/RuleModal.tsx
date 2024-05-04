@@ -1,7 +1,7 @@
 import React from "react";
 import { Rule } from "@/types/spotify";
 import { MdOutlineArrowBackIos } from "react-icons/md";
-import { RuleEntry } from "./Rule";
+import { RuleEntry } from "./RuleEntry";
 
 interface RuleModalProps {
     onAdd: (rule: Rule) => void;
@@ -15,7 +15,7 @@ function RuleModal({ onAdd, onRemove, onClose, rules }: RuleModalProps) {
         {
             name: "Danceability",
             type: "range",
-            value: 0.5,
+            value: 50,
             range: ["Not Dancable", "Danceable"],
             description:
                 "How suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity.",
@@ -23,7 +23,7 @@ function RuleModal({ onAdd, onRemove, onClose, rules }: RuleModalProps) {
         {
             name: "Mood",
             type: "axis",
-            value: [0.5, 0.5],
+            value: [50, 50],
             range: [
                 ["negative", "positive"],
                 ["intense", "mild"],
@@ -34,7 +34,7 @@ function RuleModal({ onAdd, onRemove, onClose, rules }: RuleModalProps) {
         {
             name: "Instrumentalness",
             type: "range",
-            value: 0.5,
+            value: 50,
             range: ["Vocal", "Instrumental"],
             description:
                 "High value represents more instrumental tracks, low represents more vocals in tracks.",
@@ -42,14 +42,14 @@ function RuleModal({ onAdd, onRemove, onClose, rules }: RuleModalProps) {
         {
             name: "Accousticness",
             type: "range",
-            value: 0.5,
+            value: 50,
             range: ["Synthetic", "Accoustic"],
             description: "Whether the Song is accoustic or not.",
         },
         {
             name: "Liveness",
             type: "range",
-            value: 0.5,
+            value: 50,
             range: ["Studio", "Live"],
             description:
                 "Want to listen to live performances? Detects the presence of an audience in the recording. Higher liveness values represent an increased probability that the track was performed live. A value above 0.8 provides strong likelihood that the track is live.",
@@ -57,7 +57,7 @@ function RuleModal({ onAdd, onRemove, onClose, rules }: RuleModalProps) {
         {
             name: "Popularity",
             type: "range",
-            value: 0.5,
+            value: 50,
             range: ["Underground", "Mainstream"],
             description:
                 "Want to filter out mainstream music? Or only listen to what others approved by listening to it? This is the right filter for you.",
@@ -79,9 +79,9 @@ function RuleModal({ onAdd, onRemove, onClose, rules }: RuleModalProps) {
     ];
 
     return (
-        <div className="absolute h-full w-full top-0 left-0 p-4 bg-gradient">
+        <div className="absolute h-full w-full inset-0 p-4 bg-gradient">
             <header className="flex items-center gap-4">
-                <button onClick={onClose}>
+                <button onClick={onClose} type="button">
                     <MdOutlineArrowBackIos size="2em" />
                 </button>
                 <h2>Add Rule</h2>

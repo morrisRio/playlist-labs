@@ -4,7 +4,7 @@ import {
     MdOutlineSearch,
     MdClose,
 } from "react-icons/md";
-import { SeedEntry } from "./Seed";
+import { SeedEntry } from "./SeedEntry";
 import { Seed } from "@/types/spotify";
 import { getSeedsFromItems } from "@/lib/spotifyActions";
 
@@ -52,7 +52,7 @@ const item = {
 interface Results {
     results: Seed[];
     seedTypes: string[];
-    rangeTypes: string[];
+    rangeTypes: string[][];
     selectedType: "artist" | "track";
     selectedRange: "short_term" | "medium_term" | "long_term";
 }
@@ -80,7 +80,11 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
     const [results, setResults] = useState<Results>({
         results: [],
         seedTypes: ["track", "artist"],
-        rangeTypes: ["short_term", "medium_term", "long_term"],
+        rangeTypes: [
+            ["short_term", "weekly"],
+            ["medium_term", "monthly"],
+            ["long_term", "6 months"],
+        ],
         selectedType: "track",
         selectedRange: "short_term",
     });
@@ -147,9 +151,9 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
     };
 
     return (
-        <div className="absolute h-full w-full bg-gradient top-0 left-0 p-4 z-10">
+        <div className="absolute min-h-full w-full bg-gradient top-0 left-0 p-4 z-50">
             <header className="flex items-center gap-4">
-                <button onClick={onClose}>
+                <button onClick={onClose} type="button">
                     <MdOutlineArrowBackIos size="2em" />
                 </button>
                 <h2>Add Seed</h2>
@@ -231,8 +235,12 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
                                 className="block mt-1 p-2 rounded-md bg-zinc-800 text-zinc-300 focus:outline-none focus:ring focus:border-blue-300 text-xs"
                             >
                                 {results.rangeTypes.map((duration) => (
-                                    <option key={duration} value={duration}>
-                                        {duration}
+                                    <option
+                                        key={duration[0]}
+                                        value={duration[0]}
+                                    >
+                                        {duration[1][0].toUpperCase() +
+                                            duration[1].slice(1)}
                                     </option>
                                 ))}
                             </select>

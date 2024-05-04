@@ -1,3 +1,4 @@
+import exp from "constants";
 import { DefaultSession } from "next-auth";
 
 interface AuthUser {
@@ -101,4 +102,10 @@ export interface Rule {
     value: number | boolean | number[];
     range: string[] | boolean[] | string[][];
     description: string;
+}
+
+export interface Preferences {
+    name: string;
+    frequency: string;
+    amount: number;
 }

@@ -1,6 +1,6 @@
 import { MdRemoveCircleOutline, MdAddCircleOutline } from "react-icons/md";
 import SeedModal from "./SeedModal";
-import { SeedEntry } from "./Seed";
+import { SeedEntry } from "./SeedEntry";
 import { useState } from "react";
 import { Seed } from "@/types/spotify";
 
@@ -25,14 +25,25 @@ export default function Seeds({ seeds, onRemove, onAdd }: SeedsProps) {
         setShowModal(false);
     };
     return (
-        <div>
-            <div className="border border-zinc-800 rounded-md p-4 bg-zinc-800/30 backdrop-blur-md mt-8">
+        <div className="rounded-xl p-4 bg-zinc-700/40">
+            <div>
                 {/* <hr className="border-zinc-500 -mx-4 my-8" /> */}
-                <div className="flex mb-4 gap-4">
-                    <h3>Seeds</h3>
-                    <p className="text-zinc-500 text-sm self-end">
+                <div className="flex mb-4 gap-4 justify-between">
+                    <h3 className="font-semibold">Seeds</h3>
+                    <p className="text-zinc-400 text-base self-end flex-grow">
                         {seeds?.length} /5 used
                     </p>
+                    <button
+                        className="flex items-center justify-center gap-2 self-end"
+                        onClick={openModal}
+                        type="button"
+                    >
+                        <MdAddCircleOutline
+                            size="1.2em"
+                            color="rgb(161 161 170)"
+                        />{" "}
+                        <h5 className="text-zinc-400">Add Seed</h5>
+                    </button>
                 </div>
                 {seeds.map((seed, index) => (
                     <SeedEntry
@@ -43,12 +54,6 @@ export default function Seeds({ seeds, onRemove, onAdd }: SeedsProps) {
                         added={true}
                     />
                 ))}
-                <button
-                    className="w-full flex items-center justify-center gap-2 mt-2"
-                    onClick={openModal}
-                >
-                    <MdAddCircleOutline size="1.5em" /> <h4>Add Seed</h4>
-                </button>
             </div>
             {showModal && (
                 <SeedModal

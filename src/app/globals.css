@@ -96,7 +96,6 @@ body {
         hsl(0, 0%, 0%) 100%
     );
     background-attachment: fixed;
-    /* background-size: 100% 150%; */
 }
 
 /* .custom-thumb::-webkit-slider-thumb {
