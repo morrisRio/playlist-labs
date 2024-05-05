@@ -128,6 +128,8 @@ function PlaylistForm() {
             | React.ChangeEvent<HTMLInputElement>
             | React.MouseEvent<HTMLButtonElement>
     ) => {
+        //@ts-ignore
+        //TODO: fix this
         const { name, value, type } = e.target;
         setRules((prevState) => {
             const newRules = [...prevState];
@@ -169,7 +171,7 @@ function PlaylistForm() {
 
     //Form Validation ______________________________________________________________________________________________
 
-    const validateForm = (preferences, seeds) => {
+    const validateForm = (preferences: Preferences, seeds: Seed[]) => {
         let errors: any = {};
         //check if the form is valid
         //check if the preferences are valid
@@ -254,7 +256,7 @@ function PlaylistForm() {
     return (
         <div className="flex justify-center text-white">
             <form
-                className="w-full p-3 flex flex-col gap-8"
+                className="w-full flex flex-col gap-8"
                 onSubmit={handleSubmit}
             >
                 {showSubmitErrors && (
@@ -264,8 +266,7 @@ function PlaylistForm() {
                         onClose={() => setShowSubmittErrors(false)}
                     ></InfoModal>
                 )}
-                <h1>Create Playlist</h1>
-                <div className="flex justify-between">
+                <div className="flex justify-between p-4">
                     <h3>{preferences.name}</h3>
                     <MdModeEdit
                         size="1.5em"
