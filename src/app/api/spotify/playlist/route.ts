@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { customGet, customPost } from "@/lib/serverUtils";
 import { getToken } from "next-auth/jwt";
-import { Seed, Rule, Preferences } from "@/types/spotify";
+import { Seed, Rule, Preferences, Track } from "@/types/spotify";
 
 interface PlaylistSettings {
     preferences: Preferences;
@@ -12,9 +12,7 @@ interface PlaylistSettings {
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
     const data = await req.json();
-    console.log("data:", data);
     const { preferences, seeds, rules }: PlaylistSettings = data;
-    console.log("preferences:", preferences);
 
     //add the token to the request for the api call
     const token = await getToken({ req });
@@ -25,6 +23,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     const accessToken = token?.accessToken || "no token found";
     const userId = token?.userId || "no username found";
+
     //complete the request body with the description and public fields
     const createBody = {
         name: preferences.name,
@@ -37,27 +36,25 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         createBody,
         accessToken
     );
-    console.log("res:", res);
+    // get the playlist id from the response
     const playlist_id = res.id;
 
     //create the query string for the api call from the seeds and rules
 
     const limitQuery = "limit=" + preferences.amount;
-
-    // const seedArtists =
-    //     "seed_artists=" +
-    //     seeds.map((seed) => (seed.type === "artist" ? seed.id : "")).join(",");
     const seedQuery = getSeedQuery(seeds);
     const ruleQuery = getRuleQuery(rules);
+
     //add tracks to the playlist
-    const trackRes = await customGet(
+    const trackRes: TracksResponse = await customGet(
         `https://api.spotify.com/v1/recommendations?${limitQuery}&${seedQuery}&${ruleQuery}`,
         accessToken
     );
-
+    //create the tracksquery
     const tracksToAdd = trackRes.tracks.map(
         (track) => `spotify:track:${track.id}`
     );
+
     const addBody = {
         uris: tracksToAdd,
     };
@@ -67,9 +64,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         addBody,
         accessToken
     );
+
     console.log("addRes:", addRes);
 
-    return addRes;
+    return NextResponse.json(playlist_id, { status: 201 });
 }
 
 const getRuleQuery = (rules: Rule[]) => {
@@ -78,8 +76,8 @@ const getRuleQuery = (rules: Rule[]) => {
             if (Array.isArray(rule.value)) {
                 //this might be flipped
                 return `target_valence=${
-                    1 - rule.value[0] / 100
-                }&target_energy=${rule.value[1] / 100}`;
+                    1 - rule.value[1] / 100
+                }&target_energy=${rule.value[0] / 100}`;
             } else if (
                 rule.type === "range" &&
                 typeof rule.value === "number"
@@ -140,6 +138,11 @@ interface Followers {
     href: string | null;
     total: number;
 }
+
+type TracksResponse = {
+    tracks: Track[];
+    seeds: Seed[];
+};
 
 interface Tracks {
     limit: number;

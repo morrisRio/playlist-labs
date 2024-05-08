@@ -195,20 +195,6 @@ function PlaylistForm() {
         console.log(errors);
         return errors;
     };
-    // const newPlaylist = async (e: FormEvent, formdata: FormData) => {
-    //     //create a new playlist
-    //     e.preventDefault();
-    //     console.log("fetching create-playlist with fromdata: ", formdata);
-    //     await fetch("/api/spotify/create-playlist", {
-    //         method: "POST",
-    //         body: JSON.stringify({
-    //             name: formdata.get("playlistname"),
-    //         }),
-    //     });
-    //     //get recommendations with the parameters from formdata
-
-    //     //add the tracks to the playlist
-    // };
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -230,22 +216,34 @@ function PlaylistForm() {
         console.log("finishSubmit");
         const newPlaylist = async () => {
             //create a new playlist
-            console.log("fetching create-playlist with fromdata: ", {
+            console.log("fetching playlist with fromdata: ", {
                 preferences,
                 seeds,
                 rules,
             });
 
-            await fetch("/api/spotify/create-playlist", {
+            const playlistId = await fetch("/api/spotify/playlist", {
                 method: "POST",
                 body: JSON.stringify({
                     preferences,
                     seeds,
                     rules,
                 }),
-            });
-            //get recommendations with the parameters from formdata
+            }).then((res) => res.json());
+            console.log("newPlaylist", playlistId);
 
+            //add the playlist to the database
+            const savePlaylist = await fetch(`/api/db/playlist/${playlistId}`, {
+                method: "POST",
+                body: JSON.stringify({
+                    preferences,
+                    seeds,
+                    rules,
+                }),
+            }).then((res) => res.json());
+
+            //redirect to the playlist
+            console.log("savePlaylist", savePlaylist);
             //add the tracks to the playlist
         };
 

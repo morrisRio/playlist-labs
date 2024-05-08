@@ -2,6 +2,7 @@
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { AuthSession } from "@/types/spotify";
+import { stat } from "fs";
 import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 
@@ -24,10 +25,7 @@ export const getAuthSession = async () => {
     return session;
 };
 
-export const customGet = async (
-    url: string,
-    token: string
-): Promise<NextResponse> => {
+export const customGet = async (url: string, token: string): Promise<any> => {
     "use server";
     const res = await fetch(url, {
         headers: {
@@ -44,10 +42,10 @@ export const customPost = async (
     url: string,
     body: object,
     token: string
-): Promise<NextResponse> => {
+): Promise<any> => {
     "use server";
 
-    const res = await fetch(url, {
+    const res: NextResponse = await fetch(url, {
         method: "POST",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -68,7 +66,10 @@ export const customPost = async (
         })
         .catch((error) => {
             console.error("Error creating Playlist:", error);
-            return null;
+            return NextResponse.json({
+                message: error.statusText,
+                status: 500,
+            });
         });
 
     return res;

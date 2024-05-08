@@ -24,32 +24,6 @@ interface Image {
     width: number | null;
 }
 
-export interface Playlist {
-    collaborative?: boolean;
-    description?: string | null;
-    external_urls: {
-        spotify: string;
-    };
-    followers: {
-        total: number;
-    };
-    href: string;
-    id: string;
-    images: Image[];
-    name: string;
-    owner: {
-        id: string;
-        display_name?: string;
-    };
-    items?: [{ added_at: string; track: Track }];
-    tracks: {
-        items: [{ added_at: string; track: Track }];
-        total: number;
-    };
-    type: string;
-    total?: number;
-}
-
 export interface Album {
     id: string;
     name: string;
@@ -81,10 +55,20 @@ export interface Track {
         images: { height: number; url: string; width: number }[];
     };
     artists: { name: string }[];
+    available_markets: string[];
+    disc_number: number;
+    duration_ms: number;
     external_urls: { spotify: string };
+    explicit: boolean;
+    external_ids: { isrc: string };
+    href: string;
     id: string;
     name: string;
+    popularity: number;
+    preview_url: string | null;
+    track_number: number;
     type: string;
+    uri: string;
 }
 
 export interface Seed {
@@ -109,3 +93,10 @@ export interface Preferences {
     frequency: string;
     amount: number;
 }
+
+export type Playlist = {
+    playlist_id?: string;
+    preferences: Preferences;
+    seeds: Seed[];
+    rules?: Rule[];
+};

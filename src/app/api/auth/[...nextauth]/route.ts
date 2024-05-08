@@ -1,4 +1,4 @@
-import NextAuth, { NextAuthOptions, Account } from "next-auth";
+import NextAuth, { NextAuthOptions, Account, User, Awaitable } from "next-auth";
 import SpotifyProvider from "next-auth/providers/spotify";
 import { JWT } from "next-auth/jwt";
 
@@ -6,6 +6,7 @@ async function refreshAccessToken(token: JWT) {
     try {
         console.log("REFRESHING TOKEN");
         if (!token.refreshToken) throw new Error("NO_REFRESH_TOKEN_PROVIDED");
+
         //get new access token
         const url = "https://accounts.spotify.com/api/token";
         const response: any = await fetch(url, {
@@ -87,10 +88,54 @@ export const authOptions: NextAuthOptions = {
         //   console.log(all);
         //   return all;
         // },
-        //@ts-ignore
-        async jwt({ token, account }) {
+        async signIn({
+            user,
+            account,
+        }: {
+            user: User;
+            account: Account | null;
+        }): Promise<string | boolean> {
+            console.log("SIGNIN USER", user);
+            //create user in database if he doesn't exist
+            if (account?.provider === "spotify") {
+                try {
+                    console.log("TRYING FETCH");
+                    const res = await fetch(
+                        `${process.env.NEXTAUTH_URL}/api/db/user`,
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                spotify_id: user.id,
+                                name: user.name,
+                            }),
+                        }
+                    );
+                    console.log("SIGNIN RESPONSE", res.statusText);
+                    if (!res.ok) throw new Error("SIGNIN ERROR");
+                    return true;
+                } catch (error) {
+                    console.error("SIGNIN ERROR", error);
+                    return "SIGNIN_ERROR";
+                }
+            }
+            console.error("SIGNIN_ERROR: PROVIDER_NOT_SUPPORTED");
+            return "SIGNIN_ERROR_PROVIDER_NOT_SUPPORTED";
+        },
+
+        async jwt({
+            token,
+            account,
+        }: {
+            token: JWT;
+            account: Account | null;
+            user: User;
+        }): Promise<JWT> {
             //on first sign in add the tokens from account to jwt
             if (account) {
+                console.log("USING_NEW_TOKEN");
                 return {
                     ...token,
                     accessToken: account.access_token,
@@ -110,13 +155,11 @@ export const authOptions: NextAuthOptions = {
             }
 
             // //access token has expired, try to update it
-            let refreshToken = await refreshAccessToken(token);
+            let refreshToken = (await refreshAccessToken(token)) as JWT;
             return refreshToken;
         },
 
         async session({ session, token }) {
-            //add the token to the session so the user can tap into it and use it for requests
-            // session.accessToken = token.accessToken;
             session.expires_in = token.accessTokenExpires
                 ? ((token.accessTokenExpires - Date.now()) / 60000).toFixed(1) +
                   "min"

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { MdModeEdit } from "react-icons/md";
 
 interface PreferencesProps {
@@ -17,6 +18,8 @@ export default function PreferencesForm({
     preferences,
     onChange,
 }: PreferencesProps) {
+    // const [options, setOptions] = useState(["daily", "wely", "monthly"]);
+
     return (
         <div className="flex flex-col gap-8 rounded-xl p-4">
             <h3 className="font-semibold">Preferences</h3>
@@ -29,8 +32,8 @@ export default function PreferencesForm({
                     onChange={onChange}
                     required
                 >
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
+                    // <option value="daily">Daily</option>
+                    // <option value="weekly">Weekly</option>
                     <option value="monthly">Monthly</option>
                 </select>
             </label>
