@@ -10,6 +10,8 @@ interface PlaylistSettings {
     rules: Rule[];
 }
 
+//TODO: differentiate between creating a playlist and updating a playlist
+
 export async function POST(req: NextRequest): Promise<NextResponse> {
     const data = await req.json();
     const { preferences, seeds, rules }: PlaylistSettings = data;

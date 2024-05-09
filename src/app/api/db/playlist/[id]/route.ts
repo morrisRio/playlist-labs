@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import UserModel from "../../user/userModel";
-import { connectMongoDB } from "@/lib/db";
+import UserModel from "@/models/userModel";
+import { connectMongoDB } from "@/lib/db/dbConnect";
 
 /* POST: Create a new playlist in users document*/
 export async function POST(
@@ -13,7 +13,7 @@ export async function POST(
     const token = await getToken({ req });
     const playlist_id = params.id;
 
-    //TODO:add authorization to the request
+    //TODO: add authorization to the request
 
     const user_id = token?.userId;
 
@@ -24,6 +24,7 @@ export async function POST(
 
     const playlistToAdd = { playlist_id, preferences, seeds, rules };
 
+    console.log("playlistToAdd", playlistToAdd);
     try {
         //addToSet adds the playlist to the array if it does not exist
         const user = await UserModel.findOneAndUpdate(

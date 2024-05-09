@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import UserModel from "./userModel";
-import { connectMongoDB } from "@/lib/db";
+import UserModel from "@/models/userModel";
+import { connectMongoDB } from "@/lib/db/dbConnect";
 
 /* POST: Create a new user if he does not exist*/
 export async function POST(req: NextRequest) {

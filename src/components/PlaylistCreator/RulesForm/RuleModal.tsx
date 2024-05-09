@@ -2,6 +2,7 @@ import React from "react";
 import { Rule } from "@/types/spotify";
 import { MdOutlineArrowBackIos } from "react-icons/md";
 import { RuleEntry } from "./RuleEntry";
+import { allRules } from "@/lib/spotifyConstants";
 
 interface RuleModalProps {
     onAdd: (rule: Rule) => void;
@@ -11,73 +12,7 @@ interface RuleModalProps {
 }
 
 function RuleModal({ onAdd, onRemove, onClose, rules }: RuleModalProps) {
-    const ruleArray: Rule[] = [
-        {
-            name: "Danceability",
-            type: "range",
-            value: 50,
-            range: ["Not Dancable", "Danceable"],
-            description:
-                "How suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity.",
-        },
-        {
-            name: "Mood",
-            type: "axis",
-            value: [50, 50],
-            range: [
-                ["negative", "positive"],
-                ["intense", "mild"],
-            ],
-            description:
-                "Choose the Mood according to the Arousal-Valence model of emotions (Amount of Arousal and Valence of a Track).",
-        },
-        {
-            name: "Instrumentalness",
-            type: "range",
-            value: 50,
-            range: ["Vocal", "Instrumental"],
-            description:
-                "High value represents more instrumental tracks, low represents more vocals in tracks.",
-        },
-        {
-            name: "Accousticness",
-            type: "range",
-            value: 50,
-            range: ["Synthetic", "Accoustic"],
-            description: "Whether the Song is accoustic or not.",
-        },
-        {
-            name: "Liveness",
-            type: "range",
-            value: 50,
-            range: ["Studio", "Live"],
-            description:
-                "Want to listen to live performances? Detects the presence of an audience in the recording. Higher liveness values represent an increased probability that the track was performed live. A value above 0.8 provides strong likelihood that the track is live.",
-        },
-        {
-            name: "Popularity",
-            type: "range",
-            value: 50,
-            range: ["Underground", "Mainstream"],
-            description:
-                "Want to filter out mainstream music? Or only listen to what others approved by listening to it? This is the right filter for you.",
-        },
-        {
-            name: "Mode",
-            type: "boolean",
-            value: false,
-            range: ["Minor", "Major"],
-            description: "Choose between Tracks using Minor or Major mode.",
-        },
-        {
-            name: "Tempo",
-            type: "range",
-            value: 100,
-            range: ["40", "200"],
-            description: "Choose the Tempo of the Track.",
-        },
-    ];
-
+    //possible rules imported from lib spotifyActions
     return (
         <div className="absolute h-full w-full inset-0 p-4 bg-gradient">
             <header className="flex items-center gap-4">
@@ -87,7 +22,7 @@ function RuleModal({ onAdd, onRemove, onClose, rules }: RuleModalProps) {
                 <h2>Add Rule</h2>
             </header>
             <div className="relative mt-8">
-                {ruleArray.map(
+                {allRules.map(
                     (rule, index) =>
                         !rules.some((r) => r.name === rule.name) && (
                             <RuleEntry

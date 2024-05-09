@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { playlistSchema } from "@/app/api/db/playlist/playlistSchema";
+import { playlistSchema } from "@/models/playlistSchema";
 
 const userSchema = new Schema({
     name: {

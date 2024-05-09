@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { customGet } from "@/lib/serverUtils";
 import { getToken } from "next-auth/jwt";
-import { getSeedsFromItems, genres } from "@/lib/spotifyActions";
+import { getSeedsFromItems } from "@/lib/spotifyActions";
+import { allGenres } from "@/lib/spotifyConstants";
 import { Seed } from "@/types/spotify";
 import { Track, Artist } from "@/types/spotify";
 import { distance } from "fastest-levenshtein";
@@ -12,15 +13,12 @@ interface SearchResults {
     tracks: { items: Track[] };
 }
 
-export async function GET(
-    req: NextRequest,
-    { params }: { params: { q: string } }
-): Promise<NextResponse> {
+export async function GET(req: NextRequest): Promise<NextResponse> {
     const q = req.nextUrl.searchParams.get("q");
-
     const debug = false;
 
     debug ? console.log("GETTING TOKEN") : {};
+
     //add the token to the request for the api call
     const token = await getToken({ req });
     if (!token) {
@@ -32,12 +30,9 @@ export async function GET(
 
     let foundGenres: string[] = [];
 
-    //TODO: this sometimes takes ages and crashes
-    //DO THIS FIRST THEN FILTER OUT
-    // mostly with a long search query
     debug ? console.log("SEARCHING GENRES") : {};
     if (q) {
-        foundGenres = genres.filter((genre) => {
+        foundGenres = allGenres.filter((genre) => {
             return distance(genre.substring(0, q.length), q) < 2;
         });
     }

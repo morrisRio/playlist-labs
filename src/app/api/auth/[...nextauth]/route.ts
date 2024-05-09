@@ -138,10 +138,10 @@ export const authOptions: NextAuthOptions = {
                 console.log("USING_NEW_TOKEN");
                 return {
                     ...token,
-                    accessToken: account.access_token,
-                    refreshToken: account.refresh_token,
+                    accessToken: account.access_token!,
+                    refreshToken: account.refresh_token!,
                     userId: account.providerAccountId,
-                    accessTokenExpires: account.expires_at,
+                    accessTokenExpires: account.expires_at!,
                 };
             }
 
@@ -160,6 +160,7 @@ export const authOptions: NextAuthOptions = {
         },
 
         async session({ session, token }) {
+            session.user.id = token.userId;
             session.expires_in = token.accessTokenExpires
                 ? ((token.accessTokenExpires - Date.now()) / 60000).toFixed(1) +
                   "min"

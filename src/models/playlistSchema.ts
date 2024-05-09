@@ -69,6 +69,7 @@ export const playlistSchema = new Schema<Playlist>({
                 type: String,
                 required: true,
             },
+            _id: false,
         },
     ],
     rules: [
@@ -78,6 +79,7 @@ export const playlistSchema = new Schema<Playlist>({
                 required: function () {
                     return this.rules && this.rules.length > 0;
                 },
+                _id: false,
             },
             value: {
                 type: mongoose.Schema.Types.Mixed,
@@ -102,18 +104,14 @@ export const playlistSchema = new Schema<Playlist>({
                             return false;
                         }
                     },
-                    message: "Rule value must be a string or a number",
+                    message:
+                        "Rule value must be a string, a number, or an Array of two numbers",
                 },
                 required: function () {
                     return this.rules && this.rules.length > 0;
                 },
             },
-            type: {
-                type: String,
-                required: function () {
-                    return this.rules && this.rules.length > 0;
-                },
-            },
+            _id: false,
         },
     ],
 });

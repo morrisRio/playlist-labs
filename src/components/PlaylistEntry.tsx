@@ -1,5 +1,6 @@
-import React from "react";
+"use client";
 import { Playlist } from "@/types/spotify";
+import Link from "next/link";
 
 interface PlaylistProps {
     playlist: Playlist;
@@ -15,14 +16,15 @@ interface PlaylistProps {
 //if the store does not exist fetch the data from the db and create a store for the playlists
 
 function PlaylistEntry({ playlist }: PlaylistProps) {
-    console.log("PlaylistEntry: ", playlist);
+    console.log("PlaylistEntry: ", playlist.playlist_id);
     const { playlist_id } = playlist;
-    console.log("PlaylistId ", playlist_id);
+
     return (
-        <div className=" flex gap-4 items-center p-2 w-full mb-4 bg-zinc-900/50 border border-zinc-700 rounded-xl">
-            <h4>{playlist.preferences.name}</h4>
-            {}
-        </div>
+        <Link href={`/pages/edit-playlist/${playlist_id}`}>
+            <div className=" flex gap-4 items-center p-2 w-full mb-4 bg-zinc-900/50 border border-zinc-700 rounded-xl">
+                <h4>{playlist.playlist_id}</h4>
+            </div>
+        </Link>
     );
 }
 

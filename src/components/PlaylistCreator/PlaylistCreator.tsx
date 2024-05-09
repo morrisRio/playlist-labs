@@ -7,6 +7,8 @@ import NameModal from "./NameModal";
 import { Seed, Rule, Preferences } from "@/types/spotify";
 import { MdModeEdit } from "react-icons/md";
 import InfoModal from "./InfoModal";
+import { Playlist } from "@/types/spotify";
+import { completeRules } from "@/lib/spotifyActions";
 
 interface SubmitErrorTypes {
     name?: string;
@@ -15,19 +17,26 @@ interface SubmitErrorTypes {
     seeds?: string;
 }
 
-function PlaylistForm() {
-    const [showNameModal, setShowNameModal] = useState(false);
+interface PlaylistFormProps {
+    playlist?: Playlist;
+}
 
+function PlaylistForm({ playlist }: PlaylistFormProps) {
+    const [showNameModal, setShowNameModal] = useState(false);
     const [showSubmitErrors, setShowSubmittErrors] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [submitErrors, setSubmitErrors] = useState<SubmitErrorTypes>({});
 
     //Preferences ______________________________________________________________________________________________
-    const [preferences, setPreferences] = useState<Preferences>({
-        name: "Playlist Name",
-        frequency: "daily",
-        amount: 25,
-    });
+    const [preferences, setPreferences] = useState<Preferences>(
+        playlist?.preferences
+            ? playlist.preferences
+            : {
+                  name: "Playlist Name",
+                  frequency: "daily",
+                  amount: 25,
+              }
+    );
 
     const handlePrefChange = (
         e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
@@ -42,35 +51,41 @@ function PlaylistForm() {
     };
 
     //Seeds ______________________________________________________________________________________________
-    const [seeds, setSeeds] = useState<Seed[]>([
-        {
-            spotify: "https://open.spotify.com/track/2gcpea4r4aH9Hm0Ty0kmNt",
-            id: "2gcpea4r4aH9Hm0Ty0kmNt",
-            title: "Fruchtsaft",
-            description: "LAYLA",
-            type: "track",
-            thumbnail:
-                "https://i.scdn.co/image/ab67616d00001e02785f9cdda48d87d8b3757ae7",
-        },
-        {
-            spotify: "todo: find genre links",
-            id: "hip-hop",
-            title: "hip-hop",
-            description: "genre",
-            type: "genre",
-            thumbnail: "",
-        },
-        {
-            spotify: "https://open.spotify.com/artist/4XvKzACpcdk5iiZbWNvfbq",
-            id: "4XvKzACpcdk5iiZbWNvfbq",
-            title: "Monolake",
-            description:
-                "abstract, ambient, ambient dub, ambient techno, dub techno, intelligent dance music, microhouse, minimal techno · 41.2 k followers",
-            type: "artist",
-            thumbnail:
-                "https://i.scdn.co/image/a2a0779f11ef5a1b566fde579a3a9676f60a37ac",
-        },
-    ]);
+    const [seeds, setSeeds] = useState<Seed[]>(
+        playlist?.seeds
+            ? playlist.seeds
+            : [
+                  {
+                      spotify:
+                          "https://open.spotify.com/track/2gcpea4r4aH9Hm0Ty0kmNt",
+                      id: "2gcpea4r4aH9Hm0Ty0kmNt",
+                      title: "Fruchtsaft",
+                      description: "LAYLA",
+                      type: "track",
+                      thumbnail:
+                          "https://i.scdn.co/image/ab67616d00001e02785f9cdda48d87d8b3757ae7",
+                  },
+                  {
+                      spotify: "todo: find genre links",
+                      id: "hip-hop",
+                      title: "hip-hop",
+                      description: "genre",
+                      type: "genre",
+                      thumbnail: "",
+                  },
+                  {
+                      spotify:
+                          "https://open.spotify.com/artist/4XvKzACpcdk5iiZbWNvfbq",
+                      id: "4XvKzACpcdk5iiZbWNvfbq",
+                      title: "Monolake",
+                      description:
+                          "abstract, ambient, ambient dub, ambient techno, dub techno, intelligent dance music, microhouse, minimal techno · 41.2 k followers",
+                      type: "artist",
+                      thumbnail:
+                          "https://i.scdn.co/image/a2a0779f11ef5a1b566fde579a3a9676f60a37ac",
+                  },
+              ]
+    );
     const addSeed = (seed: Seed) => {
         // console.log(seed);
 
@@ -94,34 +109,41 @@ function PlaylistForm() {
     };
 
     //Rules ______________________________________________________________________________________________
-    const [rules, setRules] = useState<Rule[]>([
-        {
-            name: "Mood",
-            type: "axis",
-            value: [50, 50],
-            range: [
-                ["negative", "positive"],
-                ["intense", "mild"],
-            ],
-            description:
-                "Choose the Mood according to the Arousal-Valence model of emotions (Amount of Arousal and Valence of a Track).",
-        },
-        {
-            name: "Danceability",
-            type: "range",
-            value: 50,
-            range: ["Not Dancable", "Danceable"],
-            description:
-                "How suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity.",
-        },
-        {
-            name: "Mode",
-            type: "boolean",
-            value: false,
-            range: ["Minor", "Major"],
-            description: "Choose between Tracks using Minor or Major mode.",
-        },
-    ]);
+    const [rules, setRules] = useState<Rule[]>(
+        playlist?.rules //if the playlist has rules, use them
+            ? //if the playlist has rules, complete them as the db only stores the name and value
+              completeRules(playlist.rules)
+            : //TODO: Remove placeholder rules and add an idle state
+              [
+                  {
+                      name: "Mood",
+                      type: "axis",
+                      value: [50, 50],
+                      range: [
+                          ["negative", "positive"],
+                          ["intense", "mild"],
+                      ],
+                      description:
+                          "Choose the Mood according to the Arousal-Valence model of emotions (Amount of Arousal and Valence of a Track).",
+                  },
+                  {
+                      name: "Danceability",
+                      type: "range",
+                      value: 50,
+                      range: ["Not Dancable", "Danceable"],
+                      description:
+                          "How suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity.",
+                  },
+                  {
+                      name: "Mode",
+                      type: "boolean",
+                      value: false,
+                      range: ["Minor", "Major"],
+                      description:
+                          "Choose between Tracks using Minor or Major mode.",
+                  },
+              ]
+    );
 
     const handleRuleChange = (
         e:
@@ -215,13 +237,7 @@ function PlaylistForm() {
     const finishSubmit = () => {
         console.log("finishSubmit");
         const newPlaylist = async () => {
-            //create a new playlist
-            console.log("fetching playlist with fromdata: ", {
-                preferences,
-                seeds,
-                rules,
-            });
-
+            //create a new playlist and populate it with the tracks
             const playlistId = await fetch("/api/spotify/playlist", {
                 method: "POST",
                 body: JSON.stringify({
