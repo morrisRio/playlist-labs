@@ -8,7 +8,6 @@ export async function POST(
     req: NextRequest,
     { params }: { params: { id: string } }
 ) {
-    console.log("POST PLAYLIST", params.id);
     const debug = true;
     const token = await getToken({ req });
     const playlist_id = params.id;
@@ -24,9 +23,13 @@ export async function POST(
 
     const playlistToAdd = { playlist_id, preferences, seeds, rules };
 
-    console.log("playlistToAdd", playlistToAdd);
+    //TODO: check for _id
+
     try {
         //addToSet adds the playlist to the array if it does not exist
+
+        //TODO: how do i only add the playlist if it does not exist?
+        //and how do i update the playlist if it does exist?
         const user = await UserModel.findOneAndUpdate(
             { spotify_id: user_id },
             { $addToSet: { playlists: playlistToAdd } },
@@ -48,59 +51,3 @@ export async function POST(
         );
     }
 }
-
-// /* GET: Get a user by spotify_id */
-// export async function GET(req: NextRequest) {
-//     const debug = true;
-//     const token = await getToken({ req });
-//     const { spotify_id } = await req.json();
-
-//     if (!token || spotify_id != token.userId) {
-//         return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-//     }
-
-//     if (debug) console.log("trying connectMongoDB");
-//     await connectMongoDB();
-
-//     //could include a double check here, to check if spotify accepsts the token
-//     // const spotify = await fetch("https://api.spotify.com/v1/me", {...});
-
-//     if (debug) console.log("GET_USER", spotify_id);
-//     const user = await UserModel.findOne({ spotify_id });
-//     if (!user) {
-//         return NextResponse.json(
-//             { message: "User not found" },
-//             { status: 404 }
-//         );
-//     }
-
-//     if (debug) console.log("USER_FOUND", user);
-//     return NextResponse.json(user, { status: 200 });
-// }
-
-// /* PUT: Update a user by spotify_id */
-// export async function PUT(req: NextRequest) {
-//     const debug = true;
-//     const token = await getToken({ req });
-//     const { spotify_id, name } = await req.json();
-
-//     if (!token || spotify_id != token.userId) {
-//         return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-//     }
-
-//     if (debug) console.log("trying connectMongoDB");
-//     await connectMongoDB();
-
-//     if (debug) console.log("UPDATE_USER", spotify_id);
-//     const user = await UserModel.findOneAndUpdate(
-//         { spotify_id },
-//         { name },
-//         { new: true } //return the updated document
-//     );
-//     if (!user) {
-//         return NextResponse.json(
-//             { message: "User not found" },
-//             { status: 404 }
-//         );
-//     }
-// }

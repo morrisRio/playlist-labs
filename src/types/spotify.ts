@@ -94,8 +94,8 @@ export interface Preferences {
     amount: number;
 }
 
-export type Playlist = {
-    playlist_id?: string;
+export type PlaylistData = {
+    playlist_id?: string | boolean;
     preferences: Preferences;
     seeds: Seed[];
     rules?: Rule[];

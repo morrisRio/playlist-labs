@@ -3,18 +3,19 @@ import Profile from "@/components/Profile";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { MdAdd } from "react-icons/md";
-import { Playlist } from "@/types/spotify";
-import { getPlaylists } from "@/lib/db/dbPlaylistActions";
+import { PlaylistData } from "@/types/spotify";
+import { getUsersPlaylists } from "@/lib/db/dbActions";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 // import Center from "@/components/Dashboard";
 
 //TODO: typescript
 export default async function Home() {
     const session = await getServerSession(authOptions);
-    let playlists: Playlist[] = [];
+    let playlists: PlaylistData[] | false = false;
 
+    //TODO: revalidate route
     if (session && session.user && session.user.id) {
-        playlists = await getPlaylists(session.user.id);
+        playlists = await getUsersPlaylists(session.user.id);
     } else {
         console.error("Session Error: ", session);
     }
@@ -35,7 +36,7 @@ export default async function Home() {
                 playlists.map((playlist) => (
                     <PlaylistEntry
                         playlist={playlist}
-                        key={playlist.playlist_id}
+                        key={playlist.playlist_id?.toString()}
                     />
                 ))}
             <Profile></Profile>

@@ -1,14 +1,19 @@
+"use server";
+
 import { connectMongoDB } from "@/lib/db/dbConnect";
-import { Playlist } from "@/types/spotify";
+import { PlaylistData } from "@/types/spotify";
 import User from "@/models/userModel";
+import { allRules } from "@/lib/spotifyConstants";
 
 type MongoPlaylist = {
     name: string;
     spotify_id: string;
-    playlists: Playlist[];
+    playlists: PlaylistData[];
 };
 
-export async function getPlaylists(userId: string): Promise<Playlist[]> {
+export async function getUsersPlaylists(
+    userId: string
+): Promise<PlaylistData[]> {
     "use server";
     await connectMongoDB();
     try {

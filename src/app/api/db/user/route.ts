@@ -58,6 +58,8 @@ export async function GET(req: NextRequest, verbose: boolean = false) {
     const token = await getToken({ req });
     const spotify_id = token?.userId;
 
+    //TODO: add authorization to the request
+    //TODO: DEBUG caching the DB connection
     if (debug) console.log("trying connectMongoDB");
     await connectMongoDB();
 

@@ -31,7 +31,7 @@ export const connectMongoDB = async () => {
     }
 
     if (!cached.promise) {
-        console.log("DB: Configuring new connection");
+        // console.log("DB: Configuring new connection");
         const options = {
             autoIndex: true,
             serverApi: {
@@ -47,14 +47,13 @@ export const connectMongoDB = async () => {
             });
     }
     try {
-        console.log("DB: Connect to new connection");
+        // console.log("DB: Connect to new connection");
         cached.conn = await cached.promise;
     } catch (e) {
         console.log("DB: Error connecting to MongoDB: ", e);
         cached.promise = null;
         throw e;
     }
-    console.log("DB: Connected to new connection");
+    console.log("DB: Using new connection");
     return cached.conn;
 };
-//TODO: remove mongodb from the project -> if mongoose does all the work, we don't need mongodb

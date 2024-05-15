@@ -83,11 +83,6 @@ export const authOptions: NextAuthOptions = {
         signIn: "/auth/signin",
     },
     callbacks: {
-        // // da kommt viel raus was man nicht sieht:
-        // async jwt(all) {
-        //   console.log(all);
-        //   return all;
-        // },
         async signIn({
             user,
             account,

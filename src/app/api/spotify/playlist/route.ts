@@ -1,21 +1,65 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { customGet, customPost } from "@/lib/serverUtils";
+import { customPost, customPut } from "@/lib/serverUtils";
+import { getRecommendations } from "@/lib/spotifyActions";
 import { getToken } from "next-auth/jwt";
-import { Seed, Rule, Preferences, Track } from "@/types/spotify";
-
-interface PlaylistSettings {
-    preferences: Preferences;
-    seeds: Seed[];
-    rules: Rule[];
-}
+import { PlaylistData } from "@/types/spotify";
 
 //TODO: differentiate between creating a playlist and updating a playlist
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
     const data = await req.json();
-    const { preferences, seeds, rules }: PlaylistSettings = data;
+    const { preferences, seeds, rules }: PlaylistData = data;
 
+    console.log(
+        "API: PLAYLIST POST - creating new playlist " + preferences.name
+    );
+    //add the token to the request for the api call
+    const token = await getToken({ req });
+    if (!token) {
+        console.error("No token found");
+        return new NextResponse("No token found", { status: 401 });
+    }
+    const accessToken = token?.accessToken || "no token found";
+    const userId = token?.userId || "no username found";
+
+    //complete the request body with the description and public fields
+    const createBody = {
+        name: preferences.name,
+        description: "Playlist created by playlistLabs",
+        public: false,
+    };
+
+    //make the api call to create the playlist and save the id for the created playlist
+    console.log(" - creating the playlist");
+    const { id: idToWriteTo } = await customPost(
+        `https://api.spotify.com/v1/users/${userId}/playlists`,
+        createBody,
+        accessToken
+    );
+    console.log(" - created playlist with id: " + idToWriteTo);
+
+    //get the recommendations and add them to the body for the api call that adds the tracks to the playlist
+    const addBody = {
+        uris: await getRecommendations(accessToken, preferences, seeds, rules),
+    };
+    //add the tracks to the playlist
+    const addRes = await customPost(
+        `https://api.spotify.com/v1/playlists/${idToWriteTo}/tracks`,
+        addBody,
+        accessToken
+    );
+
+    console.log("API: Added Tracks to Playlist:", addRes);
+
+    return NextResponse.json(idToWriteTo, { status: 201 });
+}
+
+export async function PUT(req: NextRequest): Promise<NextResponse> {
+    const data = await req.json();
+    const { playlist_id, preferences, seeds, rules }: PlaylistData = data;
+
+    console.log("API: PLAYLIST PUT - updating playlist " + preferences.name);
     //add the token to the request for the api call
     const token = await getToken({ req });
     if (!token) {
@@ -26,100 +70,38 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const accessToken = token?.accessToken || "no token found";
     const userId = token?.userId || "no username found";
 
+    //Change Description and Name of the Playlist
     //complete the request body with the description and public fields
-    const createBody = {
+    const preferencesBody = {
         name: preferences.name,
         description: "Playlist created by playlistLabs",
         public: false,
     };
-    //make the api call to create the playlist
-    const res = await customPost(
-        `https://api.spotify.com/v1/users/${userId}/playlists`,
-        createBody,
+
+    //flush the playlist
+    console.log(" - flushing the playlist");
+    const flushRes = await customPut(
+        `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
+        { uris: [] },
         accessToken
     );
-    // get the playlist id from the response
-    const playlist_id = res.id;
-
-    //create the query string for the api call from the seeds and rules
-
-    const limitQuery = "limit=" + preferences.amount;
-    const seedQuery = getSeedQuery(seeds);
-    const ruleQuery = getRuleQuery(rules);
-
-    //add tracks to the playlist
-    const trackRes: TracksResponse = await customGet(
-        `https://api.spotify.com/v1/recommendations?${limitQuery}&${seedQuery}&${ruleQuery}`,
-        accessToken
-    );
-    //create the tracksquery
-    const tracksToAdd = trackRes.tracks.map(
-        (track) => `spotify:track:${track.id}`
-    );
+    console.log(" - FLUSHED PLAYLIST: flushRes:" + flushRes);
 
     const addBody = {
-        uris: tracksToAdd,
+        uris: await getRecommendations(accessToken, preferences, seeds, rules),
     };
 
+    //add the new tracks to the playlist
     const addRes = await customPost(
         `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
         addBody,
         accessToken
     );
 
-    console.log("addRes:", addRes);
+    console.log("API: Added Tracks to Playlist:", addRes);
 
     return NextResponse.json(playlist_id, { status: 201 });
 }
-
-const getRuleQuery = (rules: Rule[]) => {
-    const ruleQuery = rules
-        .map((rule) => {
-            if (Array.isArray(rule.value)) {
-                //this might be flipped
-                return `target_valence=${
-                    1 - rule.value[1] / 100
-                }&target_energy=${rule.value[0] / 100}`;
-            } else if (
-                rule.type === "range" &&
-                typeof rule.value === "number"
-            ) {
-                return `target_${rule.name}=${rule.value / 100}`;
-            } else if (
-                rule.type === "boolean" &&
-                typeof rule.value === "boolean"
-            ) {
-                return `target_${rule.name}=${rule.value}`;
-            }
-        })
-        .join("&");
-    console.log("ruleQuery:", ruleQuery);
-    return ruleQuery;
-};
-
-const getSeedQuery = (seeds: Seed[]) => {
-    const seedArtists = seeds.filter((seed) => seed.type === "artist");
-    const seedGenres = seeds.filter((seed) => seed.type === "genre");
-    const seedTracks = seeds.filter((seed) => seed.type === "track");
-
-    const seedArtistsQuery =
-        seedArtists.length > 0
-            ? "seed_artists=" + seedArtists.map((seed) => seed.id).join(",")
-            : "";
-    const seedGenresQuery =
-        seedGenres.length > 0
-            ? "seed_genres=" + seedGenres.map((seed) => seed.id).join(",")
-            : "";
-    const seedTracksQuery =
-        seedTracks.length > 0
-            ? "seed_tracks=" + seedTracks.map((seed) => seed.id).join(",")
-            : "";
-
-    const seedQuery = [seedArtistsQuery, seedGenresQuery, seedTracksQuery]
-        .filter((seed) => seed !== "")
-        .join("&");
-    return seedQuery;
-};
 
 interface Owner {
     href: string;
@@ -140,11 +122,6 @@ interface Followers {
     href: string | null;
     total: number;
 }
-
-type TracksResponse = {
-    tracks: Track[];
-    seeds: Seed[];
-};
 
 interface Tracks {
     limit: number;

@@ -49,7 +49,8 @@ export function SeedEntry({
                         speed={30}
                     >
                         <p className={`text-zinc-400 ${fontSize}`}>
-                            {seedObj.description}
+                            {seedObj.description +
+                                (seedObj.description.length > 60 ? " - " : "")}
                         </p>
                     </Marquee>
                 ) : (
