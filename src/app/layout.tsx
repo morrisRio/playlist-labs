@@ -13,29 +13,9 @@ const ibmPlexSans = localFont({
             style: "normal",
         },
         {
-            path: "./fonts/IBMPlexSans-Italic.woff2",
-            weight: "400",
-            style: "italic",
-        },
-        {
             path: "./fonts/IBMPlexSans-Bold.woff2",
             weight: "700",
             style: "normal",
-        },
-        {
-            path: "./fonts/IBMPlexSans-BoldItalic.woff2",
-            weight: "700",
-            style: "italic",
-        },
-        {
-            path: "./fonts/IBMPlexSans-Light.woff2",
-            weight: "300",
-            style: "normal",
-        },
-        {
-            path: "./fonts/IBMPlexSans-LightItalic.woff2",
-            weight: "300",
-            style: "italic",
         },
     ],
     fallback: ["sans-serif"],
