@@ -20,8 +20,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         console.error("No token found");
         return new NextResponse("No token found", { status: 401 });
     }
-    const accessToken = token?.accessToken || "no token found";
-    const userId = token?.userId || "no username found";
+
+    const { accessToken, userId } = token;
 
     //complete the request body with the description and public fields
     const createBody = {
@@ -56,15 +56,25 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     delete preferences.hasChanged;
 
     //add playlist to user document DB
-    const dbPlaylist = await dbCreatePlaylist(userId, {
+    const dbSuccess = await dbCreatePlaylist(userId, {
         playlist_id: idToWriteTo,
         preferences,
         seeds,
         rules,
     });
+
+    if (!dbSuccess) {
+        return new NextResponse(
+            JSON.stringify({
+                message:
+                    "Playlist created on Spotify, but an error occurred while saving to the database.",
+                error: "Database save error",
+            }),
+            { status: 500 }
+        );
+    }
     //revalidate cache for home to show the new playlist
     revalidatePath("/");
-    console.log("API: Added Playlist to DB:", dbPlaylist);
 
     return NextResponse.json(idToWriteTo, { status: 201 });
 }
@@ -81,8 +91,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
         return new NextResponse("No token found", { status: 401 });
     }
 
-    const accessToken = token?.accessToken || "no token found";
-    const userId = token?.userId || "no username found";
+    const { accessToken, userId } = token;
 
     //complete the request body with the description and public fields
     //TODO: function for generating description based on seeds and rules with link to edit -> mark has changed to true for every change
@@ -125,64 +134,26 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
     console.log("API: Added Tracks to Playlist:", addRes);
 
-    const dbPlaylist = await dbUpdatePlaylist(userId, {
+    const dbSuccess = await dbUpdatePlaylist(userId, {
         playlist_id,
         preferences,
         seeds,
         rules,
     });
 
-    console.log("API: Updated Playlist in DB:", dbPlaylist);
+    if (!dbSuccess) {
+        return new NextResponse(
+            JSON.stringify({
+                message:
+                    "Playlist updated on Spotify, but an error occurred while saving changes to the database.",
+                error: "Database save error",
+            }),
+            { status: 500 }
+        );
+    }
+
     //revalidate cache for home to show the new playlist
     revalidatePath("/");
 
     return NextResponse.json(playlist_id, { status: 201 });
-}
-
-interface Owner {
-    href: string;
-    id: string;
-    type: string;
-    uri: string;
-    display_name: string | null;
-    external_urls: {
-        spotify: string;
-    };
-}
-
-interface ExternalUrls {
-    spotify: string;
-}
-
-interface Followers {
-    href: string | null;
-    total: number;
-}
-
-interface Tracks {
-    limit: number;
-    next: string | null;
-    offset: number;
-    previous: string | null;
-    href: string;
-    total: number;
-    items: any[]; // You might want to create a type for track items
-}
-
-interface PlaylistResponse {
-    collaborative: boolean;
-    description: string;
-    external_urls: ExternalUrls;
-    followers: Followers;
-    href: string;
-    id: string;
-    images: string[]; // You might want to create a type for image URLs
-    primary_color: string | null;
-    name: string;
-    type: string;
-    uri: string;
-    owner: Owner;
-    public: boolean;
-    snapshot_id: string;
-    tracks: Tracks;
 }

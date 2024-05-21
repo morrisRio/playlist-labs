@@ -11,7 +11,7 @@ export async function middleware(req: NextRequest) {
     if (pathname.includes("/api/auth") || token) {
         return NextResponse.next();
     }
-    //TODO: bug: this gets called on every page load
+    //TODO: BUG this gets called on every page load
     console.log("NO TOKEN, REDIRECTING TO SIGN IN");
     return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/api/auth/signin`);
 }

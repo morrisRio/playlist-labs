@@ -56,7 +56,7 @@
     --background-start-rgb: 0, 0, 0;
     --background-end-rgb: 255, 255, 255;
 }
-/* TODO: make radial gradient background */
+/* TODO: UI make radial gradient background lighter*/
 /* @media (prefers-color-scheme: dark) {
     :root {
         --foreground-rgb: 255, 255, 255;

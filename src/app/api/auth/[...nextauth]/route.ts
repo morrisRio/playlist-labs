@@ -1,6 +1,7 @@
 import NextAuth, { NextAuthOptions, Account, User, Awaitable } from "next-auth";
 import SpotifyProvider from "next-auth/providers/spotify";
 import { JWT } from "next-auth/jwt";
+import { dbRegisterUser } from "@/lib/db/dbActions";
 
 async function refreshAccessToken(token: JWT) {
     try {
@@ -92,33 +93,17 @@ export const authOptions: NextAuthOptions = {
         }): Promise<string | boolean> {
             console.log("SIGNIN USER", user);
             //create user in database if he doesn't exist
-            if (account?.provider === "spotify") {
-                try {
-                    console.log("TRYING FETCH");
-                    //TODO: review if it can be done without fetch as this is the only place where db endpoints are used
-                    const res = await fetch(
-                        `${process.env.NEXTAUTH_URL}/api/db/user`,
-                        {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({
-                                spotify_id: user.id,
-                                name: user.name,
-                            }),
-                        }
-                    );
-                    console.log("SIGNIN RESPONSE", res.statusText);
-                    if (!res.ok) throw new Error("SIGNIN ERROR");
-                    return true;
-                } catch (error) {
-                    console.error("SIGNIN ERROR", error);
-                    return "SIGNIN_ERROR";
-                }
+            if (account?.provider !== "spotify") {
+                console.error("SIGNIN_ERROR: PROVIDER_NOT_SUPPORTED");
+                return false;
             }
-            console.error("SIGNIN_ERROR: PROVIDER_NOT_SUPPORTED");
-            return "SIGNIN_ERROR_PROVIDER_NOT_SUPPORTED";
+
+            if (!user.name) {
+                console.error("SIGNIN_ERROR: NO_NAME_PROVIDED");
+                return false;
+            }
+
+            return dbRegisterUser(user.id, user.name);
         },
 
         async jwt({

@@ -1,7 +1,7 @@
 "use client";
 import { signIn } from "next-auth/react";
 
-//TODO for production: https://github.com/nextauthjs/next-auth/discussions/4394#discussioncomment-3859770
+//TODO: PRODUCTION https://github.com/nextauthjs/next-auth/discussions/4394#discussioncomment-3859770
 
 function Login() {
     const handleLogin = () => {
