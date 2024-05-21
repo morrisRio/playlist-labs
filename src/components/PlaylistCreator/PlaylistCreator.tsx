@@ -1,5 +1,5 @@
 "use client";
-import { useState, FormEvent, useEffect } from "react";
+import { useState, FormEvent } from "react";
 import PreferencesForm from "./PreferencesForm";
 import Rules from "./RulesForm/Rules";
 import Seeds from "./SeedsForm/Seeds";
@@ -9,6 +9,10 @@ import { MdModeEdit } from "react-icons/md";
 import InfoModal from "./InfoModal";
 import { PlaylistData } from "@/types/spotify";
 import { completeRules } from "@/lib/spotifyActions";
+import { connectMongoDB } from "@/lib/db/dbConnect";
+import UserModel from "@/models/userModel";
+import { useSession } from "next-auth/react";
+import { revalidatePath } from "next/cache";
 
 interface SubmitErrorTypes {
     name?: string;
@@ -34,7 +38,7 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
     //Preferences ______________________________________________________________________________________________
     const [preferences, setPreferences] = useState<Preferences>(
         playlist?.preferences
-            ? playlist.preferences
+            ? { ...playlist.preferences, hasChanged: false }
             : {
                   name: "Playlist Name",
                   frequency: "daily",
@@ -51,6 +55,7 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
             ...prevState,
             //update the changed value
             [name]: value,
+            hasChanged: true,
         }));
     };
 
@@ -240,7 +245,6 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
         const newPlaylist = async () => {
             //create a new playlist and populate it with the tracks
             const newPlaylistId = await fetch("/api/spotify/playlist", {
-                //differentiate between creating a new playlist and updating an existing one
                 method: playlist_id ? "PUT" : "POST",
                 body: JSON.stringify({
                     playlist_id: playlist_id,
@@ -249,25 +253,12 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
                     rules,
                 }),
             }).then((res) => res.json());
-            console.log("newPlaylist", newPlaylistId);
 
-            //add the playlist to the database
-            const savedPlaylist = await fetch(
-                `/api/db/playlist/${newPlaylistId}`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        preferences,
-                        seeds,
-                        rules,
-                    }),
-                }
-            ).then((res) => res.json());
-            //TODO: serveraction instead of fetch
+            console.log("newPlaylist", newPlaylistId);
+            //TODO: show submitting state
+            //TODO: redirect to new playlist
             //include:
             //redirect(`/playlist/${savedPlaylist.playlist_id}`);
-
-            // console.log("savePlaylist", savedPlaylist);
         };
 
         newPlaylist();

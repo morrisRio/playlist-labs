@@ -1,6 +1,8 @@
 "use client";
 import { signIn } from "next-auth/react";
 
+//TODO for production: https://github.com/nextauthjs/next-auth/discussions/4394#discussioncomment-3859770
+
 function Login() {
     const handleLogin = () => {
         signIn("spotify", { callbackUrl: "/" });
@@ -15,7 +17,7 @@ function Login() {
                 <p>Share your playlists</p>
             </div>
             <button
-                className="p-5 bg-slate-300 text-slate-600 rounded"
+                className="p-4 bg-zinc-200 text-black rounded-md"
                 onClick={handleLogin}
             >
                 Login with Spotify

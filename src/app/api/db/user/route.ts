@@ -5,7 +5,7 @@ import { connectMongoDB } from "@/lib/db/dbConnect";
 
 /* POST: Create a new user if he does not exist*/
 export async function POST(req: NextRequest) {
-    const debug = false;
+    const debug = true;
 
     //TODO:add authorization to the request
 
@@ -58,8 +58,6 @@ export async function GET(req: NextRequest, verbose: boolean = false) {
     const token = await getToken({ req });
     const spotify_id = token?.userId;
 
-    //TODO: add authorization to the request
-    //TODO: DEBUG caching the DB connection
     if (debug) console.log("trying connectMongoDB");
     await connectMongoDB();
 

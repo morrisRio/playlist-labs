@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { MdAdd } from "react-icons/md";
 import { PlaylistData } from "@/types/spotify";
-import { getUsersPlaylists } from "@/lib/db/dbActions";
+import { dbGetUsersPlaylists } from "@/lib/db/dbActions";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 // import Center from "@/components/Dashboard";
 
@@ -13,9 +13,8 @@ export default async function Home() {
     const session = await getServerSession(authOptions);
     let playlists: PlaylistData[] | false = false;
 
-    //TODO: revalidate route
     if (session && session.user && session.user.id) {
-        playlists = await getUsersPlaylists(session.user.id);
+        playlists = await dbGetUsersPlaylists(session.user.id);
     } else {
         console.error("Session Error: ", session);
     }

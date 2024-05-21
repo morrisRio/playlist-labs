@@ -1,5 +1,6 @@
 import exp from "constants";
 import { DefaultSession } from "next-auth";
+import { Document } from "mongoose";
 
 interface AuthUser {
     name: string;
@@ -92,11 +93,21 @@ export interface Preferences {
     name: string;
     frequency: string;
     amount: number;
+    hasChanged?: boolean;
 }
 
-export type PlaylistData = {
+//Mongo Types================================================================
+
+export interface PlaylistData {
+    playlist_id?: string;
+    preferences: Preferences;
+    seeds: Seed[];
+    rules?: Rule[];
+}
+
+export interface MongoPlaylistData extends Document {
     playlist_id?: string | boolean;
     preferences: Preferences;
     seeds: Seed[];
     rules?: Rule[];
-};
+}

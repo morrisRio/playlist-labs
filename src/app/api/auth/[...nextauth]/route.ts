@@ -95,6 +95,7 @@ export const authOptions: NextAuthOptions = {
             if (account?.provider === "spotify") {
                 try {
                     console.log("TRYING FETCH");
+                    //TODO: review if it can be done without fetch as this is the only place where db endpoints are used
                     const res = await fetch(
                         `${process.env.NEXTAUTH_URL}/api/db/user`,
                         {

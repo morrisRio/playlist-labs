@@ -4,8 +4,8 @@ import { customPost, customPut } from "@/lib/serverUtils";
 import { getRecommendations } from "@/lib/spotifyActions";
 import { getToken } from "next-auth/jwt";
 import { PlaylistData } from "@/types/spotify";
-
-//TODO: differentiate between creating a playlist and updating a playlist
+import { dbCreatePlaylist, dbUpdatePlaylist } from "@/lib/db/dbActions";
+import { revalidatePath } from "next/cache";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
     const data = await req.json();
@@ -52,6 +52,20 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     console.log("API: Added Tracks to Playlist:", addRes);
 
+    //delete the hasChanged field from the preferences
+    delete preferences.hasChanged;
+
+    //add playlist to user document DB
+    const dbPlaylist = await dbCreatePlaylist(userId, {
+        playlist_id: idToWriteTo,
+        preferences,
+        seeds,
+        rules,
+    });
+    //revalidate cache for home to show the new playlist
+    revalidatePath("/");
+    console.log("API: Added Playlist to DB:", dbPlaylist);
+
     return NextResponse.json(idToWriteTo, { status: 201 });
 }
 
@@ -70,13 +84,24 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     const accessToken = token?.accessToken || "no token found";
     const userId = token?.userId || "no username found";
 
-    //Change Description and Name of the Playlist
     //complete the request body with the description and public fields
-    const preferencesBody = {
-        name: preferences.name,
-        description: "Playlist created by playlistLabs",
-        public: false,
-    };
+    //TODO: function for generating description based on seeds and rules with link to edit -> mark has changed to true for every change
+    if (preferences.hasChanged) {
+        //Change Description and Name of the Playlist
+        const preferencesBody = {
+            name: preferences.name,
+            description: "Playlist created by playlistLabs",
+            public: false,
+        };
+        const updatePlaylistDetails = await customPut(
+            `https://api.spotify.com/v1/playlists/${playlist_id}`,
+            preferencesBody,
+            accessToken
+        );
+        console.log("API: Updated Playlist Details:", updatePlaylistDetails);
+    }
+
+    delete preferences.hasChanged;
 
     //flush the playlist
     console.log(" - flushing the playlist");
@@ -99,6 +124,17 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     );
 
     console.log("API: Added Tracks to Playlist:", addRes);
+
+    const dbPlaylist = await dbUpdatePlaylist(userId, {
+        playlist_id,
+        preferences,
+        seeds,
+        rules,
+    });
+
+    console.log("API: Updated Playlist in DB:", dbPlaylist);
+    //revalidate cache for home to show the new playlist
+    revalidatePath("/");
 
     return NextResponse.json(playlist_id, { status: 201 });
 }
