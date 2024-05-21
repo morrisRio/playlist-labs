@@ -1,16 +1,13 @@
 import PlaylistEntry from "@/components/PlaylistEntry";
 import Profile from "@/components/Profile";
-import { getServerSession } from "next-auth";
+import { auth } from "@/lib/serverUtils";
 import Link from "next/link";
 import { MdAdd } from "react-icons/md";
 import { PlaylistData } from "@/types/spotify";
 import { dbGetUsersPlaylists } from "@/lib/db/dbActions";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-// import Center from "@/components/Dashboard";
 
-//TODO: typescript
 export default async function Home() {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     let playlists: PlaylistData[] | false = false;
 
     if (session && session.user && session.user.id) {
