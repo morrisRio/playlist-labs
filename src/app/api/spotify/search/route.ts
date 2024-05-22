@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { customGet } from "@/lib/serverUtils";
+import { spotifyGet } from "@/lib/serverUtils";
 import { getToken } from "next-auth/jwt";
 import { getSeedsFromItems } from "@/lib/spotifyActions";
-import { allGenres } from "@/lib/spotifyConstants";
+import { allGenresSeeds } from "@/lib/spotifyConstants";
 import { Seed } from "@/types/spotify";
 import { Track, Artist } from "@/types/spotify";
 import { distance } from "fastest-levenshtein";
+import { debugLog, setDebugMode } from "@/lib/logger";
 
 interface SearchResults {
     artists: { items: Artist[] };
@@ -15,9 +16,9 @@ interface SearchResults {
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     const q = req.nextUrl.searchParams.get("q");
-    const debug = false;
+    setDebugMode(false);
 
-    debug ? console.log("GETTING TOKEN") : {};
+    debugLog("GETTING TOKEN");
 
     //add the token to the request for the api call
     const token = await getToken({ req });
@@ -28,48 +29,32 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     const accessToken = token?.accessToken || "no token found";
 
-    let foundGenres: string[] = [];
-
-    debug ? console.log("SEARCHING GENRES") : {};
+    let genreSeeds: Seed[] = [];
     if (q) {
-        foundGenres = allGenres.filter((genre) => {
-            return distance(genre.substring(0, q.length), q) < 2;
+        genreSeeds = allGenresSeeds.filter((genre) => {
+            return distance(genre.title.substring(0, q.length), q) < 2;
         });
     }
-    debug ? console.log("FORMATTING GENRES") : {};
-    const foundGenreItems = foundGenres.map((genre) => {
-        const genreItem = {
-            title: genre,
-            type: "genre",
-        };
-        return genreItem;
-    });
 
-    const genreSeeds: Seed[] = getSeedsFromItems(foundGenreItems);
-
-    debug ? console.log("GETTING THE ITEMS") : {};
+    debugLog("GETTING THE ITEMS");
 
     // make the api call to search for tracks and artists
-    const data = (await customGet(
+    const data = (await spotifyGet(
         `https://api.spotify.com/v1/search?q=${q}&type=track%2Cartist&limit=25&offset=0`,
         accessToken
     )) as unknown as SearchResults;
 
-    //@ts-ignore
-
     const { artists, tracks } = data;
-    // console.log(artists);
+
     const artistSeeds: Seed[] = getSeedsFromItems(artists.items);
     const trackSeeds: Seed[] = getSeedsFromItems(tracks.items);
 
-    debug
-        ? console.log("GOT" + artistSeeds.length + trackSeeds.length + "ITEMS")
-        : {};
+    debugLog("GOT" + artistSeeds.length + trackSeeds.length + "ITEMS");
 
     //sort them with the lehvenstein distance algorithm according to the search query
     const results = [...genreSeeds, ...trackSeeds, ...artistSeeds];
 
-    // TODO: remember to check for timeout
+    // TODO: OPRIMIZING remember to check for timeout
     const resultsRanked = results.map((item: any) => {
         return {
             ...item,
@@ -77,18 +62,17 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         };
     });
 
-    //this seems to crash/ take huge amount of time
     if (q) {
-        debug ? console.log("SORTING...") : {};
+        debugLog("SORTING...");
         let i = 0;
         resultsRanked.sort((a, b) => {
-            debug ? console.log("sorting...", i) : {};
+            debugLog("sorting...", i);
             i++;
             return a.distance - b.distance;
         });
     }
 
-    debug ? console.log("SORTING DONE, returning") : {};
+    debugLog("SORTING DONE, returning");
 
     return NextResponse.json(resultsRanked);
 }

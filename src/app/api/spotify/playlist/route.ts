@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { customPost, customPut } from "@/lib/serverUtils";
+import { spotifyPost, spotifyPut } from "@/lib/serverUtils";
 import { getRecommendations } from "@/lib/spotifyActions";
 import { getToken } from "next-auth/jwt";
 import { PlaylistData } from "@/types/spotify";
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     //make the api call to create the playlist and save the id for the created playlist
     console.log(" - creating the playlist");
-    const { id: idToWriteTo } = await customPost(
+    const { id: idToWriteTo } = await spotifyPost(
         `https://api.spotify.com/v1/users/${userId}/playlists`,
         createBody,
         accessToken
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         uris: await getRecommendations(accessToken, preferences, seeds, rules),
     };
     //add the tracks to the playlist
-    const addRes = await customPost(
+    const addRes = await spotifyPost(
         `https://api.spotify.com/v1/playlists/${idToWriteTo}/tracks`,
         addBody,
         accessToken
@@ -102,7 +102,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
             description: "Playlist created by playlistLabs",
             public: false,
         };
-        const updatePlaylistDetails = await customPut(
+        const updatePlaylistDetails = await spotifyPut(
             `https://api.spotify.com/v1/playlists/${playlist_id}`,
             preferencesBody,
             accessToken
@@ -114,7 +114,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
     //flush the playlist
     console.log(" - flushing the playlist");
-    const flushRes = await customPut(
+    const flushRes = await spotifyPut(
         `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
         { uris: [] },
         accessToken
@@ -126,7 +126,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     };
 
     //add the new tracks to the playlist
-    const addRes = await customPost(
+    const addRes = await spotifyPost(
         `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
         addBody,
         accessToken

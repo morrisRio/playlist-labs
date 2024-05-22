@@ -1,8 +1,8 @@
-//TODO: delete endpoint as ill just store the genre array
+//TODO: PRODUCTION delete endpoint as ill just store the genre array
 
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { customGet } from "@/lib/serverUtils";
+import { spotifyGet } from "@/lib/serverUtils";
 import { getToken } from "next-auth/jwt";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const accessToken = token?.accessToken || "no token found";
 
     //make the api call to create the playlist
-    const res = await customGet(
+    const res = await spotifyGet(
         `https://api.spotify.com/v1/recommendations/available-genre-seeds`,
         accessToken
     );

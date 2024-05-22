@@ -20,11 +20,11 @@ export async function auth(
     return getServerSession(...args, authOptions);
 }
 
-//TODO: rename to spotifyGet, spotifyPost, spotifyPut... and add a type for the response
+//TODO: types
 /* takes the url and a token to make an authorized get request*/
-export const customGet = async (url: string, token: string): Promise<any> => {
+export const spotifyGet = async (url: string, token: string): Promise<any> => {
     "use server";
-    console.log(" - customGet()");
+    console.log(" - spotifyGet()");
     const res = await fetch(url, {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -53,13 +53,13 @@ export const customGet = async (url: string, token: string): Promise<any> => {
 };
 
 /* takes the url a body object and a token to make an authorized post request*/
-export const customPost = async (
+export const spotifyPost = async (
     url: string,
     body: object,
     token: string
 ): Promise<any> => {
     "use server";
-    console.log(" - customPost()");
+    console.log(" - spotifyPost()");
     const res: NextResponse = await fetch(url, {
         method: "POST",
         headers: {
@@ -91,13 +91,13 @@ export const customPost = async (
 };
 
 /* takes the url a body object and a token to make an authorized post request*/
-export const customPut = async (
+export const spotifyPut = async (
     url: string,
     body: object,
     token: string
 ): Promise<any> => {
     "use server";
-    console.log(" - customPut()");
+    console.log(" - spotifyPut()");
     const res: NextResponse = await fetch(url, {
         method: "PUT",
         headers: {

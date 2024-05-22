@@ -1,7 +1,7 @@
 import formatter from "numbuffix";
 import { Seed, Rule, Preferences, Track, PlaylistData } from "@/types/spotify";
 import { allRules } from "@/lib/spotifyConstants";
-import { customGet, customPost } from "@/lib/serverUtils";
+import { spotifyGet, spotifyPost } from "@/lib/serverUtils";
 
 //CREATE ==============================================================================
 
@@ -46,7 +46,7 @@ export const getSeedsFromItems = (items: any[]): Seed[] => {
     });
     return seeds;
 };
-//TODO: add type from spotify response
+
 export const getThumbnail = (item: any): string => {
     let thumbnail = "";
     if (item.type === "artist") {
@@ -59,6 +59,7 @@ export const getThumbnail = (item: any): string => {
                 : "";
     }
     //genre
+    //TODO: add custom genre thumbnail
     return thumbnail;
 };
 
@@ -80,7 +81,7 @@ export const getRecommendations = async (
     const seedQuery = "&" + getSeedQuery(seeds);
     const ruleQuery = rules ? "&" + getRuleQuery(rules) : "";
 
-    const trackRes: TracksResponse = await customGet(
+    const trackRes: TracksResponse = await spotifyGet(
         `https://api.spotify.com/v1/recommendations?${limitQuery}${seedQuery}${ruleQuery}`,
         accessToken
     );

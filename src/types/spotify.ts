@@ -77,7 +77,7 @@ export interface Seed {
     id: string;
     title: string;
     description: string;
-    thumbnail: string;
+    thumbnail: string | number;
 }
 
 export interface Rule {

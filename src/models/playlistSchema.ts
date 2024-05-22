@@ -32,7 +32,6 @@ export const playlistSchema = new Schema<Playlist>({
         required: true,
         unique: true,
     },
-    //TODO: fix preferences
     preferences: {
         name: {
             type: String,

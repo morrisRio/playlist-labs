@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { customGet } from "@/lib/serverUtils";
+import { spotifyGet } from "@/lib/serverUtils";
 import { getToken } from "next-auth/jwt";
 
 export async function GET(
@@ -21,7 +21,7 @@ export async function GET(
     const accessToken = token?.accessToken || "no token found";
 
     // make the api call to get top items
-    const data = await customGet(
+    const data = await spotifyGet(
         `https://api.spotify.com/v1/me/top/${type}/?time_range=${time_range}`,
         accessToken
     );

@@ -1,3 +1,4 @@
+import { RiMusic2Fill } from "react-icons/ri";
 import { MdRemoveCircleOutline, MdAddCircleOutline } from "react-icons/md";
 import Marquee from "react-fast-marquee";
 import { Seed } from "@/types/spotify";
@@ -32,7 +33,20 @@ export function SeedEntry({
 
     return (
         <div className={`flex gap-4 items-center justify-between ${seedCard}`}>
-            {seedObj.thumbnail ? (
+            {seedObj.type === "genre" &&
+            typeof seedObj.thumbnail === "number" ? (
+                <div
+                    className={`${imgClass} flex items-center justify-center`}
+                    style={{
+                        backgroundColor: `hsl(${seedObj.thumbnail} 80 40)`,
+                    }}
+                >
+                    <RiMusic2Fill
+                        size={small ? "1rem" : "1.5rem"}
+                        color={`hsl(${seedObj.thumbnail} 90 70)`}
+                    />
+                </div>
+            ) : seedObj.thumbnail && typeof seedObj.thumbnail === "string" ? (
                 <img
                     className={`${imgClass} flex-none object-cover`}
                     src={seedObj.thumbnail}
