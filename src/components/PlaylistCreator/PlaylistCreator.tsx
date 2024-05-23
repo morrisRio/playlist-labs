@@ -8,7 +8,7 @@ import { Seed, Rule, Preferences } from "@/types/spotify";
 import { MdModeEdit } from "react-icons/md";
 import InfoModal from "./InfoModal";
 import { PlaylistData } from "@/types/spotify";
-import { completeRules } from "@/lib/spotifyActions";
+import { completeRules } from "@/lib/spotifyUtils";
 import { connectMongoDB } from "@/lib/db/dbConnect";
 import UserModel from "@/models/userModel";
 import { useSession } from "next-auth/react";
@@ -46,16 +46,13 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
               }
     );
 
-    const handlePrefChange = (
-        e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
-    ) => {
+    const handlePrefChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target;
         setPreferences((prevState) => ({
             //spread the previous state
             ...prevState,
             //update the changed value
             [name]: value,
-            hasChanged: true,
         }));
     };
 
@@ -65,14 +62,12 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
             ? playlist.seeds
             : [
                   {
-                      spotify:
-                          "https://open.spotify.com/track/2gcpea4r4aH9Hm0Ty0kmNt",
+                      spotify: "https://open.spotify.com/track/2gcpea4r4aH9Hm0Ty0kmNt",
                       id: "2gcpea4r4aH9Hm0Ty0kmNt",
                       title: "Fruchtsaft",
                       description: "LAYLA",
                       type: "track",
-                      thumbnail:
-                          "https://i.scdn.co/image/ab67616d00001e02785f9cdda48d87d8b3757ae7",
+                      thumbnail: "https://i.scdn.co/image/ab67616d00001e02785f9cdda48d87d8b3757ae7",
                   },
                   {
                       spotify: "todo: find genre links",
@@ -83,15 +78,13 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
                       thumbnail: "",
                   },
                   {
-                      spotify:
-                          "https://open.spotify.com/artist/4XvKzACpcdk5iiZbWNvfbq",
+                      spotify: "https://open.spotify.com/artist/4XvKzACpcdk5iiZbWNvfbq",
                       id: "4XvKzACpcdk5iiZbWNvfbq",
                       title: "Monolake",
                       description:
                           "abstract, ambient, ambient dub, ambient techno, dub techno, intelligent dance music, microhouse, minimal techno · 41.2 k followers",
                       type: "artist",
-                      thumbnail:
-                          "https://i.scdn.co/image/a2a0779f11ef5a1b566fde579a3a9676f60a37ac",
+                      thumbnail: "https://i.scdn.co/image/a2a0779f11ef5a1b566fde579a3a9676f60a37ac",
                   },
               ]
     );
@@ -148,17 +141,12 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
                       type: "boolean",
                       value: false,
                       range: ["Minor", "Major"],
-                      description:
-                          "Choose between Tracks using Minor or Major mode.",
+                      description: "Choose between Tracks using Minor or Major mode.",
                   },
               ]
     );
 
-    const handleRuleChange = (
-        e:
-            | React.ChangeEvent<HTMLInputElement>
-            | React.MouseEvent<HTMLButtonElement>
-    ) => {
+    const handleRuleChange = (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {
         //@ts-ignore
         //TODO: fix this
         const { name, value, type } = e.target;
@@ -171,13 +159,7 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
             //now it can only be boolean
             //if the type is boolean (value is true), return true, else return false
             const valueParsed =
-                type === "range"
-                    ? parseFloat(value)
-                    : type === "axis"
-                    ? value
-                    : value === "true"
-                    ? true
-                    : false;
+                type === "range" ? parseFloat(value) : type === "axis" ? value : value === "true" ? true : false;
 
             newRules[i].value = valueParsed;
             return newRules;
@@ -206,13 +188,8 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
         let errors: any = {};
         //check if the form is valid
         //check if the preferences are valid
-        if (preferences.name.length < 1)
-            errors.name = "Your Playlist should have a name";
-        if (
-            (typeof preferences.amount !== "number" &&
-                preferences.amount < 5) ||
-            preferences.amount > 50
-        )
+        if (preferences.name.length < 1) errors.name = "Your Playlist should have a name";
+        if ((typeof preferences.amount !== "number" && preferences.amount < 5) || preferences.amount > 50)
             errors.amount = "The amount of tracks should be between 5 and 50";
         if (
             preferences.frequency !== "daily" &&
@@ -220,8 +197,7 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
             preferences.frequency !== "monthly"
         )
             errors.frequency = "Invalid frequency";
-        if (seeds.length < 1)
-            errors.seeds = "You need to add at least one seed";
+        if (seeds.length < 1) errors.seeds = "You need to add at least one seed";
         if (seeds.length > 5) errors.seeds = "You can only add 5 seeds";
         console.log(errors);
         return errors;
@@ -267,10 +243,7 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
 
     return (
         <div className="flex justify-center text-white">
-            <form
-                className="w-full flex flex-col gap-8"
-                onSubmit={handleSubmit}
-            >
+            <form className="w-full flex flex-col gap-8" onSubmit={handleSubmit}>
                 {showSubmitErrors && (
                     <InfoModal
                         title="Failed to create the Playlist"
@@ -280,10 +253,7 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
                 )}
                 <div className="flex justify-between p-4">
                     <h3>{preferences.name}</h3>
-                    <MdModeEdit
-                        size="1.5em"
-                        onClick={() => setShowNameModal(true)}
-                    />
+                    <MdModeEdit size="1.5em" onClick={() => setShowNameModal(true)} />
                     {showNameModal && (
                         <NameModal
                             name={preferences.name}
@@ -292,21 +262,10 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
                         />
                     )}
                 </div>
-                <PreferencesForm
-                    preferences={preferences}
-                    onChange={handlePrefChange}
-                />
+                <PreferencesForm preferences={preferences} onChange={handlePrefChange} />
                 <Seeds seeds={seeds} onRemove={removeSeed} onAdd={addSeed} />
-                <Rules
-                    rules={rules}
-                    onAdd={addRule}
-                    onRemove={removeRule}
-                    onChange={handleRuleChange}
-                ></Rules>
-                <button
-                    type="submit"
-                    className={`p-2 px-8 rounded-md text-black bg-white self-end`}
-                >
+                <Rules rules={rules} onAdd={addRule} onRemove={removeRule} onChange={handleRuleChange}></Rules>
+                <button type="submit" className={`p-2 px-8 rounded-md text-black bg-white self-end`}>
                     Create Playlist
                 </button>
             </form>

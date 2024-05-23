@@ -64,8 +64,21 @@ export const playlistSchema = new Schema<Playlist>({
                 type: String,
                 required: true,
             },
+            //TODO: thumbnail not required
             thumbnail: {
-                type: String,
+                type: mongoose.Schema.Types.Mixed,
+                validate: {
+                    validator: function (v: any) {
+                        // Custom validation function to check the type of value
+                        if (typeof v === "string" || typeof v === "number") {
+                            return true;
+                        } else {
+                            // Invalid value
+                            return false;
+                        }
+                    },
+                    message: "Thumbnail value must be a string or a number",
+                },
                 required: true,
             },
             _id: false,

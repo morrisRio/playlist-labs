@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { spotifyGet } from "@/lib/serverUtils";
 import { getToken } from "next-auth/jwt";
-import { getSeedsFromItems } from "@/lib/spotifyActions";
+import { getSeedsFromItems } from "@/lib/spotifyUtils";
 import { allGenresSeeds } from "@/lib/spotifyConstants";
 import { Seed } from "@/types/spotify";
 import { Track, Artist } from "@/types/spotify";
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     //sort them with the lehvenstein distance algorithm according to the search query
     const results = [...genreSeeds, ...trackSeeds, ...artistSeeds];
 
-    // TODO: OPRIMIZING remember to check for timeout
+    // TODO: OPTIMIZING remember to check for timeout
     const resultsRanked = results.map((item: any) => {
         return {
             ...item,

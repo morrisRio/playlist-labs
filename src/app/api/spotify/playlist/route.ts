@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { spotifyPost, spotifyPut } from "@/lib/serverUtils";
-import { getRecommendations } from "@/lib/spotifyActions";
+import { getRecommendations, createPlaylistDescription } from "@/lib/spotifyUtils";
 import { getToken } from "next-auth/jwt";
-import { PlaylistData } from "@/types/spotify";
+import { PlaylistData, Preferences, Seed, Rule } from "@/types/spotify";
 import { dbCreatePlaylist, dbUpdatePlaylist } from "@/lib/db/dbActions";
 import { revalidatePath } from "next/cache";
 
@@ -11,9 +11,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const data = await req.json();
     const { preferences, seeds, rules }: PlaylistData = data;
 
-    console.log(
-        "API: PLAYLIST POST - creating new playlist " + preferences.name
-    );
+    console.log("API: PLAYLIST POST - creating new playlist " + preferences.name);
     //add the token to the request for the api call
     const token = await getToken({ req });
     if (!token) {
@@ -26,12 +24,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     //complete the request body with the description and public fields
     const createBody = {
         name: preferences.name,
-        description: "Playlist created by playlistLabs",
+        description: createPlaylistDescription(preferences, seeds, rules),
         public: false,
     };
 
     //make the api call to create the playlist and save the id for the created playlist
     console.log(" - creating the playlist");
+    //@ts-ignore
     const { id: idToWriteTo } = await spotifyPost(
         `https://api.spotify.com/v1/users/${userId}/playlists`,
         createBody,
@@ -66,8 +65,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (!dbSuccess) {
         return new NextResponse(
             JSON.stringify({
-                message:
-                    "Playlist created on Spotify, but an error occurred while saving to the database.",
+                message: "Playlist created on Spotify, but an error occurred while saving to the database.",
                 error: "Database save error",
             }),
             { status: 500 }
@@ -94,23 +92,19 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     const { accessToken, userId } = token;
 
     //complete the request body with the description and public fields
-    //TODO: function for generating description based on seeds and rules with link to edit -> mark has changed to true for every change
-    if (preferences.hasChanged) {
-        //Change Description and Name of the Playlist
-        const preferencesBody = {
-            name: preferences.name,
-            description: "Playlist created by playlistLabs",
-            public: false,
-        };
-        const updatePlaylistDetails = await spotifyPut(
-            `https://api.spotify.com/v1/playlists/${playlist_id}`,
-            preferencesBody,
-            accessToken
-        );
-        console.log("API: Updated Playlist Details:", updatePlaylistDetails);
-    }
 
-    delete preferences.hasChanged;
+    //Change Description and Name of the Playlist
+    const preferencesBody = {
+        name: preferences.name,
+        description: createPlaylistDescription(preferences, seeds, rules),
+        public: false,
+    };
+
+    const updatePlaylistDetails = await spotifyPut(
+        `https://api.spotify.com/v1/playlists/${playlist_id}`,
+        preferencesBody,
+        accessToken
+    );
 
     //flush the playlist
     console.log(" - flushing the playlist");
@@ -119,7 +113,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
         { uris: [] },
         accessToken
     );
-    console.log(" - FLUSHED PLAYLIST: flushRes:" + flushRes);
+    // console.log(" - FLUSHED PLAYLIST: flushRes:" + flushRes);
 
     const addBody = {
         uris: await getRecommendations(accessToken, preferences, seeds, rules),
@@ -132,7 +126,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
         accessToken
     );
 
-    console.log("API: Added Tracks to Playlist:", addRes);
+    // console.log("API: Added Tracks to Playlist:", addRes);
 
     const dbSuccess = await dbUpdatePlaylist(userId, {
         playlist_id,
@@ -144,8 +138,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     if (!dbSuccess) {
         return new NextResponse(
             JSON.stringify({
-                message:
-                    "Playlist updated on Spotify, but an error occurred while saving changes to the database.",
+                message: "Playlist updated on Spotify, but an error occurred while saving changes to the database.",
                 error: "Database save error",
             }),
             { status: 500 }

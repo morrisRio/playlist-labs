@@ -1,12 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import {
-    MdOutlineArrowBackIos,
-    MdOutlineSearch,
-    MdClose,
-} from "react-icons/md";
+import { MdOutlineArrowBackIos, MdOutlineSearch, MdClose } from "react-icons/md";
 import { SeedEntry } from "./SeedEntry";
 import { Seed } from "@/types/spotify";
-import { getSeedsFromItems } from "@/lib/spotifyActions";
+import { getSeedsFromItems } from "@/lib/spotifyUtils";
 
 interface SeedModalProps {
     onAdd: (seed: Seed) => void;
@@ -133,11 +129,7 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
     }, [debouncedSearch]);
 
     const inputRef = useRef(null);
-    const changeFilter = (
-        e:
-            | React.MouseEvent<HTMLButtonElement>
-            | React.ChangeEvent<HTMLSelectElement>
-    ) => {
+    const changeFilter = (e: React.MouseEvent<HTMLButtonElement> | React.ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.currentTarget;
         console.log(name, value);
         setResults((prevState) => ({
@@ -157,9 +149,7 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
                     <MdOutlineArrowBackIos size="2em" />
                 </button>
                 <h2>Add Seed</h2>
-                <h3 className="text-zinc-500 text-right flex-grow self-end">
-                    {seeds?.length} /5 used
-                </h3>
+                <h3 className="text-zinc-500 text-right flex-grow self-end">{seeds?.length} /5 used</h3>
             </header>
             <div className="relative mt-8">
                 <input
@@ -219,13 +209,10 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
                                 >
                                     <p
                                         className={`font-bold ${
-                                            results.selectedType == type
-                                                ? "text-white"
-                                                : "text-zinc-400"
+                                            results.selectedType == type ? "text-white" : "text-zinc-400"
                                         }`}
                                     >
-                                        Top{" "}
-                                        {type[0].toUpperCase() + type.slice(1)}s
+                                        Top {type[0].toUpperCase() + type.slice(1)}s
                                     </p>
                                 </button>
                             ))}
@@ -235,12 +222,8 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
                                 className="block mt-1 p-2 rounded-md bg-zinc-800 text-zinc-300 focus:outline-none focus:ring focus:border-blue-300 text-xs"
                             >
                                 {results.rangeTypes.map((duration) => (
-                                    <option
-                                        key={duration[0]}
-                                        value={duration[0]}
-                                    >
-                                        {duration[1][0].toUpperCase() +
-                                            duration[1].slice(1)}
+                                    <option key={duration[0]} value={duration[0]}>
+                                        {duration[1][0].toUpperCase() + duration[1].slice(1)}
                                     </option>
                                 ))}
                             </select>

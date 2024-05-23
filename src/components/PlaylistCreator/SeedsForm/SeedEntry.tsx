@@ -30,11 +30,10 @@ export function SeedEntry({
         : "mb-6";
     const fontSize = small ? "text-sm" : "text-base";
     const removeColor = small ? "white" : "lightgreen";
-
+    //TODO: something is wrong with genre thumbnails when saved to db
     return (
         <div className={`flex gap-4 items-center justify-between ${seedCard}`}>
-            {seedObj.type === "genre" &&
-            typeof seedObj.thumbnail === "number" ? (
+            {seedObj.type === "genre" ? (
                 <div
                     className={`${imgClass} flex items-center justify-center`}
                     style={{
