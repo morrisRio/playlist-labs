@@ -1,8 +1,4 @@
-import {
-    MdRemoveCircleOutline,
-    MdAddCircleOutline,
-    MdInfoOutline,
-} from "react-icons/md";
+import { MdRemoveCircleOutline, MdAddCircleOutline, MdInfoOutline } from "react-icons/md";
 import { Rule } from "@/types/spotify";
 import { useState } from "react";
 import { TwoAxisSlider, AxisRule } from "./TwoAxis";
@@ -16,11 +12,7 @@ type RuleEntryProps = {
     onAdd: (rule: Rule) => void;
     control?: boolean;
     added?: boolean;
-    onChange?: (
-        e:
-            | React.ChangeEvent<HTMLInputElement>
-            | React.MouseEvent<HTMLButtonElement>
-    ) => void;
+    onChange?: (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => void;
 };
 
 export function RuleEntry({
@@ -49,33 +41,18 @@ export function RuleEntry({
         //it was the backdrop blur that was causing the issue
         <div className={`flex flex-col  p-5 rounded-xl ${ruleCard}`}>
             {showInfo && (
-                <InfoModal
-                    title={`What is ${rule.name}?`}
-                    body={rule.description}
-                    onClose={closeModal}
-                ></InfoModal>
+                <InfoModal title={`What is ${rule.name}?`} body={rule.description} onClose={closeModal}></InfoModal>
             )}
-            <div
-                className={`w-full flex items-center justify-between gap-4 ${
-                    control ? "mb-4" : "mb-0"
-                }`}
-            >
+            <div className={`w-full flex items-center justify-between gap-4 ${control ? "mb-4" : "mb-0"}`}>
                 {/* Info _____________________________________________________________________ */}
                 <div className="flex-grow flex items-center gap-4">
                     <h4 className={fontSize}>{rule.name}</h4>
-                    <MdInfoOutline
-                        size="1.2rem"
-                        color="rgb(113 113 122)"
-                        onClick={openModal}
-                    ></MdInfoOutline>
+                    <MdInfoOutline size="1.2rem" color="rgb(113 113 122)" onClick={openModal}></MdInfoOutline>
                 </div>
                 {/* Toggles ___________________________________________________________________ */}
                 {added && (
                     <button onClick={() => onRemove(rule.name)} type="button">
-                        <MdRemoveCircleOutline
-                            size="1.2em"
-                            color={removeColor}
-                        />
+                        <MdRemoveCircleOutline size="1.2em" color={removeColor} />
                     </button>
                 )}
                 {!added && onAdd && (
@@ -97,12 +74,8 @@ export function RuleEntry({
                                 onChange={onChange}
                             />
                             <div className="flex justify-between mt-1">
-                                <span className="text-zinc-500 text-sm">
-                                    {rule.range[0]}
-                                </span>
-                                <span className="text-zinc-500 text-sm">
-                                    {rule.range[1]}
-                                </span>
+                                <span className="text-zinc-500 text-sm">{rule.range[0]}</span>
+                                <span className="text-zinc-500 text-sm">{rule.range[1]}</span>
                             </div>
                         </div>
                     ) : typeof rule.value === "boolean" ? (
@@ -134,12 +107,9 @@ export function RuleEntry({
                             </button>
                         </div>
                     ) : Array.isArray(rule.value) && rule.value.length === 2 ? (
-                        <TwoAxisSlider
-                            rule={rule as AxisRule}
-                            onChange={onChange}
-                        ></TwoAxisSlider>
+                        <TwoAxisSlider rule={rule as AxisRule} onChange={onChange}></TwoAxisSlider>
                     ) : (
-                        <h2>Something went wrong</h2>
+                        <h3>Something went wrong</h3>
                     )}
                 </div>
             )}

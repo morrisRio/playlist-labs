@@ -110,3 +110,9 @@ export interface MongoPlaylistData extends Document {
     seeds: Seed[];
     rules?: Rule[];
 }
+
+export interface RuleInput extends EventTarget {
+    name: string;
+    value: string | number[];
+    type: string;
+}

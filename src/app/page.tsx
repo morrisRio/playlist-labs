@@ -7,7 +7,10 @@ import { PlaylistData } from "@/types/spotify";
 import { dbGetUsersPlaylists } from "@/lib/db/dbActions";
 
 export default async function Home() {
-    const session = await auth();
+    //TODO: this second call to auth is not necessary
+    //it gets called in the layout component
+    //but since this is a server side rendered page it is necessary
+    const session = await auth("home");
     let playlists: PlaylistData[] | false = false;
 
     if (session && session.user && session.user.id) {
@@ -30,10 +33,7 @@ export default async function Home() {
             {/* render all playlists found in database for user */}
             {playlists &&
                 playlists.map((playlist) => (
-                    <PlaylistEntry
-                        playlist={playlist}
-                        key={playlist.playlist_id?.toString()}
-                    />
+                    <PlaylistEntry playlist={playlist} key={playlist.playlist_id?.toString()} />
                 ))}
             <Profile></Profile>
         </div>

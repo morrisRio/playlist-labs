@@ -14,23 +14,14 @@ type SeedEntryProps = {
     added?: boolean;
 };
 
-export function SeedEntry({
-    seedObj,
-    onRemove,
-    onAdd,
-    small = false,
-    added = false,
-}: SeedEntryProps): JSX.Element {
+export function SeedEntry({ seedObj, onRemove, onAdd, small = false, added = false }: SeedEntryProps): JSX.Element {
     const imgSize = small ? "size-8" : "size-14";
     const imgRound = seedObj.type === "artist" ? "rounded-full" : "rounded-md";
     const imgClass = `${imgSize} ${imgRound}`;
 
-    const seedCard = small
-        ? "mb-3 bg-zinc-950/60 px-4 py-3 rounded-xl"
-        : "mb-6";
+    const seedCard = small ? "mb-3 bg-zinc-950/60 px-4 py-3 rounded-xl" : "mb-6";
     const fontSize = small ? "text-sm" : "text-base";
     const removeColor = small ? "white" : "lightgreen";
-    //TODO: something is wrong with genre thumbnails when saved to db
     return (
         <div className={`flex gap-4 items-center justify-between ${seedCard}`}>
             {seedObj.type === "genre" ? (
@@ -40,30 +31,19 @@ export function SeedEntry({
                         backgroundColor: `hsl(${seedObj.thumbnail} 80 40)`,
                     }}
                 >
-                    <RiMusic2Fill
-                        size={small ? "1rem" : "1.5rem"}
-                        color={`hsl(${seedObj.thumbnail} 90 70)`}
-                    />
+                    <RiMusic2Fill size={small ? "1rem" : "1.5rem"} color={`hsl(${seedObj.thumbnail} 90 70)`} />
                 </div>
             ) : seedObj.thumbnail && typeof seedObj.thumbnail === "string" ? (
-                <img
-                    className={`${imgClass} flex-none object-cover`}
-                    src={seedObj.thumbnail}
-                    alt={seedObj.title}
-                />
+                <img className={`${imgClass} flex-none object-cover`} src={seedObj.thumbnail} alt={seedObj.title} />
             ) : (
                 <div className={`${imgClass} flex-none bg-zinc-800`}></div>
             )}
             <div className="flex-grow">
                 <p className={fontSize}>{seedObj.title}</p>
                 {!small ? (
-                    <Marquee
-                        play={seedObj.description.length > 60 ? true : false}
-                        speed={30}
-                    >
+                    <Marquee play={seedObj.description.length > 60 ? true : false} speed={30}>
                         <p className={`text-zinc-400 ${fontSize}`}>
-                            {seedObj.description +
-                                (seedObj.description.length > 60 ? " - " : "")}
+                            {seedObj.description + (seedObj.description.length > 60 ? " - " : "")}
                         </p>
                     </Marquee>
                 ) : (
@@ -73,20 +53,12 @@ export function SeedEntry({
                 )}
             </div>
             {added && (
-                <button
-                    className="justify-end"
-                    onClick={() => onRemove(seedObj.id)}
-                    type="button"
-                >
+                <button className="justify-end" onClick={() => onRemove(seedObj.id)} type="button">
                     <MdRemoveCircleOutline size="1.2rem" color={removeColor} />
                 </button>
             )}
             {!added && onAdd && (
-                <button
-                    className="justify-end"
-                    onClick={() => onAdd(seedObj)}
-                    type="button"
-                >
+                <button className="justify-end" onClick={() => onAdd(seedObj)} type="button">
                     <MdAddCircleOutline size="1.2rem" />
                 </button>
             )}

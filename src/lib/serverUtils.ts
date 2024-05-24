@@ -7,15 +7,16 @@ import { NextResponse } from "next/server";
 
 /* helper function for getServerSession() to avoid passing authOptions around */
 export async function auth(
+    calledBy: string = "",
     ...args:
         | [GetServerSidePropsContext["req"], GetServerSidePropsContext["res"]]
         | [NextApiRequest, NextApiResponse]
         | []
 ) {
+    console.log(" - auth() from: ", calledBy);
     return getServerSession(...args, authOptions);
 }
 
-//TODO: check all types again
 /* takes the url and a token to make an authorized get request*/
 export const spotifyGet = async (url: string, token: string): Promise<any> => {
     "use server";

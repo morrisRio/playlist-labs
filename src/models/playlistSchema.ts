@@ -64,7 +64,6 @@ export const playlistSchema = new Schema<Playlist>({
                 type: String,
                 required: true,
             },
-            //TODO: thumbnail not required
             thumbnail: {
                 type: mongoose.Schema.Types.Mixed,
                 validate: {
@@ -79,7 +78,6 @@ export const playlistSchema = new Schema<Playlist>({
                     },
                     message: "Thumbnail value must be a string or a number",
                 },
-                required: true,
             },
             _id: false,
         },
@@ -98,17 +96,10 @@ export const playlistSchema = new Schema<Playlist>({
                 validate: {
                     validator: function (v: any) {
                         // Custom validation function to check the type of value
-                        if (
-                            Array.isArray(v) &&
-                            v.length === 2 &&
-                            v.every((num) => typeof num === "number")
-                        ) {
+                        if (Array.isArray(v) && v.length === 2 && v.every((num) => typeof num === "number")) {
                             // Array of two numbers
                             return true;
-                        } else if (
-                            typeof v === "number" ||
-                            typeof v === "boolean"
-                        ) {
+                        } else if (typeof v === "number" || typeof v === "boolean") {
                             // Single number or boolean
                             return true;
                         } else {
@@ -116,8 +107,7 @@ export const playlistSchema = new Schema<Playlist>({
                             return false;
                         }
                     },
-                    message:
-                        "Rule value must be a string, a number, or an Array of two numbers",
+                    message: "Rule value must be a string, a number, or an Array of two numbers",
                 },
                 required: function () {
                     return this.rules && this.rules.length > 0;

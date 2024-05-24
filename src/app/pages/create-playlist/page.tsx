@@ -11,7 +11,7 @@ export default async function Home() {
                 <Link href="/">
                     <MdChevronLeft size="2rem"></MdChevronLeft>
                 </Link>
-                <h2> Create Playlist</h2>
+                <h3> Create Playlist</h3>
             </div>
             <PlaylistCreator></PlaylistCreator>
             <Profile></Profile>

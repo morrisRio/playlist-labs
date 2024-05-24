@@ -27,15 +27,11 @@ export const metadata: Metadata = {
     description: "Generate Spotify playlists based on your preferences",
 };
 
-export default async function RootLayout({
-    children,
-}: Readonly<{ children: React.ReactNode }>) {
-    const session = await auth();
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+    const session = await auth("layout");
     return (
         <html lang="en">
-            <body
-                className={`${ibmPlexSans.variable} font-ibm antialiased bg-zinc-950`}
-            >
+            <body className={`${ibmPlexSans.variable} font-ibm antialiased bg-zinc-950`}>
                 <SessionProvider session={session}>
                     <main className="min-h-screen">{children}</main>
                 </SessionProvider>

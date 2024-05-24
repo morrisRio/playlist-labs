@@ -4,14 +4,11 @@ import PreferencesForm from "./PreferencesForm";
 import Rules from "./RulesForm/Rules";
 import Seeds from "./SeedsForm/Seeds";
 import NameModal from "./NameModal";
-import { Seed, Rule, Preferences } from "@/types/spotify";
+import { Seed, Rule, Preferences, RuleInput } from "@/types/spotify";
 import { MdModeEdit } from "react-icons/md";
 import InfoModal from "./InfoModal";
 import { PlaylistData } from "@/types/spotify";
 import { completeRules } from "@/lib/spotifyUtils";
-import { connectMongoDB } from "@/lib/db/dbConnect";
-import UserModel from "@/models/userModel";
-import { useSession } from "next-auth/react";
 import { revalidatePath } from "next/cache";
 
 interface SubmitErrorTypes {
@@ -147,9 +144,7 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
     );
 
     const handleRuleChange = (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {
-        //@ts-ignore
-        //TODO: fix this
-        const { name, value, type } = e.target;
+        const { name, value, type } = e.target as RuleInput;
         setRules((prevState) => {
             const newRules = [...prevState];
             const i = newRules.findIndex((r) => r.name === name);
@@ -159,7 +154,13 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
             //now it can only be boolean
             //if the type is boolean (value is true), return true, else return false
             const valueParsed =
-                type === "range" ? parseFloat(value) : type === "axis" ? value : value === "true" ? true : false;
+                type === "range" && typeof value === "string"
+                    ? parseFloat(value)
+                    : type === "axis" && Array.isArray(value)
+                    ? value
+                    : value === "true"
+                    ? true
+                    : false;
 
             newRules[i].value = valueParsed;
             return newRules;
