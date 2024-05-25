@@ -1,3 +1,6 @@
+// export const dynamic = "force-dynamic";
+//TODO: wait for unstable_cache to be stable to use for revalidation on demand (submit trigger)
+
 import PlaylistEntry from "@/components/PlaylistEntry";
 import Profile from "@/components/Profile";
 import { auth } from "@/lib/serverUtils";
@@ -5,19 +8,28 @@ import Link from "next/link";
 import { MdAdd } from "react-icons/md";
 import { PlaylistData } from "@/types/spotify";
 import { dbGetUsersPlaylists } from "@/lib/db/dbActions";
+import { headers } from "next/headers";
 
 export default async function Home() {
     //TODO: this second call to auth is not necessary
     //it gets called in the layout component
     //but since this is a server side rendered page it is necessary
-    const session = await auth("home");
+    // const session = await auth("home");
     let playlists: PlaylistData[] | false = false;
 
-    if (session && session.user && session.user.id) {
-        playlists = await dbGetUsersPlaylists(session.user.id);
-    } else {
-        console.error("Session Error: ", session);
-    }
+    /* 
+        This is workaround to get the playlists from a database with a fetch to be able to use 
+        tagged data cache
+        //TODO: wait for unstable_cache to be stable to use for revalidation on demand (submit trigger)
+    */
+    const res = await fetch(process.env.NEXTAUTH_URL + "/api/spotify/playlist", {
+        method: "GET",
+        headers: new Headers(headers()),
+        next: { tags: ["playlist"] },
+    }).then((res) => res.json());
+    console.log("User res", res);
+    playlists = res;
+    //TODO: ERROR HANDLING
 
     return (
         <div className="h-full w-full p-4 flex flex-col gap-8">

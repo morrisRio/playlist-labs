@@ -9,7 +9,7 @@ import { MdModeEdit } from "react-icons/md";
 import InfoModal from "./InfoModal";
 import { PlaylistData } from "@/types/spotify";
 import { completeRules } from "@/lib/spotifyUtils";
-import { revalidatePath } from "next/cache";
+import { redirect, useRouter } from "next/navigation";
 
 interface SubmitErrorTypes {
     name?: string;
@@ -23,15 +23,14 @@ interface PlaylistFormProps {
 }
 
 function PlaylistForm({ playlist }: PlaylistFormProps) {
+    const router = useRouter();
     const [showNameModal, setShowNameModal] = useState(false);
     const [showSubmitErrors, setShowSubmittErrors] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [submitErrors, setSubmitErrors] = useState<SubmitErrorTypes>({});
-
     //to differentiate between creating a new playlist and updating an existing one
     const playlist_id = playlist?.playlist_id ? playlist.playlist_id : false;
 
-    console.log("PlaylistId: ", playlist_id);
     //Preferences ______________________________________________________________________________________________
     const [preferences, setPreferences] = useState<Preferences>(
         playlist?.preferences
@@ -206,7 +205,6 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log("handleSubmit triggered");
 
         const errors = validateForm(preferences, seeds);
         if (Object.keys(errors).length > 0) {
@@ -230,12 +228,15 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
                     rules,
                 }),
             }).then((res) => res.json());
+            //revalidate tag playlists with serveraction
 
-            console.log("newPlaylist", newPlaylistId);
+            //TODO: ERROR HANDLING
+            console.log("New Playlist ID: ", newPlaylistId);
             //TODO: show submitting state
-            //TODO: redirect to new playlist
-            //include:
-            //redirect(`/playlist/${savedPlaylist.playlist_id}`);
+            setSubmitting(false);
+
+            router.replace("/pages/edit-playlist/" + newPlaylistId, { scroll: false });
+            router.refresh();
         };
 
         newPlaylist();

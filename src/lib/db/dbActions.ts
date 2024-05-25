@@ -21,10 +21,7 @@ interface MongoUserData extends Document {
  * @param {string} name - The name of the user.
  * @returns {Promise<boolean>} A promise that resolves to true if the user is successfully registered or already exists, and false if an error occurs.
  */
-export async function dbRegisterUser(
-    userId: string,
-    name: string
-): Promise<boolean> {
+export async function dbRegisterUser(userId: string, name: string): Promise<boolean> {
     await connectMongoDB();
     if (!userId || !name) return false;
 
@@ -53,19 +50,20 @@ export async function dbRegisterUser(
  * @async
  * @function dbGetUsersPlaylists
  * @param {string} userId - The Spotify ID of the user.
- * @returns {Promise<PlaylistData[] | []>} A promise that resolves to an array of playlist data, or an empty array if an error occurs.
+ * @returns {Promise<PlaylistData[] | Object>} A promise that resolves to an array of playlist data, or an empty array if an error occurs.
  * @throws {Error} Will throw an error if the user is not found or if the user has no playlists.
  */
-export async function dbGetUsersPlaylists(
-    userId: string
-): Promise<PlaylistData[] | []> {
+
+interface PlaylistResponseDB {
+    playlists: PlaylistData[];
+    error: string | null;
+}
+
+export async function dbGetUsersPlaylists(userId: string): Promise<PlaylistResponseDB> {
     await connectMongoDB();
     try {
         console.log("searching for user", userId);
-        const user = (await User.findOne(
-            { spotify_id: userId },
-            { _id: 0 }
-        ).lean()) as MongoUserData;
+        const user = (await User.findOne({ spotify_id: userId }, { _id: 0 }).lean()) as MongoUserData;
 
         if (!user) {
             throw new Error("User not found");
@@ -81,10 +79,10 @@ export async function dbGetUsersPlaylists(
             delete playlist._id;
         });
 
-        return playlists as PlaylistData[];
-    } catch (error) {
+        return { playlists: playlists, error: null } as PlaylistResponseDB;
+    } catch (error: any) {
         console.error("Error getting playlists: ", error);
-        return [];
+        return { playlists: [], error: error.message } as PlaylistResponseDB;
     }
 }
 
@@ -97,10 +95,7 @@ export async function dbGetUsersPlaylists(
  * @param {string} playlistId - The ID of the playlist to fetch.
  * @returns {Promise<PlaylistData | null>} A promise that resolves to the playlist data if found, or null if not found.
  */
-export async function dbGetOnePlaylist(
-    userId: string,
-    playlistId: string
-): Promise<PlaylistData | null> {
+export async function dbGetOnePlaylist(userId: string, playlistId: string): Promise<PlaylistData | null> {
     //for fetching only one playlist: https://www.mongodb.com/docs/manual/tutorial/optimize-query-performance-with-indexes-and-projections/
     await connectMongoDB();
 
@@ -128,19 +123,12 @@ export async function dbGetOnePlaylist(
  * @param {PlaylistData} playlistData - The data of the playlist to be added.
  * @returns {Promise<boolean>} - Returns true if the playlist was successfully added, false otherwise.
  */
-export async function dbCreatePlaylist(
-    userId: string,
-    playlistData: PlaylistData
-): Promise<boolean> {
+export async function dbCreatePlaylist(userId: string, playlistData: PlaylistData): Promise<boolean> {
     await connectMongoDB();
     try {
-        const result = await UserModel.updateOne(
-            { spotify_id: userId },
-            { $addToSet: { playlists: playlistData } }
-        );
+        const result = await UserModel.updateOne({ spotify_id: userId }, { $addToSet: { playlists: playlistData } });
 
-        if (!result.acknowledged)
-            throw new Error("Error adding playlist to user");
+        if (!result.acknowledged) throw new Error("Error adding playlist to user");
         return true;
     } catch (error) {
         console.error("Error Adding new playlist:", error);
@@ -155,10 +143,7 @@ export async function dbCreatePlaylist(
  * @param {PlaylistData} playlistData - The updated data of the playlist.
  * @returns {Promise<boolean>} - Returns true if the playlist was successfully updated, false otherwise.
  */
-export async function dbUpdatePlaylist(
-    userId: string,
-    playlistData: PlaylistData
-): Promise<boolean> {
+export async function dbUpdatePlaylist(userId: string, playlistData: PlaylistData): Promise<boolean> {
     await connectMongoDB();
     try {
         const result = await UserModel.updateOne(
@@ -168,8 +153,7 @@ export async function dbUpdatePlaylist(
             },
             { $set: { "playlists.$": playlistData } }
         );
-        if (!result.acknowledged)
-            throw new Error("Change not acknowledged in DB");
+        if (!result.acknowledged) throw new Error("Change not acknowledged in DB");
         return true;
     } catch (error) {
         console.error("Error updating playlist:", error);

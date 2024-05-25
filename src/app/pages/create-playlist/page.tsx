@@ -4,11 +4,11 @@ import Link from "next/link";
 import { MdChevronLeft } from "react-icons/md";
 // import Center from "@/components/Dashboard";
 
-export default async function Home() {
+export default async function createPlaylist() {
     return (
         <div className="h-full w-full p-3 flex flex-col gap-4">
             <div className="flex items-center">
-                <Link href="/">
+                <Link href="/" replace={true}>
                     <MdChevronLeft size="2rem"></MdChevronLeft>
                 </Link>
                 <h3> Create Playlist</h3>
