@@ -1201,7 +1201,7 @@ export const allRules: Rule[] = [
         name: "Tempo",
         type: "range",
         value: 100,
-        range: ["40", "250"],
+        range: [40, 250],
         description: "Choose the Tempo of the Track.",
     },
 ];

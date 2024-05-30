@@ -59,18 +59,21 @@ export function RuleEntry({
                 <div className="flex-grow flex items-center gap-4">
                     <h4 className={fontSize}>{rule.name}</h4>
                     <MdInfoOutline size="1.2rem" color={infoColor} onClick={openModal}></MdInfoOutline>
+                    {rule.name === "Tempo" && control && onChange && typeof rule.value === "number" && (
+                        <>
+                            <input
+                                type="number"
+                                className="text-sm hide-arrows p-2 rounded-lg bg-ui-800 max-w-12 text-themetext/60 focus:outline-none focus:ring focus:border-themetext"
+                                name="amount"
+                                value={rule.value}
+                                min="40"
+                                max="250"
+                                disabled={true}
+                            />
+                            <p className="text-ui-600 -m-2">BPM</p>
+                        </>
+                    )}
                 </div>
-                {rule.name === "Tempo" && control && onChange && typeof rule.value === "number" && (
-                    <input
-                        type="number"
-                        className="text-sm hide-arrows p-2 rounded-lg bg-ui-800 max-w-12 text-themetext/60 focus:outline-none focus:ring focus:border-themetext"
-                        name="amount"
-                        value={rule.value}
-                        min="40"
-                        max="250"
-                        onChange={onChange}
-                    />
-                )}
                 {/* Toggles ___________________________________________________________________ */}
                 {added && (
                     <button onClick={() => onRemove(rule.name)} type="button">
@@ -91,8 +94,8 @@ export function RuleEntry({
                                 className="rule-slider"
                                 type="range"
                                 name={rule.name}
-                                min={0}
-                                max={100}
+                                min={rule.name === "Tempo" && typeof rule.range[0] === "number" ? rule.range[0] : 0}
+                                max={rule.name === "Tempo" && typeof rule.range[1] === "number" ? rule.range[1] : 100}
                                 value={rule.value}
                                 onChange={onChange}
                             />

@@ -84,7 +84,7 @@ export interface Rule {
     name: string;
     type: "boolean" | "axis" | "range";
     value: number | boolean | number[];
-    range: string[] | boolean[] | string[][];
+    range: number[] | string[] | boolean[] | string[][];
     description: string;
 }
 

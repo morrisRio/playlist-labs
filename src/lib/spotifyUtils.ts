@@ -124,6 +124,7 @@ const getRuleQuery = (rules: Rule[]): string => {
                 //this might be flipped
                 return `target_valence=${1 - rule.value[1] / 100}&target_energy=${rule.value[0] / 100}`;
             } else if (rule.type === "range" && typeof rule.value === "number") {
+                if (rule.name === "Tempo") return `target_${rule.name}=${rule.value}`;
                 return `target_${rule.name}=${rule.value / 100}`;
             } else if (rule.type === "boolean" && typeof rule.value === "boolean") {
                 return `target_${rule.name}=${rule.value}`;
