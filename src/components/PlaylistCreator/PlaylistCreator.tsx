@@ -191,7 +191,7 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
 
     return (
         <div className="flex justify-center text-white">
-            <form className="w-full flex flex-col gap-2" onSubmit={handleSubmit}>
+            <form className="w-full flex flex-col gap-10" onSubmit={handleSubmit}>
                 {showSubmitErrors && (
                     <InfoModal
                         title="Failed to create the Playlist"

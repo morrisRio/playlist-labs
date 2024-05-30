@@ -33,8 +33,8 @@ export default function Seeds({ seeds, onRemove, onAdd }: SeedsProps) {
     //@ts-expect-error
     const interactColor = fullConfig.theme.colors.themetext["DEFAULT"] + "a8"; //a8 is 65% opacity
     return (
-        <div className="p-4">
-            <div className="flex mb-4 gap-4 justify-between">
+        <div className="px-4">
+            <div className="flex mb-8 gap-4 justify-between">
                 <h3>Seeds</h3>
                 <p className="text-ui-600 text-base self-end flex-grow">{seeds?.length} /5 used</p>
                 <button className="flex items-center justify-center gap-2 self-end" onClick={openModal} type="button">
@@ -48,7 +48,7 @@ export default function Seeds({ seeds, onRemove, onAdd }: SeedsProps) {
                     <p className="mx-auto my-8 text-ui-40000 text-base self-end flex-grow">Add at least one Seed</p>
                 </div>
             ) : (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4 mb-4">
                     {seeds.map((seed, index) => (
                         <SeedEntry seedObj={seed} onRemove={onRemove} key={seed.id} card={true} added={true} />
                     ))}

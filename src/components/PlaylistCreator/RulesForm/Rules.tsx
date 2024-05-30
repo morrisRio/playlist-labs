@@ -39,8 +39,8 @@ function Rules({ rules, onAdd, onRemove, onChange }: RulesProps) {
     //@ts-expect-error
     const interactColor = fullConfig.theme.colors.themetext["DEFAULT"] + "a8"; //a8 is 65% opacity
     return (
-        <div className="p-4">
-            <div className="flex mb-4 gap-4 justify-between">
+        <div className="px-4">
+            <div className="flex mb-8 gap-4 justify-between">
                 <h3>Rules</h3>
                 <button className="flex items-center justify-center gap-2 self-end" onClick={openModal} type="button">
                     <MdAddCircleOutline size="1.5em" color={interactColor} />
@@ -52,7 +52,7 @@ function Rules({ rules, onAdd, onRemove, onChange }: RulesProps) {
                     <p className="text-zinc-400 text-base self-end flex-grow">Add at least one Rule</p>
                 </div>
             ) : (
-                <div className="flex flex-col gap-5">
+                <div className="flex flex-col gap-8">
                     {rules.map((rule, index) => (
                         <RuleEntry
                             rule={rule}

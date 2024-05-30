@@ -7,7 +7,7 @@ import { PlaylistData } from "@/types/spotify";
 import { dbCreatePlaylist, dbGetUsersPlaylists, dbUpdatePlaylist } from "@/lib/db/dbActions";
 import { debugLog, setDebugMode } from "@/lib/logger";
 
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 

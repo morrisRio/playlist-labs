@@ -62,9 +62,6 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
                 `/api/spotify/top-items/${selectedTops.selectedType}s?time_range=${selectedTops.selectedRange}`,
                 {
                     method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
                 }
             );
             const { data } = await response.json();
@@ -83,9 +80,6 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
         const fetchSearch = async () => {
             const response = await fetch(`/api/spotify/search?q=${search}`, {
                 method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
             });
             const data = await response.json();
             setSearchResults(data);
