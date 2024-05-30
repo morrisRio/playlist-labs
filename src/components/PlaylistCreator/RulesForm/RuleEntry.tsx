@@ -4,6 +4,9 @@ import { useState } from "react";
 import { TwoAxisSlider, AxisRule } from "./TwoAxis";
 import InfoModal from "../InfoModal";
 
+import resolveConfig from "tailwindcss/resolveConfig";
+import tailwindConfig from "@/../tailwind.config";
+
 //TODO: Add numeric input for tempo
 
 type RuleEntryProps = {
@@ -25,9 +28,14 @@ export function RuleEntry({
 }: RuleEntryProps): JSX.Element {
     const [showInfo, setShowInfo] = useState(false);
 
-    const ruleCard = control ? "mb-0 bg-zinc-950/60" : "mb-4 bg-zinc-700/40";
-    const fontSize = control ? "text-base" : "text-base";
-    const removeColor = control ? "white" : "lightgreen";
+    const ruleCard = control ? "bg-ui-900" : "mb-4 bg-zinc-700/40";
+    const fontSize = "text-base";
+
+    const fullConfig = resolveConfig(tailwindConfig);
+    //@ts-expect-error
+    const interactColor = fullConfig.theme.colors.themetext["DEFAULT"] + "a8"; //a8 is 65% opacity
+    //@ts-expect-error
+    const infoColor = fullConfig.theme.colors.ui[600]; //a8 is 65% opacity
 
     const openModal = () => {
         setShowInfo(true);
@@ -39,33 +47,48 @@ export function RuleEntry({
 
     return (
         //it was the backdrop blur that was causing the issue
-        <div className={`flex flex-col  p-5 rounded-xl ${ruleCard}`}>
+        <div className={`flex flex-col ${ruleCard} overflow-hidden`}>
             {showInfo && (
                 <InfoModal title={`What is ${rule.name}?`} body={rule.description} onClose={closeModal}></InfoModal>
             )}
-            <div className={`w-full flex items-center justify-between gap-4 ${control ? "mb-4" : "mb-0"}`}>
+            <div
+                className={`w-full flex items-center justify-between gap-4 bg-ui-900
+                 border border-b-0 border-ui-700 p-5 rounded-t-lg shadow-md shadow-neutral-950/30 z-10`}
+            >
                 {/* Info _____________________________________________________________________ */}
                 <div className="flex-grow flex items-center gap-4">
                     <h4 className={fontSize}>{rule.name}</h4>
-                    <MdInfoOutline size="1.2rem" color="rgb(113 113 122)" onClick={openModal}></MdInfoOutline>
+                    <MdInfoOutline size="1.2rem" color={infoColor} onClick={openModal}></MdInfoOutline>
                 </div>
+                {rule.name === "Tempo" && control && onChange && typeof rule.value === "number" && (
+                    <input
+                        type="number"
+                        className="text-sm hide-arrows p-2 rounded-lg bg-ui-800 max-w-12 text-themetext/60 focus:outline-none focus:ring focus:border-themetext"
+                        name="amount"
+                        value={rule.value}
+                        min="40"
+                        max="250"
+                        onChange={onChange}
+                    />
+                )}
                 {/* Toggles ___________________________________________________________________ */}
                 {added && (
                     <button onClick={() => onRemove(rule.name)} type="button">
-                        <MdRemoveCircleOutline size="1.2em" color={removeColor} />
+                        <MdRemoveCircleOutline size="1.5em" color={interactColor} />
                     </button>
                 )}
                 {!added && onAdd && (
                     <button onClick={() => onAdd(rule)} type="button">
-                        <MdAddCircleOutline size="1.2em" />
+                        <MdAddCircleOutline size="1.5em" />
                     </button>
                 )}
             </div>
             {control && onChange && (
                 <div>
                     {rule.type === "range" && typeof rule.value === "number" ? (
-                        <div className="w-full">
+                        <div className="w-full relative">
                             <input
+                                className="rule-slider"
                                 type="range"
                                 name={rule.name}
                                 min={0}
@@ -73,20 +96,20 @@ export function RuleEntry({
                                 value={rule.value}
                                 onChange={onChange}
                             />
-                            <div className="flex justify-between mt-1">
-                                <span className="text-zinc-500 text-sm">{rule.range[0]}</span>
-                                <span className="text-zinc-500 text-sm">{rule.range[1]}</span>
+                            <div className="absolute p-3 top-2 w-full flex justify-between pointer-events-none">
+                                <span className="text-invertme mix-blend-difference text-sm">{rule.range[0]}</span>
+                                <span className="text-invertme mix-blend-difference text-sm">{rule.range[1]}</span>
                             </div>
                         </div>
                     ) : typeof rule.value === "boolean" ? (
-                        <div className="relative flex justify-between bg-zinc-800 rounded-xl shadow-lg">
+                        <div className="h-16 relative flex justify-between bg-ui-800 rounded-b-lg">
                             <div
-                                className={`w-1/2 h-full bg-zinc-600 border-4 border-zinc-800 absolute rounded-xl transition-all duration-200 ${
-                                    rule.value ? "left-0" : "left-1/2"
+                                className={`mx-4 -top-2 bottom-3 bg-ui-500 absolute rounded-b-lg transition-all duration-200 ${
+                                    rule.value ? "left-0 right-1/2" : "left-1/2 right-0"
                                 }`}
                             ></div>
                             <button
-                                className="w-1/2 p-2 m-1 bg-transparent text-center rounded-md z-10"
+                                className="relative -top-1 w-1/2 p-3 m-1 bg-transparent text-center rounded-lg z-10 text-invertme mix-blend-difference"
                                 name={rule.name}
                                 value={"true"}
                                 onClick={onChange}
@@ -96,7 +119,7 @@ export function RuleEntry({
                                 {rule.range[0]}
                             </button>
                             <button
-                                className="w-1/2 p-2 m-1 bg-transparent text-center rounded-md z-10"
+                                className="relative -top-1 w-1/2 p-3 m-1  bg-transparent text-center rounded-lg z-10 text-invertme mix-blend-difference"
                                 type="button"
                                 name={rule.name}
                                 value={"false"}

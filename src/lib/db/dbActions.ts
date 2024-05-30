@@ -5,6 +5,7 @@ import { PlaylistData, MongoPlaylistData } from "@/types/spotify";
 import User from "@/models/userModel";
 import UserModel from "@/models/userModel";
 import { Document } from "mongoose";
+import { debugLog, setDebugMode } from "@/lib/logger";
 
 interface MongoUserData extends Document {
     name: string;
@@ -22,11 +23,13 @@ interface MongoUserData extends Document {
  * @returns {Promise<boolean>} A promise that resolves to true if the user is successfully registered or already exists, and false if an error occurs.
  */
 export async function dbRegisterUser(userId: string, name: string): Promise<boolean> {
+    setDebugMode(false);
+
     await connectMongoDB();
     if (!userId || !name) return false;
 
     if (await UserModel.exists({ spotify_id: userId })) {
-        console.log("User already exists");
+        debugLog("User already exists");
         return true;
     }
 
@@ -36,7 +39,7 @@ export async function dbRegisterUser(userId: string, name: string): Promise<bool
             spotify_id: userId,
             playlists: [],
         });
-        console.log("User created successfully", user);
+        debugLog("User created successfully", user);
         return true;
     } catch (error) {
         console.error("Error creating User:", error);
@@ -60,9 +63,10 @@ interface PlaylistResponseDB {
 }
 
 export async function dbGetUsersPlaylists(userId: string): Promise<PlaylistResponseDB> {
+    setDebugMode(false);
     await connectMongoDB();
     try {
-        console.log("searching for user", userId);
+        debugLog("searching for user", userId);
         const user = (await User.findOne({ spotify_id: userId }, { _id: 0 }).lean()) as MongoUserData;
 
         if (!user) {

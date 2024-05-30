@@ -1,5 +1,5 @@
 "use client";
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import PreferencesForm from "./PreferencesForm";
 import Rules from "./RulesForm/Rules";
 import Seeds from "./SeedsForm/Seeds";
@@ -24,6 +24,7 @@ interface PlaylistFormProps {
 
 function PlaylistForm({ playlist }: PlaylistFormProps) {
     const router = useRouter();
+
     const [showNameModal, setShowNameModal] = useState(false);
     const [showSubmitErrors, setShowSubmittErrors] = useState(false);
     const [submitting, setSubmitting] = useState(false);
@@ -31,16 +32,21 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
     //to differentiate between creating a new playlist and updating an existing one
     const playlist_id = playlist?.playlist_id ? playlist.playlist_id : false;
 
-    //Preferences ______________________________________________________________________________________________
-    const [preferences, setPreferences] = useState<Preferences>(
-        playlist?.preferences
-            ? { ...playlist.preferences, hasChanged: false }
+    const initialState = {
+        preferences: playlist?.preferences
+            ? playlist.preferences
             : {
                   name: "Playlist Name",
-                  frequency: "daily",
+                  frequency: "Weekly",
                   amount: 25,
-              }
-    );
+              },
+        seeds: playlist?.seeds ? playlist.seeds : [],
+        //if the playlist has rules, complete them as the db only stores the name and value
+        rules: playlist?.rules ? completeRules(playlist.rules) : [],
+    };
+
+    //Preferences ______________________________________________________________________________________________
+    const [preferences, setPreferences] = useState<Preferences>(initialState.preferences);
 
     const handlePrefChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -53,40 +59,8 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
     };
 
     //Seeds ______________________________________________________________________________________________
-    const [seeds, setSeeds] = useState<Seed[]>(
-        playlist?.seeds
-            ? playlist.seeds
-            : [
-                  {
-                      spotify: "https://open.spotify.com/track/2gcpea4r4aH9Hm0Ty0kmNt",
-                      id: "2gcpea4r4aH9Hm0Ty0kmNt",
-                      title: "Fruchtsaft",
-                      description: "LAYLA",
-                      type: "track",
-                      thumbnail: "https://i.scdn.co/image/ab67616d00001e02785f9cdda48d87d8b3757ae7",
-                  },
-                  {
-                      spotify: "todo: find genre links",
-                      id: "hip-hop",
-                      title: "hip-hop",
-                      description: "genre",
-                      type: "genre",
-                      thumbnail: "",
-                  },
-                  {
-                      spotify: "https://open.spotify.com/artist/4XvKzACpcdk5iiZbWNvfbq",
-                      id: "4XvKzACpcdk5iiZbWNvfbq",
-                      title: "Monolake",
-                      description:
-                          "abstract, ambient, ambient dub, ambient techno, dub techno, intelligent dance music, microhouse, minimal techno · 41.2 k followers",
-                      type: "artist",
-                      thumbnail: "https://i.scdn.co/image/a2a0779f11ef5a1b566fde579a3a9676f60a37ac",
-                  },
-              ]
-    );
+    const [seeds, setSeeds] = useState<Seed[]>(initialState.seeds);
     const addSeed = (seed: Seed) => {
-        // console.log(seed);
-
         if (seeds.length < 5) {
             setSeeds((prevState) => {
                 return [...prevState, seed];
@@ -107,40 +81,7 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
     };
 
     //Rules ______________________________________________________________________________________________
-    const [rules, setRules] = useState<Rule[]>(
-        playlist?.rules //if the playlist has rules, use them
-            ? //if the playlist has rules, complete them as the db only stores the name and value
-              completeRules(playlist.rules)
-            : //TODO: Remove placeholder rules and add an idle state
-              [
-                  {
-                      name: "Mood",
-                      type: "axis",
-                      value: [50, 50],
-                      range: [
-                          ["negative", "positive"],
-                          ["intense", "mild"],
-                      ],
-                      description:
-                          "Choose the Mood according to the Arousal-Valence model of emotions (Amount of Arousal and Valence of a Track).",
-                  },
-                  {
-                      name: "Danceability",
-                      type: "range",
-                      value: 50,
-                      range: ["Not Dancable", "Danceable"],
-                      description:
-                          "How suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity.",
-                  },
-                  {
-                      name: "Mode",
-                      type: "boolean",
-                      value: false,
-                      range: ["Minor", "Major"],
-                      description: "Choose between Tracks using Minor or Major mode.",
-                  },
-              ]
-    );
+    const [rules, setRules] = useState<Rule[]>(initialState.rules);
 
     const handleRuleChange = (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {
         const { name, value, type } = e.target as RuleInput;
@@ -183,7 +124,6 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
     };
 
     //Form Validation ______________________________________________________________________________________________
-
     const validateForm = (preferences: Preferences, seeds: Seed[]) => {
         let errors: any = {};
         //check if the form is valid
@@ -199,7 +139,6 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
             errors.frequency = "Invalid frequency";
         if (seeds.length < 1) errors.seeds = "You need to add at least one seed";
         if (seeds.length > 5) errors.seeds = "You can only add 5 seeds";
-        console.log(errors);
         return errors;
     };
 
@@ -231,7 +170,6 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
             //revalidate tag playlists with serveraction
 
             //TODO: ERROR HANDLING
-            console.log("New Playlist ID: ", newPlaylistId);
             //TODO: show submitting state
             setSubmitting(false);
 
@@ -243,9 +181,17 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
         setSubmitting(false);
     };
 
+    //check if the playlist has changed
+    const currentState = {
+        preferences: preferences,
+        seeds: seeds,
+        rules: rules,
+    };
+    const changed = JSON.stringify(initialState) !== JSON.stringify(currentState);
+
     return (
         <div className="flex justify-center text-white">
-            <form className="w-full flex flex-col gap-8" onSubmit={handleSubmit}>
+            <form className="w-full flex flex-col gap-2" onSubmit={handleSubmit}>
                 {showSubmitErrors && (
                     <InfoModal
                         title="Failed to create the Playlist"
@@ -254,7 +200,7 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
                     ></InfoModal>
                 )}
                 <div className="flex justify-between p-4">
-                    <h3>{preferences.name}</h3>
+                    <h2>{preferences.name}</h2>
                     <MdModeEdit size="1.5em" onClick={() => setShowNameModal(true)} />
                     {showNameModal && (
                         <NameModal
@@ -265,10 +211,16 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
                     )}
                 </div>
                 <PreferencesForm preferences={preferences} onChange={handlePrefChange} />
+                <hr className="border-ui-700"></hr>
                 <Seeds seeds={seeds} onRemove={removeSeed} onAdd={addSeed} />
+                <hr className="border-ui-700"></hr>
                 <Rules rules={rules} onAdd={addRule} onRemove={removeRule} onChange={handleRuleChange}></Rules>
-                <button type="submit" className={`p-2 px-8 rounded-md text-black bg-white self-end`}>
-                    Create Playlist
+                <button
+                    type="submit"
+                    className={`p-2 px-8 rounded-lg text-black bg-white self-end`}
+                    disabled={submitting || !changed}
+                >
+                    {!changed ? "Nothing to Save" : playlist_id ? "Update Playlist" : "Create Playlist"}
                 </button>
             </form>
         </div>

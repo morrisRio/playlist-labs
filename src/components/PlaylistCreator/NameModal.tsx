@@ -17,7 +17,6 @@ function InfoModal({ name, onClose, onChange }: NameModalProps) {
 
     const saveName = () => {
         if (inputElement.current === null) return;
-        console.log(inputElement.current.value);
         onChange({
             target: inputElement.current,
         } as React.ChangeEvent<HTMLInputElement>);

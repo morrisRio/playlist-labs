@@ -16,7 +16,6 @@ interface PlaylistProps {
 //if the store does not exist fetch the data from the db and create a store for the playlists
 
 function PlaylistEntry({ playlist }: PlaylistProps) {
-    console.log("PlaylistEntry: ", playlist.playlist_id);
     const { playlist_id } = playlist;
     const { name: playlist_name } = playlist.preferences;
 

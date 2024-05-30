@@ -20,7 +20,7 @@ async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
     }
 
     return (
-        <div className="h-full w-full p-3 flex flex-col gap-4">
+        <div className="h-full w-full flex flex-col gap-4">
             <div className="flex items-center">
                 <Link href="/" replace={true}>
                     <MdChevronLeft size="2rem"></MdChevronLeft>

@@ -1,7 +1,8 @@
 import formatter from "numbuffix";
-import { Seed, Rule, Preferences, Track, Artist, PlaylistData } from "@/types/spotify";
+import { Seed, Rule, Preferences, Track, Artist } from "@/types/spotify";
 import { allRules } from "@/lib/spotifyConstants";
 import { spotifyGet, spotifyPost } from "@/lib/serverUtils";
+import { debugLog, setDebugMode } from "@/lib/logger";
 
 /**
  * Generates a description for a given item (Track or Artist).
@@ -10,8 +11,9 @@ import { spotifyGet, spotifyPost } from "@/lib/serverUtils";
  * @returns {string} - The generated description of the item.
  * */
 export const getItemDescription = (item: Track | Artist) => {
+    setDebugMode(false);
     if (item.type === "artist" && "genres" in item) {
-        return `${item.genres.join(", ")} · ${formatter(item.followers.total, "")} followers`;
+        return `${formatter(item.followers.total, "")} followers`;
     } else if ("artists" in item) {
         return item.artists.map((artist) => artist.name).join(", ");
     } else {
@@ -83,7 +85,8 @@ export const getRecommendations = async (
     seeds: Seed[],
     rules?: Rule[]
 ): Promise<string[]> => {
-    console.info(" - getting recommendations");
+    setDebugMode(false);
+    debugLog(" - getting recommendations");
     //create the query string for the api call from the seeds and rules
     const limitQuery = "limit=" + preferences.amount;
     const seedQuery = "&" + getSeedQuery(seeds);
@@ -114,6 +117,7 @@ export const getRecommendations = async (
  * The resulting query parameters are then joined with '&' to form the final query string.
  */
 const getRuleQuery = (rules: Rule[]): string => {
+    setDebugMode(false);
     const ruleQuery = rules
         .map((rule) => {
             if (Array.isArray(rule.value)) {
@@ -126,7 +130,7 @@ const getRuleQuery = (rules: Rule[]): string => {
             }
         })
         .join("&");
-    console.log("RULE_QUERY: ", ruleQuery);
+    debugLog("RULE_QUERY: ", ruleQuery);
     return ruleQuery;
 };
 
@@ -214,6 +218,8 @@ export const createPlaylistDescription = (preferences: Preferences, seeds: Seed[
      * @returns The rule description.
      */
     const getRuleDescription = (rules: Rule[] | undefined) => {
+        setDebugMode(false);
+
         if (!rules || rules.length === 0 || !Array.isArray(rules)) {
             return "";
         }
@@ -254,7 +260,7 @@ export const createPlaylistDescription = (preferences: Preferences, seeds: Seed[
         });
 
         if (ruleStrings.length === 1) {
-            console.log("ruleStrings", ruleStrings);
+            debugLog("ruleStrings", ruleStrings);
             return `. Aiming for ${ruleStrings[0]}`;
         }
 
@@ -262,13 +268,13 @@ export const createPlaylistDescription = (preferences: Preferences, seeds: Seed[
         const lastRule = ruleStrings.pop();
         const ruleDescription = `. Aiming for ${ruleStrings.join(", ")} and ${lastRule}`;
 
-        console.log("ruleDescription", ruleDescription);
+        debugLog("ruleDescription", ruleDescription);
         return ruleDescription;
     };
 
     const description = `Playlist created by playlistLabs. ${
         preferencesDescription + getSeedDescription(seeds) + getRuleDescription(rules)
     }`;
-    console.log("Finished Description: ", description);
+    debugLog("Finished Description: ", description);
     return description;
 };

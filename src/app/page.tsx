@@ -27,7 +27,6 @@ export default async function Home() {
         headers: new Headers(headers()),
         next: { tags: ["playlist"] },
     }).then((res) => res.json());
-    console.log("User res", res);
     playlists = res;
     //TODO: ERROR HANDLING
 
@@ -36,7 +35,7 @@ export default async function Home() {
             <h1>playlistLabs</h1>
             <Link href="/pages/create-playlist">
                 <div className=" flex gap-4 items-center p-2 w-full mb-4 bg-zinc-900/50 border border-zinc-700 rounded-xl">
-                    <div className="size-20 bg-zinc-900/50 border border-zinc-700 rounded-md flex items-center justify-center">
+                    <div className="size-20 bg-zinc-900/50 border border-zinc-700 rounded-lg flex items-center justify-center">
                         <MdAdd size="3rem"></MdAdd>
                     </div>
                     <h4>Create New Playlist</h4>

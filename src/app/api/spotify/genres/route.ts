@@ -6,8 +6,6 @@ import { spotifyGet } from "@/lib/serverUtils";
 import { getToken } from "next-auth/jwt";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
-    console.log("GETTING GENRES");
-
     //add the token to the request for the api call
     const token = await getToken({ req });
     if (!token) {
@@ -18,10 +16,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const accessToken = token?.accessToken || "no token found";
 
     //make the api call to create the playlist
-    const res = await spotifyGet(
-        `https://api.spotify.com/v1/recommendations/available-genre-seeds`,
-        accessToken
-    );
+    const res = await spotifyGet(`https://api.spotify.com/v1/recommendations/available-genre-seeds`, accessToken);
     //@ts-ignore
     const { genres } = res;
 

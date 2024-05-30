@@ -8,11 +8,7 @@ export interface AxisRule extends Rule {
 
 interface TwoAxisSliderProps {
     rule: AxisRule;
-    onChange: (
-        e:
-            | React.ChangeEvent<HTMLInputElement>
-            | React.MouseEvent<HTMLButtonElement>
-    ) => void;
+    onChange: (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 export const TwoAxisSlider = ({ rule, onChange }: TwoAxisSliderProps): any => {
@@ -24,7 +20,6 @@ export const TwoAxisSlider = ({ rule, onChange }: TwoAxisSliderProps): any => {
     useEffect(() => {
         // Clean up the event listeners when component unmounts
         return () => {
-            // console.log("cleanup");
             document.removeEventListener("pointermove", handlePointerMove);
             document.removeEventListener("pointerleave", handlePointerLeave);
             document.removeEventListener("pointerup", handlePointerUp);
@@ -45,14 +40,12 @@ export const TwoAxisSlider = ({ rule, onChange }: TwoAxisSliderProps): any => {
             const cappedX = Math.min(100, Math.max(0, x));
             const cappedY = Math.min(100, Math.max(0, y));
 
-            // console.log("calculateValues", cappedX, cappedY);
             setValues(cappedX, cappedY);
         }
     };
 
     // Function to set the new values in the parent component
     const setValues = (x: number, y: number) => {
-        // console.log("setValues", x, y);
         //this is a bit hacky, but it works
         //we need to create a fake event object to pass to the onChange function
         const pseudoElement = {
@@ -68,13 +61,10 @@ export const TwoAxisSlider = ({ rule, onChange }: TwoAxisSliderProps): any => {
 
     // Event handlers for mouse events _______________________________________________________
     const handlePointerMove = (moveEvent: PointerEvent) => {
-        // console.log("mouseMove", moveEvent.clientX, moveEvent.clientY);
-
         calculateValues(moveEvent.clientX, moveEvent.clientY);
     };
 
     const handlePointerUp = () => {
-        // console.log("mouseUp");
         setDragging(false);
         document.removeEventListener("pointermove", handlePointerMove);
         document.removeEventListener("pointerleave", handlePointerLeave);
@@ -88,7 +78,6 @@ export const TwoAxisSlider = ({ rule, onChange }: TwoAxisSliderProps): any => {
     };
 
     const handlePointerDown = (e: React.PointerEvent) => {
-        console.log("mouseDown", e);
         e.preventDefault();
         calculateValues(e.clientX, e.clientY);
         setDragging(true);
@@ -99,38 +88,33 @@ export const TwoAxisSlider = ({ rule, onChange }: TwoAxisSliderProps): any => {
     };
 
     return (
-        <div
-            className="relative w-full h-44 bg-zinc-800 rounded-md"
-            style={{ padding: `${height / 2}px` }}
-        >
+        <div className="relative w-full h-44 bg-ui-800 rounded-b-lg" style={{ padding: `${height / 2}px` }}>
             <div
                 ref={containerRef}
-                className="relative w-full h-full bg-zinc-800 rounded-md"
+                className="relative w-full h-full bg-ui-800 rounded-b-lg"
                 onPointerDown={handlePointerDown}
                 style={{ touchAction: "none" }}
             >
-                <hr className="relative top-1/2 border-zinc-600" />
-                <div className="relative h-full w-1 border-l border-l-zinc-600 left-1/2"></div>
-                <span className="absolute top-0 pb-2 left-1/2 -translate-x-1/2 text-zinc-500 bg-zinc-800 text-xs">
-                    {rule.range[0][1]}
+                <hr className="relative top-1/2 border-invertme/60 mix-blend-difference" />
+                <div className="relative h-5/6 left-1/2 w-1 border-l border-invertme/60 mix-blend-difference "></div>
+                <span className="absolute top-0 pb-2 left-1/2 -translate-x-1/2 bg-ui-800">
+                    <p className="text-invertme mix-blend-difference text-xs">{rule.range[0][1]}</p>
                 </span>
-                <span className="absolute bottom-0 pt-2 left-1/2 -translate-x-1/2 text-zinc-500 bg-zinc-800 text-xs">
-                    {rule.range[0][0]}
+                <span className="absolute bottom-0 pt-2 left-1/2 -translate-x-1/2 bg-ui-800">
+                    <p className="text-invertme mix-blend-difference text-xs">{rule.range[0][0]}</p>
                 </span>
-                <span className="absolute pr-2 top-1/2 -translate-y-1/2  text-zinc-500 bg-zinc-800 text-xs">
-                    {rule.range[1][1]}
+                <span className="absolute pr-2 top-1/2 -translate-y-1/2  text-zinc-500 bg-ui-800 text-xs">
+                    <p className="text-invertme mix-blend-difference text-xs">{rule.range[1][1]}</p>
                 </span>
-                <span className="absolute right-0 pl-2 top-1/2 translate-x-1/1 -translate-y-1/2  text-zinc-500 bg-zinc-800 text-xs">
-                    {rule.range[1][0]}
+                <span className="absolute right-0 pl-2 top-1/2 translate-x-1/1 -translate-y-1/2 bg-ui-800 text-xs">
+                    <p className="text-invertme mix-blend-difference text-xs">{rule.range[1][0]}</p>
                 </span>
                 <div
-                    className={`customThumb ${
-                        dragging ? "!border-zinc-600" : "!border-zinc-200"
-                    }`}
+                    className={`rounded-full border-2  ${dragging ? "!border-ui-600" : "!border-themetext-nerfed"}`}
                     style={{
                         position: "absolute",
-                        height: `${height}px`,
-                        width: `${height}px`,
+                        height: `${height * (dragging ? 2 : 1)}px`,
+                        width: `${height * (dragging ? 2 : 1)}px`,
                         left: `${rule.value[0]}%`,
                         top: `${rule.value[1]}%`,
                         transform: "translate(-50%, -50%)",

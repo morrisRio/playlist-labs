@@ -38,7 +38,6 @@ export const authOptions: NextAuthOptions = {
     },
     callbacks: {
         async signIn({ user, account }: { user: User; account: Account | null }): Promise<string | boolean> {
-            console.log("SIGNIN USER", user);
             //create user in database if he doesn't exist
             if (account?.provider !== "spotify") {
                 console.error("SIGNIN_ERROR: PROVIDER_NOT_SUPPORTED");
@@ -56,7 +55,6 @@ export const authOptions: NextAuthOptions = {
         async jwt({ token, account }: { token: JWT; account: Account | null; user: User }): Promise<JWT> {
             //on first sign in add the tokens from account to jwt
             if (account) {
-                console.log("USING_NEW_TOKEN");
                 return {
                     ...token,
                     accessToken: account.access_token!,
@@ -68,7 +66,6 @@ export const authOptions: NextAuthOptions = {
 
             //return previous token if it hasn't expired yet
             if (token.accessTokenExpires && Date.now() < token.accessTokenExpires) {
-                console.log("USING_OLD_TOKEN");
                 return token;
             }
 
@@ -89,7 +86,6 @@ export const authOptions: NextAuthOptions = {
 
 async function refreshAccessToken(token: JWT) {
     try {
-        console.log("REFRESHING TOKEN");
         if (!token.refreshToken) throw new Error("NO_REFRESH_TOKEN_PROVIDED");
 
         //get new access token
@@ -111,8 +107,6 @@ async function refreshAccessToken(token: JWT) {
         const refreshedToken = await response.json();
 
         if (!response.ok) throw new Error("NETWORK RESPONSE ERROR");
-
-        console.log("REFRESHED TOKEN");
 
         return {
             ...token,

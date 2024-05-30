@@ -31,7 +31,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     const session = await auth("layout");
     return (
         <html lang="en">
-            <body className={`${ibmPlexSans.variable} font-ibm antialiased bg-zinc-950`}>
+            <body className={`${ibmPlexSans.variable} font-ibm antialiased`}>
                 <SessionProvider session={session}>
                     <main className="min-h-screen">{children}</main>
                 </SessionProvider>

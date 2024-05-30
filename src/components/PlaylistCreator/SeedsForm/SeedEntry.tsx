@@ -1,7 +1,14 @@
+"use client";
+
 import { RiMusic2Fill } from "react-icons/ri";
 import { MdRemoveCircleOutline, MdAddCircleOutline } from "react-icons/md";
 import Marquee from "react-fast-marquee";
 import { Seed } from "@/types/spotify";
+
+import resolveConfig from "tailwindcss/resolveConfig";
+import tailwindConfig from "@/../tailwind.config";
+
+import { useState, useRef, useLayoutEffect } from "react";
 
 //using marquee. Docs:
 //https://www.react-fast-marquee.com/documentation
@@ -10,56 +17,115 @@ type SeedEntryProps = {
     seedObj: Seed;
     onRemove: (id: string) => void;
     onAdd?: (seed: Seed) => void;
-    small?: boolean;
+    card?: boolean;
     added?: boolean;
 };
 
-export function SeedEntry({ seedObj, onRemove, onAdd, small = false, added = false }: SeedEntryProps): JSX.Element {
-    const imgSize = small ? "size-8" : "size-14";
-    const imgRound = seedObj.type === "artist" ? "rounded-full" : "rounded-md";
+export function SeedEntry({ seedObj, onRemove, onAdd, card = false, added = false }: SeedEntryProps): JSX.Element {
+    const { description, title, thumbnail, type } = seedObj;
+
+    const fullConfig = resolveConfig(tailwindConfig);
+    //@ts-expect-error
+    const interactColor = fullConfig.theme.colors.themetext["DEFAULT"] + "a8"; //a8 is 65% opacity
+
+    let imgSize = "size-14";
+    let imgRound = type === "artist" ? "rounded-full" : "rounded-lg";
+    let seedCard = "";
+
+    if (card) {
+        imgRound = type === "artist" ? "rounded-full" : "rounded-l-lg";
+        imgSize = type === "artist" ? "size-12 m-2" : "size-16";
+        seedCard = "bg-ui-900 border border-ui-700 rounded-lg";
+    }
+
+    if (added) {
+        seedCard = `bg-ui-900 shadow-[0_0_0_1px] shadow-ui-700 rounded-lg`;
+        imgRound = type === "artist" ? "rounded-full" : "rounded-l-lg";
+    }
+
     const imgClass = `${imgSize} ${imgRound}`;
 
-    const seedCard = small ? "mb-3 bg-zinc-950/60 px-4 py-3 rounded-xl" : "mb-6";
-    const fontSize = small ? "text-sm" : "text-base";
-    const removeColor = small ? "white" : "lightgreen";
+    const [titleTooLong, setTitleTooLong] = useState(false);
+    const [descTooLong, setDescTooLong] = useState(false);
+
+    const titleRef = useRef<HTMLParagraphElement>(null);
+    const descRef = useRef<HTMLParagraphElement>(null);
+
+    useLayoutEffect(() => {
+        const checkOverflow = () => {
+            const titleElem = titleRef.current;
+            const descElem = descRef.current;
+
+            if (titleElem) {
+                setTitleTooLong(titleElem.scrollWidth > titleElem.clientWidth);
+            }
+
+            if (descElem) {
+                setDescTooLong(descElem.scrollWidth > descElem.clientWidth);
+            }
+        };
+
+        const resizeObserver = new ResizeObserver(checkOverflow);
+        if (titleRef.current) {
+            resizeObserver.observe(titleRef.current);
+        }
+
+        // Initial check in case the element is already overflowing
+        checkOverflow();
+
+        // Cleanup observer on component unmount
+        return () => {
+            if (titleRef.current) {
+                resizeObserver.unobserve(titleRef.current);
+            }
+        };
+    }, [title, description]);
+
     return (
-        <div className={`flex gap-4 items-center justify-between ${seedCard}`}>
+        <div className={`flex gap-4 items-center justify-between ${seedCard} overflow-hidden`}>
             {seedObj.type === "genre" ? (
                 <div
                     className={`${imgClass} flex items-center justify-center`}
                     style={{
-                        backgroundColor: `hsl(${seedObj.thumbnail} 80 40)`,
+                        backgroundColor: `hsl(${thumbnail} 80 40)`,
                     }}
                 >
-                    <RiMusic2Fill size={small ? "1rem" : "1.5rem"} color={`hsl(${seedObj.thumbnail} 90 70)`} />
+                    <RiMusic2Fill size={card ? "2rem" : "1.2rem"} color={`hsl(${thumbnail} 90 70)`} />
                 </div>
-            ) : seedObj.thumbnail && typeof seedObj.thumbnail === "string" ? (
-                <img className={`${imgClass} flex-none object-cover`} src={seedObj.thumbnail} alt={seedObj.title} />
+            ) : thumbnail && typeof thumbnail === "string" ? (
+                <img className={`${imgClass} flex-none object-cover`} src={thumbnail} alt={title} />
             ) : (
                 <div className={`${imgClass} flex-none bg-zinc-800`}></div>
             )}
-            <div className="flex-grow">
-                <p className={fontSize}>{seedObj.title}</p>
-                {!small ? (
-                    <Marquee play={seedObj.description.length > 60 ? true : false} speed={30}>
-                        <p className={`text-zinc-400 ${fontSize}`}>
-                            {seedObj.description + (seedObj.description.length > 60 ? " - " : "")}
-                        </p>
+            <div className="flex-auto overflow-hidden">
+                {titleTooLong && !card ? (
+                    <Marquee play={true} speed={30} delay={1}>
+                        <p className="text-base whitespace-nowrap">{title + "\xa0-\xa0"}</p>
                     </Marquee>
                 ) : (
-                    <p className={`text-zinc-500 ${fontSize}`}>
-                        {seedObj.type[0].toUpperCase() + seedObj.type.slice(1)}
+                    <p ref={titleRef} className="text-base whitespace-nowrap overflow-hidden truncate">
+                        {title}
+                    </p>
+                )}
+
+                {descTooLong && !card ? (
+                    <Marquee speed={30}>
+                        <p className={`text-ui-600 text-base`}>{description + "\xa0-\xa0"}</p>
+                    </Marquee>
+                ) : (
+                    <p ref={descRef} className={`text-ui-600 text-base whitespace-nowrap truncate`}>
+                        {description}
                     </p>
                 )}
             </div>
             {added && (
-                <button className="justify-end" onClick={() => onRemove(seedObj.id)} type="button">
-                    <MdRemoveCircleOutline size="1.2rem" color={removeColor} />
+                <button className="justify-end mr-4" onClick={() => onRemove(seedObj.id)} type="button">
+                    <MdRemoveCircleOutline size="1.5rem" color={interactColor} />
                 </button>
             )}
             {!added && onAdd && (
-                <button className="justify-end" onClick={() => onAdd(seedObj)} type="button">
-                    <MdAddCircleOutline size="1.2rem" />
+                <button className="justify-end mr-4" onClick={() => onAdd(seedObj)} type="button">
+                    <MdAddCircleOutline size="1.5rem" color={interactColor} />
                 </button>
             )}
         </div>

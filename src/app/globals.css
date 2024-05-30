@@ -5,12 +5,18 @@
 @layer base {
     h1 {
         @apply text-3xl;
+        @apply font-semibold;
+        @apply text-themetext-nerfed;
     }
     h2 {
         @apply text-2xl;
+        @apply font-semibold;
+        @apply text-themetext-nerfed;
     }
     h3 {
         @apply text-xl;
+        @apply font-semibold;
+        @apply text-themetext-nerfed;
     }
     h4 {
         @apply text-lg;
@@ -27,7 +33,12 @@
         -moz-appearance: textfield !important;
     }
 
-    .bg-gradient {
+    body {
+        @apply bg-ui-950;
+        @apply text-themetext;
+    }
+
+    /* .bg-gradient {
         background: radial-gradient(
             circle at 50% 30%,
             hsl(0, 0%, 8%) 0%,
@@ -48,119 +59,122 @@
             hsl(0, 0%, 0%) 100%
         );
         background-attachment: fixed;
+    } */
+
+    .bg-gradient {
+        background: var(--gradient);
     }
 }
 
+/* 
+                ui: {
+                    950: "#121212",
+                    900: "#141414",
+                    800: "#292929",
+                    700: "#3a3a3a",
+                    600: "#737373",
+                    500: "#999999",
+                    400: "#b3b3b3",
+                },
+                themetext: {
+                    DEFAULT: "#ffffff",
+                    nerfed: "#f2f2f2",
+                },
+                invertme: {
+                    DEFAULT: "#c9c9c9",
+                }, */
 :root {
-    --foreground-rgb: 0, 0, 0;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 255, 255, 255;
-}
-/* TODO: UI make radial gradient background lighter*/
-/* @media (prefers-color-scheme: dark) {
-    :root {
-        --foreground-rgb: 255, 255, 255;
-        --background-start-rgb: 0, 0, 0;
-        --background-end-rgb: 0, 0, 0;
-    }
-}
-
-body {
-    color: rgb(var(--foreground-rgb));
-    background: linear-gradient(
-            to bottom,
-            transparent,
-            rgb(var(--background-end-rgb))
-        )
-        rgb(var(--background-start-rgb));
-} */
-body {
-    color: white;
-    background: radial-gradient(
-        circle at 50% 30%,
-        hsl(0, 0%, 8%) 0%,
-        hsl(0, 0%, 7.9%) 9.6%,
-        hsl(0, 0%, 7.61%) 18.2%,
-        hsl(0, 0%, 7.17%) 26%,
-        hsl(0, 0%, 6.6%) 32.9%,
-        hsl(0, 0%, 5.93%) 39.3%,
-        hsl(0, 0%, 5.18%) 45.1%,
-        hsl(0, 0%, 4.4%) 50.7%,
-        hsl(0, 0%, 3.6%) 56%,
-        hsl(0, 0%, 2.82%) 61.3%,
-        hsl(0, 0%, 2.07%) 66.7%,
-        hsl(0, 0%, 1.4%) 72.4%,
-        hsl(0, 0%, 0.83%) 78.4%,
-        hsl(0, 0%, 0.39%) 84.9%,
-        hsl(0, 0%, 0.1%) 92%,
-        hsl(0, 0%, 0%) 100%
-    );
-    background-attachment: fixed;
+    --gradient: radial-gradient(circle at 50vw 30vh, #222121, ease-in-out, #0e0e0e);
+    --color-ui-950: #121212;
+    --color-ui-900: #141414;
+    --color-ui-800: #292929;
+    --color-ui-700: #3a3a3a;
+    --color-ui-600: #737373;
+    --color-ui-500: #999999;
+    --color-ui-400: #b3b3b3;
+    --color-themetext: #ffffff;
+    --color-themetext-nerfed: #f2f2f2;
+    --color-invertme: #c9c9c9;
 }
 
-/* .custom-thumb::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 15px;
-    height: 15px;
-    background-color: #4caf50;
-    cursor: pointer;
-    border-radius: 50%;
-} */
+/* TODO: FIDELITY ADD TOGGLE FOR LIGHT MODE */
 
+/* regular slider */
 input[type="range"] {
     -webkit-appearance: none;
     appearance: none;
     width: 100%;
-    height: 24px;
+    height: 4px;
     border-radius: 1000px;
-    border: 4px solid rgb(39, 39, 42);
-    background-color: rgb(39, 39, 42);
+    background-color: var(--color-ui-700);
 }
 
+/* Chrome */
 input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    height: 14px;
-    width: 14px;
-    background-color: transparent;
-    border: 3px solid rgb(219, 219, 219);
+    height: 16px;
+    width: 16px;
+    border: 1px solid var(--color-themetext);
+    box-shadow: 0 0 0 4px var(--color-ui-950);
+    border-radius: 100px;
+    background-color: var(--color-ui-900);
     cursor: pointer;
-    border-radius: 100%;
 }
+
+/* Firefox */
 input[type="range"]::-moz-range-thumb {
     -webkit-appearance: none;
     appearance: none;
-    height: 14px;
-    width: 14px;
-    background-color: black;
-    border: 3px solid rgb(219, 219, 219);
-    box-shadow: -2000px 0 0 1990px rgb(219, 219, 219);
+    height: 16px;
+    width: 16px;
+    border: 1px solid var(--color-themetext);
+    box-shadow: 0 0 0 4px var(--color-ui-950);
+    border-radius: 100px;
+    background-color: var(--color-ui-900);
     cursor: pointer;
-    border-radius: 100%;
-}
-
-.customThumb {
-    height: 20px;
-    width: 20px;
-    background-color: transparent;
-    border: 3px solid rgb(219, 219, 219);
-    cursor: pointer;
-    border-radius: 100%;
 }
 
 input[type="range"]::-moz-range-progress {
     appearance: none;
+    border-radius: 100px;
+    background-color: var(--color-themetext);
 }
 
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-    input[type="range"] {
-        overflow: hidden;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-        box-shadow: -2000px 0 0 1994px rgb(82 82 91);
-        position: relative;
-    }
+/* Rule slider */
+input[type="range"].rule-slider {
+    width: 100%;
+    height: 64px;
+    background-color: var(--color-ui-800);
+    border: 4px solid var(--color-ui-800);
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+}
+
+/* chrome */
+input[type="range"].rule-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 100px;
+    width: 4px;
+    background-color: var(--color-themetext);
+    cursor: pointer;
+    box-shadow: -2000px 0 0 1994px var(--color-ui-500);
+    position: relative;
+}
+
+/* firefox */
+input[type="range"].rule-slider::-moz-range-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 100px;
+    width: 4px;
+    background-color: var(--color-themetext);
+    border: 1px solid var(--color-ui-800);
+    border-radius: 1px;
+    box-shadow: -2000px 0 0 1995px var(--color-ui-500);
+    cursor: pointer;
+    position: relative;
 }
 
 @layer utilities {

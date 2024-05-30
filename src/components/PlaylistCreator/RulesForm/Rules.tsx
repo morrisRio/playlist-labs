@@ -1,19 +1,18 @@
 import { useState } from "react";
 import { MdAddCircleOutline } from "react-icons/md";
-import { Rule } from "@/types/spotify";
 
+import { Rule } from "@/types/spotify";
 import RuleModal from "./RuleModal";
 import { RuleEntry } from "./RuleEntry";
+
+import resolveConfig from "tailwindcss/resolveConfig";
+import tailwindConfig from "@/../tailwind.config";
 
 interface RulesProps {
     rules: Rule[];
     onAdd: (rule: Rule) => void;
     onRemove: (id: string) => void;
-    onChange: (
-        e:
-            | React.ChangeEvent<HTMLInputElement>
-            | React.MouseEvent<HTMLButtonElement>
-    ) => void;
+    onChange: (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 function Rules({ rules, onAdd, onRemove, onChange }: RulesProps) {
@@ -36,38 +35,38 @@ function Rules({ rules, onAdd, onRemove, onChange }: RulesProps) {
         closeModal();
     };
 
+    const fullConfig = resolveConfig(tailwindConfig);
+    //@ts-expect-error
+    const interactColor = fullConfig.theme.colors.themetext["DEFAULT"] + "a8"; //a8 is 65% opacity
     return (
-        <div className="flex flex-col rounded-xl p-4 bg-zinc-700/40 gap-5">
-            <div className="flex justify-between items-end">
-                <h3 className="font-semibold">Rules</h3>
-                <button
-                    className="flex items-center justify-center gap-2"
-                    onClick={openModal}
-                    type="button"
-                >
-                    <MdAddCircleOutline size="1.2em" color="rgb(161 161 170)" />
-                    <h5 className="text-zinc-400 align-bottom">Add Rule</h5>
+        <div className="p-4">
+            <div className="flex mb-4 gap-4 justify-between">
+                <h3>Rules</h3>
+                <button className="flex items-center justify-center gap-2 self-end" onClick={openModal} type="button">
+                    <MdAddCircleOutline size="1.5em" color={interactColor} />
+                    <h4 className="text-themetext/60">Add Rule</h4>
                 </button>
             </div>
-            {rules.map((rule, index) => (
-                <RuleEntry
-                    rule={rule}
-                    onRemove={onRemove}
-                    onAdd={onAdd}
-                    key={index}
-                    control={true}
-                    added={true}
-                    onChange={onChange}
-                />
-            ))}
-            {showModal && (
-                <RuleModal
-                    onAdd={handleRuleAdd}
-                    onRemove={onRemove}
-                    onClose={closeModal}
-                    rules={rules}
-                />
+            {rules.length == 0 ? (
+                <div>
+                    <p className="text-zinc-400 text-base self-end flex-grow">Add at least one Rule</p>
+                </div>
+            ) : (
+                <div className="flex flex-col gap-5">
+                    {rules.map((rule, index) => (
+                        <RuleEntry
+                            rule={rule}
+                            onRemove={onRemove}
+                            onAdd={onAdd}
+                            key={index}
+                            control={true}
+                            added={true}
+                            onChange={onChange}
+                        />
+                    ))}
+                </div>
             )}
+            {showModal && <RuleModal onAdd={handleRuleAdd} onRemove={onRemove} onClose={closeModal} rules={rules} />}
         </div>
     );
 }

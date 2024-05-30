@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import type { GetServerSidePropsContext, NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
+import { debugLog, setDebugMode } from "@/lib/logger";
 
 /* helper function for getServerSession() to avoid passing authOptions around */
 export async function auth(
@@ -13,14 +14,15 @@ export async function auth(
         | [NextApiRequest, NextApiResponse]
         | []
 ) {
-    console.log(" - auth() from: ", calledBy);
+    setDebugMode(false);
+    debugLog(" - auth() from: ", calledBy);
     return getServerSession(...args, authOptions);
 }
 
 /* takes the url and a token to make an authorized get request*/
 export const spotifyGet = async (url: string, token: string): Promise<any> => {
-    "use server";
-    console.log(" - spotifyGet()");
+    setDebugMode(false);
+    debugLog(" - spotifyGet()");
     const response = await fetch(url, {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -45,8 +47,8 @@ export const spotifyGet = async (url: string, token: string): Promise<any> => {
 
 /* takes the url a body object and a token to make an authorized post request*/
 export const spotifyPost = async (url: string, body: object, token: string): Promise<any> => {
-    "use server";
-    console.log(" - spotifyPost()");
+    setDebugMode(false);
+    debugLog(" - spotifyPost()");
     const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -74,8 +76,8 @@ export const spotifyPost = async (url: string, body: object, token: string): Pro
 
 /* takes the url a body object and a token to make an authorized post request*/
 export const spotifyPut = async (url: string, body: object, token: string): Promise<any> => {
-    "use server";
-    console.log(" - spotifyPut()");
+    setDebugMode(false);
+    debugLog(" - spotifyPut()");
     const response = await fetch(url, {
         method: "PUT",
         headers: {
@@ -85,7 +87,6 @@ export const spotifyPut = async (url: string, body: object, token: string): Prom
         body: JSON.stringify(body),
     })
         .then((res) => {
-            // console.log(" - spotifyPut() response", res);
             if (!res.ok) {
                 throw new Error("Network response was not ok " + res.status + " " + res.statusText);
             }

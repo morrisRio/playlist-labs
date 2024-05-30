@@ -1,5 +1,6 @@
 import { ServerApiVersion } from "mongodb";
 import mongoose from "mongoose";
+import { debugLog, setDebugMode } from "@/lib/logger";
 
 declare global {
     var mongoose: any;
@@ -13,9 +14,7 @@ global.mongoose = {
 const MONGODB_URI = process.env.MONGODB_URI!;
 
 if (!MONGODB_URI) {
-    throw new Error(
-        "Please define the MONGODB_URI environment variable inside .env.local"
-    );
+    throw new Error("Please define the MONGODB_URI environment variable inside .env.local");
 }
 
 let cached = global.mongoose;
@@ -25,13 +24,13 @@ if (!cached) {
 }
 
 export const connectMongoDB = async () => {
+    setDebugMode(false);
     if (cached.conn) {
-        console.log("DB: Using cached connection");
+        debugLog("DB: Using cached connection");
         return cached.conn;
     }
 
     if (!cached.promise) {
-        // console.log("DB: Configuring new connection");
         const options = {
             autoIndex: true,
             serverApi: {
@@ -40,20 +39,17 @@ export const connectMongoDB = async () => {
                 deprecationErrors: true,
             },
         };
-        cached.promise = mongoose
-            .connect(MONGODB_URI, options)
-            .then((mongoose) => {
-                return mongoose;
-            });
+        cached.promise = mongoose.connect(MONGODB_URI, options).then((mongoose) => {
+            return mongoose;
+        });
     }
     try {
-        // console.log("DB: Connect to new connection");
         cached.conn = await cached.promise;
     } catch (e) {
-        console.log("DB: Error connecting to MongoDB: ", e);
+        debugLog("DB: Error connecting to MongoDB: ", e);
         cached.promise = null;
         throw e;
     }
-    console.log("DB: Using new connection");
+    debugLog("DB: Using new connection");
     return cached.conn;
 };

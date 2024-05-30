@@ -16,10 +16,7 @@ function Login() {
                 <p>Discover new music</p>
                 <p>Share your playlists</p>
             </div>
-            <button
-                className="p-4 bg-zinc-200 text-black rounded-md"
-                onClick={handleLogin}
-            >
+            <button className="p-4 bg-zinc-200 text-black rounded-lg" onClick={handleLogin}>
                 Login with Spotify
             </button>
         </div>
