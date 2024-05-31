@@ -80,11 +80,29 @@ export interface Seed {
     thumbnail: string | number;
 }
 
-export interface Rule {
+export type Rule = BooleanRule | AxisRule | RangeRule;
+
+export interface BooleanRule {
     name: string;
-    type: "boolean" | "axis" | "range";
-    value: number | boolean | number[];
-    range: number[] | string[] | boolean[] | string[][];
+    type: "boolean";
+    value: boolean;
+    range: string[];
+    description: string;
+}
+
+export interface AxisRule {
+    name: string;
+    type: "axis";
+    value: [number, number];
+    range: [string[], string[]];
+    description: string;
+}
+
+export interface RangeRule {
+    name: string;
+    type: "range";
+    value: number;
+    range: number[] | string[];
     description: string;
 }
 

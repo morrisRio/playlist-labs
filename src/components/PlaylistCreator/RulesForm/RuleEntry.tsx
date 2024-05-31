@@ -1,7 +1,7 @@
 import { MdRemoveCircleOutline, MdAddCircleOutline, MdInfoOutline } from "react-icons/md";
 import { Rule } from "@/types/spotify";
 import { useState } from "react";
-import { TwoAxisSlider, AxisRule } from "./TwoAxis";
+import { TwoAxisSlider } from "./TwoAxis";
 import InfoModal from "../InfoModal";
 
 import resolveConfig from "tailwindcss/resolveConfig";
@@ -59,7 +59,7 @@ export function RuleEntry({
                 <div className="flex-grow flex items-center gap-4">
                     <h4 className={fontSize}>{rule.name}</h4>
                     <MdInfoOutline size="1.2rem" color={infoColor} onClick={openModal}></MdInfoOutline>
-                    {rule.name === "Tempo" && control && onChange && typeof rule.value === "number" && (
+                    {rule.type === "range" && rule.name === "Tempo" && control && onChange && (
                         <>
                             <input
                                 type="number"
@@ -88,7 +88,7 @@ export function RuleEntry({
             </div>
             {control && onChange && (
                 <div>
-                    {rule.type === "range" && typeof rule.value === "number" ? (
+                    {rule.type === "range" ? (
                         <div className="w-full relative">
                             <input
                                 className="rule-slider"
@@ -104,7 +104,7 @@ export function RuleEntry({
                                 <span className="text-invertme mix-blend-difference text-sm">{rule.range[1]}</span>
                             </div>
                         </div>
-                    ) : typeof rule.value === "boolean" ? (
+                    ) : rule.type === "boolean" ? (
                         <div className="h-16 relative flex justify-between bg-ui-800 rounded-b-lg">
                             <div
                                 className={`mx-4 -top-2 bottom-3 bg-ui-500 absolute rounded-b-lg transition-all duration-200 ${
@@ -132,8 +132,8 @@ export function RuleEntry({
                                 {rule.range[1]}
                             </button>
                         </div>
-                    ) : Array.isArray(rule.value) && rule.value.length === 2 ? (
-                        <TwoAxisSlider rule={rule as AxisRule} onChange={onChange}></TwoAxisSlider>
+                    ) : rule.type === "axis" ? (
+                        <TwoAxisSlider rule={rule} onChange={onChange}></TwoAxisSlider>
                     ) : (
                         <h3>Something went wrong</h3>
                     )}

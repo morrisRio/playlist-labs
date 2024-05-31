@@ -1,10 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Rule } from "@/types/spotify";
-
-export interface AxisRule extends Rule {
-    value: [number, number];
-    range: [string[], string[]];
-}
+import { AxisRule } from "@/types/spotify";
 
 interface TwoAxisSliderProps {
     rule: AxisRule;

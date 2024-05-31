@@ -100,7 +100,7 @@ export const getRecommendations = async (
     //create the tracksquery
     const tracksToAdd = trackRes.tracks.map((track) => `spotify:track:${track.id}`);
 
-    console.info(` -> got ${tracksToAdd.length} recommendations`);
+    // console.info(` -> got ${tracksToAdd.length} recommendations`);
     return tracksToAdd;
 };
 
