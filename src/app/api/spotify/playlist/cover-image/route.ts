@@ -6,7 +6,7 @@ import { debugLog, setDebugMode } from "@/lib/logger";
 import { debug } from "console";
 
 export async function GET(req: NextRequest, res: NextResponse): Promise<NextResponse> {
-    setDebugMode(true);
+    setDebugMode(false);
 
     const token = await getToken({ req });
 
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest, res: NextResponse): Promise<NextResp
 
     const validatePlaylistImage = (data: any) => {
         if (!data || !data[1] || !data[1].url || typeof data[1].url !== "string") {
-            return { valid: false, message: "No image found", status: 404 };
+            return { valid: false, message: "No image found", status: 412 };
         }
         return { valid: true };
     };
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest, res: NextResponse): Promise<NextResp
         `https://api.spotify.com/v1/playlists/${playlistId}/images`,
         accessToken,
         validatePlaylistImage,
-        true // Enable debug mode
+        false // Enable debug mode
     );
 
     if (imageResponseData.error) {

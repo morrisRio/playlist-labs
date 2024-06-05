@@ -1,3 +1,5 @@
+import { ErrorRes } from "@/types/spotify";
+
 /**
  * Represents a validation function that takes in data and returns an object
  * indicating whether the data is valid or not.
@@ -16,6 +18,7 @@ const defaultValidationFunction: ValidationFunction = (data) => {
     }
     return { valid: true };
 };
+
 /**
  * Handles the response from a fetch request.
  *
@@ -23,11 +26,12 @@ const defaultValidationFunction: ValidationFunction = (data) => {
  * @param {boolean} debug - Indicates if debug mode is enabled.
  * @returns {Promise<any>} The parsed response data or an error object.
  */
-export const handleResponse = async (res: Response, debug: boolean): Promise<any> => {
+export const handleResponse = async (res: Response, debug: boolean): Promise<any | ErrorRes> => {
     if (debug) console.log(" - handleResponse() status:", res.status, res.statusText);
 
     if (!res.ok) {
-        return { error: { message: res.statusText, status: res.status } };
+        if (debug) console.log(" - handleResponse() error:", res.statusText);
+        return handleSpotifyError(res);
     }
 
     const isJson = (res.headers.get("content-type") || "").includes("application/json");
@@ -37,24 +41,21 @@ export const handleResponse = async (res: Response, debug: boolean): Promise<any
 };
 
 /**
- * Handles Spotify API errors and returns an error object with a message and status.
- * If the error object contains an 'error' property, it uses the message and status from the error object.
- * Otherwise, it uses the provided default message and status.
+ * Takes a failed Spotify API response and returns an object with a message and status.
  *
- * @param error - The error object returned from the Spotify API.
+ * @param error - The failed response object from the Spotify API.
  * @param defaultMessage - The default error message to use if the error object does not contain a message.
  * @param defaultStatus - The default error status to use if the error object does not contain a status.
  * @returns An object with a message and status representing the error.
  */
 export const handleSpotifyError = (
-    error: any,
+    failedRes: any,
     defaultMessage: string = "Internal Server Error",
     defaultStatus: number = 500
 ) => {
-    if (error.error) {
-        return { message: error.error.message || defaultMessage, status: error.error.status || defaultStatus };
-    }
-    return { message: defaultMessage, status: defaultStatus };
+    return {
+        error: { message: failedRes.statusText || defaultMessage, status: failedRes.status || defaultStatus },
+    };
 };
 
 /**
@@ -76,41 +77,46 @@ export const fetchFromSpotify = async (
 
     const data = await fetch(url, options)
         .then((res) => handleResponse(res, debug))
+        .then((data) => {
+            //if there was problem with the response, forward the error object
+            if (data.error) {
+                return data;
+            }
+
+            if (debug) console.log(" - fetchFromSpotify() data after fetch:", data);
+
+            // Default validation
+            const defaultValidationResult = defaultValidationFunction(data);
+            if (!defaultValidationResult.valid) {
+                return {
+                    error: {
+                        message: defaultValidationResult.message || "Invalid data",
+                        status: defaultValidationResult.status || 400,
+                    },
+                };
+            }
+
+            // Custom validation if provided
+            if (validationFunction) {
+                const validationResult = validationFunction(data);
+                if (!validationResult.valid) {
+                    if (debug) console.log(" - fetchFromSpotify() validation failed:", validationResult);
+                    return {
+                        error: {
+                            message: validationResult.message || "Invalid data",
+                            status: validationResult.status || 404,
+                        },
+                    };
+                }
+            }
+
+            if (debug) console.log(" - fetchFromSpotify() validation succeeded");
+            return data;
+        })
         .catch((error) => {
-            console.error("API - Error on fetch catch:", error);
-            return { error: { message: error.message || error, status: 500 } };
+            console.error("Unexpected Error", error);
+            return { error: { message: error.message || "Unexpected Error", status: 500 } };
         });
-
-    if (data.error) {
-        const { message, status } = handleSpotifyError(data.error);
-        return { error: { message, status } };
-    }
-
-    if (debug) console.log(" - fetchFromSpotify() data after fetch:", data);
-
-    // Default validation
-    const defaultValidationResult = defaultValidationFunction(data);
-    if (!defaultValidationResult.valid) {
-        return {
-            error: {
-                message: defaultValidationResult.message || "Invalid data",
-                status: defaultValidationResult.status || 400,
-            },
-        };
-    }
-
-    // Custom validation if provided
-    if (validationFunction) {
-        const validationResult = validationFunction(data);
-        if (!validationResult.valid) {
-            if (debug) console.log(" - fetchFromSpotify() validation failed:", validationResult);
-            return {
-                error: { message: validationResult.message || "Invalid data", status: validationResult.status || 412 },
-            };
-        }
-    }
-
-    if (debug) console.log(" - fetchFromSpotify() validation succeeded");
 
     return data;
 };

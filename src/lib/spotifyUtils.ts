@@ -1,7 +1,8 @@
 import formatter from "numbuffix";
 import { Seed, Rule, Preferences, Track, Artist } from "@/types/spotify";
 import { allRules } from "@/lib/spotifyConstants";
-import { spotifyGet, spotifyPost } from "@/lib/serverUtils";
+import { spotifyGet } from "@/lib/serverUtils";
+import { ErrorRes } from "@/types/spotify";
 import { debugLog, setDebugMode } from "@/lib/logger";
 
 /**
@@ -62,11 +63,6 @@ export const getThumbnail = (item: Artist | Track): string => {
     return thumbnail;
 };
 
-type TracksResponse = {
-    tracks: Track[];
-    seeds: Seed[];
-};
-
 /**
  * Fetches track recommendations from the Spotify API based on provided preferences, seeds, and rules.
  *
@@ -84,7 +80,7 @@ export const getRecommendations = async (
     preferences: Preferences,
     seeds: Seed[],
     rules?: Rule[]
-): Promise<string[]> => {
+): Promise<string[] | ErrorRes> => {
     setDebugMode(false);
     debugLog(" - getting recommendations");
     //create the query string for the api call from the seeds and rules
@@ -92,15 +88,35 @@ export const getRecommendations = async (
     const seedQuery = "&" + getSeedQuery(seeds);
     const ruleQuery = rules ? "&" + getRuleQuery(rules) : "";
 
-    const trackRes = (await spotifyGet(
+    const validateTrackRes = (data: any) => {
+        if (!data || !data.tracks || !Array.isArray(data.tracks)) {
+            return { valid: false, message: "Could not get recommandations", status: 500 };
+        }
+        return { valid: true };
+    };
+
+    interface TracksResponse {
+        tracks: Track[];
+        seeds: Seed[];
+    }
+
+    type TrackRes = TracksResponse | ErrorRes;
+
+    const trackRes: TrackRes = await spotifyGet(
         `https://api.spotify.com/v1/recommendations?${limitQuery}${seedQuery}${ruleQuery}`,
-        accessToken
-    )) as TracksResponse;
+        accessToken,
+        validateTrackRes
+    );
+
+    if ("error" in trackRes) {
+        const { message, status } = trackRes.error;
+        debugLog("API - error", message);
+        return { error: { message, status } };
+    }
 
     //create the tracksquery
     const tracksToAdd = trackRes.tracks.map((track) => `spotify:track:${track.id}`);
 
-    // console.info(` -> got ${tracksToAdd.length} recommendations`);
     return tracksToAdd;
 };
 

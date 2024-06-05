@@ -16,11 +16,12 @@ async function PlaylistEntry({ playlist }: PlaylistProps) {
         next: { tags: ["playlist"] },
     })
         .then(async (res) => {
+            const data = await res.json();
             if (!res.ok) {
-                const message = await res.json().then((data) => data.message);
+                const { message } = data;
                 throw new Error("Network response was not ok " + res.status + " " + message);
             }
-            return res.json();
+            return data;
         })
         .catch((error) => {
             console.log("Error on Server Component:", error);

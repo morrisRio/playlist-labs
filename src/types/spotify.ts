@@ -16,7 +16,15 @@ export interface AuthSession extends Omit<DefaultSession, "user"> {
     accessToken: AuthUser;
     user: AuthUser;
 }
-//Spotify Types================================================================
+
+//Spotify API return Types================================================================
+
+export type ErrorRes = {
+    error: {
+        message: string;
+        status: number;
+    };
+};
 
 interface Image {
     height: number | null;
@@ -80,6 +88,13 @@ export interface Seed {
     thumbnail: string | number;
 }
 
+export interface Preferences {
+    name: string;
+    frequency: string;
+    amount: number;
+    hasChanged?: boolean;
+}
+
 export type Rule = BooleanRule | AxisRule | RangeRule;
 
 export interface BooleanRule {
@@ -106,17 +121,24 @@ export interface RangeRule {
     description: string;
 }
 
-export interface Preferences {
+export type RuleInput = RangeRuleInput | BoolRuleInput | AxisRuleInput;
+
+export interface RangeRuleInput extends EventTarget {
     name: string;
-    frequency: string;
-    amount: number;
-    hasChanged?: boolean;
+    value: string;
+    type: "range";
 }
 
-export interface RuleInput extends EventTarget {
+export interface BoolRuleInput extends EventTarget {
     name: string;
-    value: string | [number, number];
-    type: string;
+    value: string;
+    type: "boolean";
+}
+
+export interface AxisRuleInput extends EventTarget {
+    name: string;
+    value: [number, number];
+    type: "axis";
 }
 
 //Mongo Types================================================================

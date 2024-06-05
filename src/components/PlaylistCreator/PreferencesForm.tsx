@@ -13,8 +13,6 @@ interface Preferences {
 }
 
 export default function PreferencesForm({ preferences, onChange }: PreferencesProps) {
-    // const [options, setOptions] = useState(["daily", "wely", "monthly"]);
-
     return (
         <div className="flex flex-col gap-6 rounded-xl p-4">
             <h3 className="font-semibold">Preferences</h3>

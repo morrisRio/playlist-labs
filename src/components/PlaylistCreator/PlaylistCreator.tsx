@@ -10,6 +10,7 @@ import InfoModal from "./InfoModal";
 import { PlaylistData } from "@/types/spotify";
 import { completeRules } from "@/lib/spotifyUtils";
 import { redirect, useRouter } from "next/navigation";
+import { set } from "mongoose";
 
 interface SubmitErrorTypes {
     name?: string;
@@ -36,8 +37,8 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
         preferences: playlist?.preferences
             ? playlist.preferences
             : {
-                  name: "Playlist Name",
-                  frequency: "Weekly",
+                  name: "",
+                  frequency: "weekly",
                   amount: 25,
               },
         seeds: playlist?.seeds ? playlist.seeds : [],
@@ -128,17 +129,18 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
         let errors: any = {};
         //check if the form is valid
         //check if the preferences are valid
-        if (preferences.name.length < 1) errors.name = "Your Playlist should have a name";
+        if (preferences.name.length < 1) errors.name = "Your Playlist should have a name.\n";
         if ((typeof preferences.amount !== "number" && preferences.amount < 5) || preferences.amount > 50)
-            errors.amount = "The amount of tracks should be between 5 and 50";
+            errors.amount = "The amount of tracks should be between 5 and 50.\n";
         if (
             preferences.frequency !== "daily" &&
             preferences.frequency !== "weekly" &&
             preferences.frequency !== "monthly"
         )
-            errors.frequency = "Invalid frequency";
-        if (seeds.length < 1) errors.seeds = "You need to add at least one seed";
-        if (seeds.length > 5) errors.seeds = "You can only add 5 seeds";
+            errors.frequency =
+                "There's something wrong with the frequency. That's strange 😉\n Try changing it to something supported";
+        if (seeds.length < 1) errors.seeds = "We'll need atleast one Seed for creating the Playlist.\n";
+        if (seeds.length > 5) errors.seeds = "Sorry we can only handle 5 seeds at a time.\n";
         return errors;
     };
 
@@ -155,28 +157,36 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
         finishSubmit();
     };
 
-    const finishSubmit = () => {
-        const newPlaylist = async () => {
-            //create a new playlist and populate it with the tracks
-            const newPlaylistId = await fetch("/api/spotify/playlist", {
-                method: playlist_id ? "PUT" : "POST",
-                body: JSON.stringify({
-                    playlist_id: playlist_id,
-                    preferences,
-                    seeds,
-                    rules,
-                }),
-            }).then((res) => res.json());
+    const finishSubmit = async () => {
+        //create a new playlist and populate it with the tracks
+        await fetch("/api/spotify/playlist", {
+            method: playlist_id ? "PUT" : "POST",
+            body: JSON.stringify({
+                playlist_id: playlist_id,
+                preferences,
+                seeds,
+                rules,
+            }),
+        })
+            .then(async (res) => {
+                const data = await res.json();
+                if (!res.ok) {
+                    const { message } = data;
+                    throw new Error(message || "Network response was not ok");
+                }
+                setSubmitting(false);
+                router.replace("/pages/edit-playlist/" + data, { scroll: false });
+                router.refresh();
+            })
+            .catch((err) => {
+                setSubmitting(false);
+                setSubmitErrors({ name: err.message });
+                setShowSubmittErrors(true);
+                console.error(err);
+            });
 
-            //TODO: ERROR HANDLING
-            //TODO: show submitting state
-            setSubmitting(false);
-
-            router.replace("/pages/edit-playlist/" + newPlaylistId, { scroll: false });
-            router.refresh();
-        };
-
-        newPlaylist();
+        //TODO: ERROR HANDLING
+        //TODO: show submitting state
         setSubmitting(false);
     };
 
@@ -214,13 +224,20 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
                 <Seeds seeds={seeds} onRemove={removeSeed} onAdd={addSeed} />
                 <hr className="border-ui-700"></hr>
                 <Rules rules={rules} onAdd={addRule} onRemove={removeRule} onChange={handleRuleChange}></Rules>
-                <button
-                    type="submit"
-                    className={`p-2 px-8 rounded-lg text-black bg-white self-end`}
-                    disabled={submitting || !changed}
-                >
-                    {!changed ? "Nothing to Save" : playlist_id ? "Update Playlist" : "Create Playlist"}
-                </button>
+                <div className={`flex ${playlist_id ? "justify-between" : "justify-end"} mx-auto gap-4 mb-14`}>
+                    {playlist_id && (
+                        <button className="text-themetext px-10" type="submit">
+                            Shuffle
+                        </button>
+                    )}
+                    <button
+                        type="submit"
+                        className={`p-2 px-8 rounded-lg text-themetext border border-themetext-nerfed self-end`}
+                        disabled={submitting || !changed}
+                    >
+                        {!changed ? "Nothing to Save" : playlist_id ? "Save Updates" : "Create Playlist"}
+                    </button>
+                </div>
             </form>
         </div>
     );
