@@ -45,10 +45,10 @@ export default function Seeds({ seeds, onRemove, onAdd }: SeedsProps) {
             {seeds.length == 0 ? (
                 <div>
                     {/* TODO: UI make fancy */}
-                    <p className="mx-auto my-8 text-ui-40000 text-base self-end flex-grow">Add at least one Seed</p>
+                    <p className="mx-auto my-8 text-ui-400 text-base self-end flex-grow">Add at least one Seed</p>
                 </div>
             ) : (
-                <div className="flex flex-col gap-4 mb-4">
+                <div className="flex flex-col gap-5 mb-4">
                     {seeds.map((seed, index) => (
                         <SeedEntry seedObj={seed} onRemove={onRemove} key={seed.id} card={true} added={true} />
                     ))}

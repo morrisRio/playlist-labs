@@ -28,17 +28,17 @@ export function SeedEntry({ seedObj, onRemove, onAdd, card = false, added = fals
     //@ts-expect-error
     const interactColor = fullConfig.theme.colors.themetext["DEFAULT"] + "a8"; //a8 is 65% opacity
 
-    let imgSize = "size-14";
+    let imgSize = "size-16";
     let imgRound = type === "artist" ? "rounded-full" : "rounded-lg";
     let seedCard = "";
 
     if (card) {
         imgRound = type === "artist" ? "rounded-full" : "rounded-l-lg";
-        imgSize = type === "artist" ? "size-12 m-2" : "size-16";
+        imgSize = type === "artist" ? "size-16 m-2" : "size-[4.5rem]";
         seedCard = "bg-ui-900 border border-ui-700 rounded-lg";
     }
 
-    if (added) {
+    if (added && !card) {
         seedCard = `bg-ui-900 shadow-[0_0_0_1px] shadow-ui-700 rounded-lg`;
         imgRound = type === "artist" ? "rounded-full" : "rounded-l-lg";
     }

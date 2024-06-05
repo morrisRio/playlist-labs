@@ -1,16 +1,15 @@
 "use client";
-import { useState, FormEvent, useEffect } from "react";
+import { useState, FormEvent } from "react";
 import PreferencesForm from "./PreferencesForm";
 import Rules from "./RulesForm/Rules";
 import Seeds from "./SeedsForm/Seeds";
 import NameModal from "./NameModal";
 import { Seed, Rule, Preferences, RuleInput } from "@/types/spotify";
 import { MdModeEdit } from "react-icons/md";
-import InfoModal from "./InfoModal";
+import InfoModal from "../InfoModal";
 import { PlaylistData } from "@/types/spotify";
 import { completeRules } from "@/lib/spotifyUtils";
-import { redirect, useRouter } from "next/navigation";
-import { set } from "mongoose";
+import { useRouter } from "next/navigation";
 
 interface SubmitErrorTypes {
     name?: string;
@@ -30,6 +29,7 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
     const [showSubmitErrors, setShowSubmittErrors] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [submitErrors, setSubmitErrors] = useState<SubmitErrorTypes>({});
+
     //to differentiate between creating a new playlist and updating an existing one
     const playlist_id = playlist?.playlist_id ? playlist.playlist_id : false;
 
@@ -37,7 +37,7 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
         preferences: playlist?.preferences
             ? playlist.preferences
             : {
-                  name: "",
+                  name: "Playlist Name",
                   frequency: "weekly",
                   amount: 25,
               },
@@ -184,8 +184,6 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
                 setShowSubmittErrors(true);
                 console.error(err);
             });
-
-        //TODO: ERROR HANDLING
         //TODO: show submitting state
         setSubmitting(false);
     };

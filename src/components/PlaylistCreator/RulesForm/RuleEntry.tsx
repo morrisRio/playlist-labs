@@ -2,7 +2,7 @@ import { MdRemoveCircleOutline, MdAddCircleOutline, MdInfoOutline } from "react-
 import { Rule } from "@/types/spotify";
 import { useState } from "react";
 import { TwoAxisSlider } from "./TwoAxis";
-import InfoModal from "../InfoModal";
+import InfoModal from "../../InfoModal";
 
 import resolveConfig from "tailwindcss/resolveConfig";
 import tailwindConfig from "@/../tailwind.config";

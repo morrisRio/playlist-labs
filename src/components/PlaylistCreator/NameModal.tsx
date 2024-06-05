@@ -25,32 +25,35 @@ function InfoModal({ name, onClose, onChange }: NameModalProps) {
 
     return (
         <Modal position="top">
-            <h4 className="mb-4 text-zinc-300">How should we name your Playlist?</h4>
-            <input
-                autoFocus
-                ref={inputElement}
-                type="text"
-                name="name"
-                value={newName}
-                onChange={onChangeName}
-                placeholder="playlist-name"
-                className="w-full pb-2 bg-transparent border-b border-b-zinc-500 focus:outline-none focus:border-b-white placeholder-zinc-500 text-lg"
-            />
-            <div className="flex justify-between mt-8">
-                <button
-                    onClick={onClose}
-                    className="p2 min-w-32 bg-transparent border border-white text-white rounded-xl font-semibold"
-                    type="button"
-                >
-                    Cancel
-                </button>
-                <button
-                    onClick={saveName}
-                    className="p-2 min-w-32 bg-white text-zinc-950 rounded-xl text-center font-semibold"
-                    type="button"
-                >
-                    Save
-                </button>
+            <div className="flex flex-col gap-5">
+                <h3 className="text-zinc-300 mb-2">Give your Playlist a name</h3>
+                <input
+                    autoFocus
+                    ref={inputElement}
+                    type="text"
+                    name="name"
+                    value={newName}
+                    onChange={onChangeName}
+                    onFocus={(e) => e.target.select()}
+                    placeholder="Playlist "
+                    className="w-full p-3 bg-ui-800 rounded-lg focus:outline-none placeholder-ui-600 text-lg"
+                />
+                <div className="flex justify-between">
+                    <button
+                        onClick={onClose}
+                        className="p2 min-w-32 bg-transparent text-themetext/60 rounded-xl text-lg"
+                        type="button"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={saveName}
+                        className="p-2 min-w-32 border border-themetext-nerfed text-themetext text-lg rounded-md text-center"
+                        type="button"
+                    >
+                        Rename
+                    </button>
+                </div>
             </div>
         </Modal>
     );

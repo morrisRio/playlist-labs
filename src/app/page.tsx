@@ -31,7 +31,7 @@ export default async function Home() {
     //TODO: ERROR HANDLING
 
     return (
-        <div className="h-full w-full p-4 flex flex-col gap-4">
+        <div className="h-full w-full p-4 flex flex-col gap-6">
             <h2 className="font-normal text-ui-400 mb-4">playlistLabs</h2>
             <Link href="/pages/create-playlist">
                 <div className="flex gap-4 items-center w-full mb-4 bg-ui-900 border border-ui-700 rounded-lg">
