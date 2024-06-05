@@ -113,6 +113,12 @@ export interface Preferences {
     hasChanged?: boolean;
 }
 
+export interface RuleInput extends EventTarget {
+    name: string;
+    value: string | [number, number];
+    type: string;
+}
+
 //Mongo Types================================================================
 
 export interface PlaylistData {
@@ -127,10 +133,4 @@ export interface MongoPlaylistData extends Document {
     preferences: Preferences;
     seeds: Seed[];
     rules?: Rule[];
-}
-
-export interface RuleInput extends EventTarget {
-    name: string;
-    value: string | number[];
-    type: string;
 }

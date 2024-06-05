@@ -20,12 +20,14 @@ export default async function Home() {
         tagged data cache
         //TODO: wait for unstable_cache to be stable to use for revalidation on demand (submit trigger)
     */
+
     const res = await fetch(process.env.NEXTAUTH_URL + "/api/spotify/playlist", {
         method: "GET",
         headers: new Headers(headers()),
         next: { tags: ["playlist"] },
     }).then((res) => res.json());
     playlists = res;
+
     //TODO: ERROR HANDLING
 
     return (

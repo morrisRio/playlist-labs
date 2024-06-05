@@ -25,7 +25,7 @@ interface PlaylistFormProps {
 function PlaylistForm({ playlist }: PlaylistFormProps) {
     const router = useRouter();
 
-    const [showNameModal, setShowNameModal] = useState(false);
+    const [showNameModal, setShowNameModal] = useState(playlist ? false : true);
     const [showSubmitErrors, setShowSubmittErrors] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [submitErrors, setSubmitErrors] = useState<SubmitErrorTypes>({});
@@ -96,7 +96,7 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
             const valueParsed =
                 type === "range" && typeof value === "string"
                     ? parseFloat(value)
-                    : type === "axis" && Array.isArray(value)
+                    : type === "axis"
                     ? value
                     : value === "true"
                     ? true
@@ -167,7 +167,6 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
                     rules,
                 }),
             }).then((res) => res.json());
-            //revalidate tag playlists with serveraction
 
             //TODO: ERROR HANDLING
             //TODO: show submitting state

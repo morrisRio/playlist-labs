@@ -22,7 +22,7 @@ export async function POST(req: NextRequest, res: NextResponse): Promise<NextRes
     const token = await getToken({ req });
     if (!token) {
         console.error("No token found");
-        return new NextResponse("No token found", { status: 401 });
+        return NextResponse.json({ message: "No token found", error: "Unauthorized" }, { status: 401 });
     }
 
     const { accessToken, userId } = token;
@@ -39,8 +39,8 @@ export async function POST(req: NextRequest, res: NextResponse): Promise<NextRes
     //@ts-ignore
     const { id: idToWriteTo } = await spotifyPost(
         `https://api.spotify.com/v1/users/${userId}/playlists`,
-        createBody,
-        accessToken
+        accessToken,
+        createBody
     );
     debugLog(" - created playlist with id: " + idToWriteTo);
 
@@ -51,8 +51,8 @@ export async function POST(req: NextRequest, res: NextResponse): Promise<NextRes
     //add the tracks to the playlist
     const addRes = await spotifyPost(
         `https://api.spotify.com/v1/playlists/${idToWriteTo}/tracks`,
-        addBody,
-        accessToken
+        accessToken,
+        addBody
     );
 
     debugLog("API: Added Tracks to Playlist:", addRes);
@@ -67,17 +67,17 @@ export async function POST(req: NextRequest, res: NextResponse): Promise<NextRes
         seeds,
         rules,
     });
-    revalidateTag("playlists");
 
     if (!dbSuccess) {
-        return new NextResponse(
-            JSON.stringify({
+        return NextResponse.json(
+            {
                 message: "Playlist created on Spotify, but an error occurred while saving to the database.",
                 error: "Database save error",
-            }),
+            },
             { status: 500 }
         );
     }
+    revalidateTag("playlists");
 
     /* const url = req.nextUrl.clone();
     url.pathname = `/edit-playlist/${idToWriteTo}`;
@@ -104,7 +104,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     const token = await getToken({ req });
     if (!token) {
         console.error("No token found");
-        return new NextResponse("No token found", { status: 401 });
+        return NextResponse.json({ message: "No token found", error: "Unauthorized" }, { status: 401 });
     }
 
     const { accessToken, userId } = token;
@@ -118,17 +118,15 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
     const updatePlaylistDetails = await spotifyPut(
         `https://api.spotify.com/v1/playlists/${playlist_id}`,
-        preferencesBody,
-        accessToken
+        accessToken,
+        preferencesBody
     );
 
     //flush the playlist
     debugLog(" - flushing the playlist");
-    const flushRes = await spotifyPut(
-        `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
-        { uris: [] },
-        accessToken
-    );
+    const flushRes = await spotifyPut(`https://api.spotify.com/v1/playlists/${playlist_id}/tracks`, accessToken, {
+        uris: [],
+    });
     // debugLog(" - FLUSHED PLAYLIST: flushRes:" + flushRes);
 
     const addBody = {
@@ -138,8 +136,8 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     //add the new tracks to the playlist
     const addRes = await spotifyPost(
         `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
-        addBody,
-        accessToken
+        accessToken,
+        addBody
     );
 
     // debugLog("API: Added Tracks to Playlist:", addRes);
@@ -153,11 +151,11 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     revalidateTag("playlists");
 
     if (!dbSuccess) {
-        return new NextResponse(
-            JSON.stringify({
+        return NextResponse.json(
+            {
                 message: "Playlist updated on Spotify, but an error occurred while saving changes to the database.",
                 error: "Database save error",
-            }),
+            },
             { status: 500 }
         );
     }
@@ -179,13 +177,13 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
  */
 
 export async function GET(req: NextRequest, res: NextResponse): Promise<NextResponse> {
-    setDebugMode(true);
+    setDebugMode(false);
 
     const session = await getServerSession(authOptions);
     debugLog("got session", session);
 
     if (!session || !session.user || !session.user.id) {
-        return new NextResponse("Unauthorized", { status: 401 });
+        return NextResponse.json({ message: "No session found", error: "Unauthorized" }, { status: 401 });
     }
 
     const userId = session.user.id;
@@ -193,11 +191,11 @@ export async function GET(req: NextRequest, res: NextResponse): Promise<NextResp
     const { playlists, error } = await dbGetUsersPlaylists(userId);
     debugLog("API: PLAYLIST GET - fetching playlists for user", userId, playlists, error);
     if (error) {
-        return new NextResponse(
-            JSON.stringify({
+        return NextResponse.json(
+            {
                 message: "An error occurred while fetching the playlists.",
                 error: error,
-            }),
+            },
             { status: 500 }
         );
     }

@@ -88,55 +88,57 @@ export function RuleEntry({
             </div>
             {control && onChange && (
                 <div>
-                    {rule.type === "range" ? (
-                        <div className="w-full relative">
-                            <input
-                                className="rule-slider"
-                                type="range"
-                                name={rule.name}
-                                min={rule.name === "Tempo" && typeof rule.range[0] === "number" ? rule.range[0] : 0}
-                                max={rule.name === "Tempo" && typeof rule.range[1] === "number" ? rule.range[1] : 100}
-                                value={rule.value}
-                                onChange={onChange}
-                            />
-                            <div className="absolute p-3 top-2 w-full flex justify-between pointer-events-none">
-                                <span className="text-invertme mix-blend-difference text-sm">{rule.range[0]}</span>
-                                <span className="text-invertme mix-blend-difference text-sm">{rule.range[1]}</span>
+                    {{
+                        range: rule.type === "range" && (
+                            <div className="w-full relative">
+                                <input
+                                    className="rule-slider"
+                                    type="range"
+                                    name={rule.name}
+                                    min={rule.name === "Tempo" && typeof rule.range[0] === "number" ? rule.range[0] : 0}
+                                    max={
+                                        rule.name === "Tempo" && typeof rule.range[1] === "number" ? rule.range[1] : 100
+                                    }
+                                    value={rule.value}
+                                    onChange={onChange}
+                                />
+                                <div className="absolute p-3 top-2 w-full flex justify-between pointer-events-none">
+                                    <span className="text-invertme mix-blend-difference text-sm">{rule.range[0]}</span>
+                                    <span className="text-invertme mix-blend-difference text-sm">{rule.range[1]}</span>
+                                </div>
                             </div>
-                        </div>
-                    ) : rule.type === "boolean" ? (
-                        <div className="h-16 relative flex justify-between bg-ui-800 rounded-b-lg">
-                            <div
-                                className={`mx-4 -top-2 bottom-3 bg-ui-500 absolute rounded-b-lg transition-all duration-200 ${
-                                    rule.value ? "left-0 right-1/2" : "left-1/2 right-0"
-                                }`}
-                            ></div>
-                            <button
-                                className="relative -top-1 w-1/2 p-3 m-1 bg-transparent text-center rounded-lg z-10 text-invertme mix-blend-difference"
-                                name={rule.name}
-                                value={"true"}
-                                onClick={onChange}
-                                disabled={rule.value}
-                                type="button"
-                            >
-                                {rule.range[0]}
-                            </button>
-                            <button
-                                className="relative -top-1 w-1/2 p-3 m-1  bg-transparent text-center rounded-lg z-10 text-invertme mix-blend-difference"
-                                type="button"
-                                name={rule.name}
-                                value={"false"}
-                                onClick={onChange}
-                                disabled={!rule.value}
-                            >
-                                {rule.range[1]}
-                            </button>
-                        </div>
-                    ) : rule.type === "axis" ? (
-                        <TwoAxisSlider rule={rule} onChange={onChange}></TwoAxisSlider>
-                    ) : (
-                        <h3>Something went wrong</h3>
-                    )}
+                        ),
+                        boolean: rule.type === "boolean" && (
+                            <div className="h-16 relative flex justify-between bg-ui-800 rounded-b-lg">
+                                <div
+                                    className={`mx-4 -top-2 bottom-3 bg-ui-500 absolute rounded-b-lg transition-all duration-200 ${
+                                        rule.value ? "left-0 right-1/2" : "left-1/2 right-0"
+                                    }`}
+                                ></div>
+                                <button
+                                    className="relative -top-1 w-1/2 p-3 m-1 bg-transparent text-center rounded-lg z-10 text-invertme mix-blend-difference"
+                                    name={rule.name}
+                                    value={"true"}
+                                    onClick={onChange}
+                                    disabled={rule.value}
+                                    type="button"
+                                >
+                                    {rule.range[0]}
+                                </button>
+                                <button
+                                    className="relative -top-1 w-1/2 p-3 m-1  bg-transparent text-center rounded-lg z-10 text-invertme mix-blend-difference"
+                                    type="button"
+                                    name={rule.name}
+                                    value={"false"}
+                                    onClick={onChange}
+                                    disabled={!rule.value}
+                                >
+                                    {rule.range[1]}
+                                </button>
+                            </div>
+                        ),
+                        axis: rule.type === "axis" && <TwoAxisSlider rule={rule} onChange={onChange}></TwoAxisSlider>,
+                    }[rule.type] || <h3>Something went wrong</h3>}
                 </div>
             )}
         </div>

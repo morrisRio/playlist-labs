@@ -24,8 +24,8 @@ function InfoModal({ name, onClose, onChange }: NameModalProps) {
     };
 
     return (
-        <div className="fixed inset-0 w-full h-full p-4 flex bg-zinc-950/80 z-50 md:items-center">
-            <div className="w-full flex flex-col md:max-w-96 md:m-auto h-fit p-6 bg-zinc-800/40 backdrop-blur-md rounded-xl">
+        <div className="fixed inset-0 w-full h-full p-4 flex bg-ui-950/80 z-50 md:items-center">
+            <div className="w-full flex flex-col md:max-w-96 md:m-auto h-fit p-6 bg-ui-900 border-t border-ui-800 backdrop-blur-md rounded-xl">
                 <h4 className="mb-4 text-zinc-300">Name your Playlist</h4>
                 <input
                     autoFocus
