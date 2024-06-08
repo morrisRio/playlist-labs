@@ -222,15 +222,15 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
                 <Seeds seeds={seeds} onRemove={removeSeed} onAdd={addSeed} />
                 <hr className="border-ui-700"></hr>
                 <Rules rules={rules} onAdd={addRule} onRemove={removeRule} onChange={handleRuleChange}></Rules>
-                <div className={`flex ${playlist_id ? "justify-between" : "justify-end"} mx-auto gap-4 mb-14`}>
+                <div className={`flex ${playlist_id ? "justify-between" : "justify-end"} mx-4 gap-4 mb-14`}>
                     {playlist_id && (
-                        <button className="text-themetext px-10" type="submit">
+                        <button className="p2min-w-32 bg-transparent text-b6b6b6 rounded-xl text-lg" type="submit">
                             Shuffle
                         </button>
                     )}
                     <button
                         type="submit"
-                        className={`p-2 px-8 rounded-lg text-themetext border border-themetext-nerfed self-end`}
+                        className={`p-2 px-8 min-w-32 border border-themetext-nerfed text-themetext text-lg rounded-md text-center`}
                         disabled={submitting || !changed}
                     >
                         {!changed ? "Nothing to Save" : playlist_id ? "Save Updates" : "Create Playlist"}

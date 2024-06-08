@@ -41,7 +41,7 @@ function InfoModal({ name, onClose, onChange }: NameModalProps) {
                 <div className="flex justify-between">
                     <button
                         onClick={onClose}
-                        className="p2 min-w-32 bg-transparent text-themetext/60 rounded-xl text-lg"
+                        className="p2 min-w-32 bg-transparent text-b6b6b6 rounded-xl text-lg"
                         type="button"
                     >
                         Cancel

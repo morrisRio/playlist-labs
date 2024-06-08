@@ -13,20 +13,21 @@ const config: Config = {
             },
             colors: {
                 ui: {
-                    950: "#121212",
-                    900: "#171717",
-                    800: "#292929",
-                    700: "#3a3a3a",
-                    600: "#737373",
-                    500: "#999999",
-                    400: "#b3b3b3",
+                    950: "#000000", //bg
+                    900: "#090909", //card
+                    800: "#1F1F1F", //border
+                    700: "#333333", //rule-bg input-bgs
+                    650: "#4D4D4D", //tags
+                    600: "#878787", //desc text
+                    500: "#BEBEBE", //slider progress
+                    400: "#b6b6b6", //light-interact
                 },
                 themetext: {
-                    DEFAULT: "#ffffff",
+                    DEFAULT: "#EDEDED",
                     nerfed: "#f2f2f2",
                 },
                 invertme: {
-                    DEFAULT: "#c9c9c9",
+                    DEFAULT: "#a8a8a8",
                 },
             },
         },

@@ -30,6 +30,7 @@ export function RuleEntry({
 
     const ruleCard = control ? "bg-ui-900" : "mb-4 bg-zinc-700/40";
     const fontSize = "text-base";
+    const nameConatiner = control ? "border border-b-0 rounded-t-md" : "border rounded-md";
 
     const fullConfig = resolveConfig(tailwindConfig);
     //@ts-expect-error
@@ -53,7 +54,7 @@ export function RuleEntry({
             )}
             <div
                 className={`w-full flex items-center justify-between gap-4 bg-ui-900
-                 border border-b-0 border-ui-700 p-5 rounded-t-lg shadow-md shadow-neutral-950/30 z-10`}
+                  border-ui-700 p-5 ${nameConatiner} shadow-md shadow-neutral-950/30 z-10`}
             >
                 {/* Info _____________________________________________________________________ */}
                 <div className="flex-grow flex items-center gap-4">
@@ -63,7 +64,7 @@ export function RuleEntry({
                         <>
                             <input
                                 type="number"
-                                className="text-sm hide-arrows p-2 rounded-lg bg-ui-800 max-w-12 text-themetext/60 focus:outline-none focus:ring focus:border-themetext"
+                                className="text-sm hide-arrows p-2 rounded-lg bg-ui-800 max-w-12 text-b6b6b6 focus:outline-none focus:ring focus:border-themetext"
                                 name="amount"
                                 value={rule.value}
                                 min="40"

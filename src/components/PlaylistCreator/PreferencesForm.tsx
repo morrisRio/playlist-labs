@@ -19,7 +19,7 @@ export default function PreferencesForm({ preferences, onChange }: PreferencesPr
             <label className="flex space-between items-center justify-between text-base">
                 Update Frequency
                 <select
-                    className="block p-2 rounded-lg bg-ui-800 text-themetext/60 focus:outline-none focus:ring focus:border-themetext text-sm"
+                    className="block p-2 rounded-lg bg-ui-800 text-b6b6b6 focus:outline-none focus:ring focus:border-themetext text-sm"
                     name="frequency"
                     value={preferences.frequency}
                     onChange={onChange}
@@ -35,7 +35,7 @@ export default function PreferencesForm({ preferences, onChange }: PreferencesPr
                     Number of Tracks
                     <input
                         type="number"
-                        className="text-sm hide-arrows p-2 rounded-lg bg-ui-800 max-w-12 text-themetext/60 focus:outline-none focus:ring focus:border-themetext"
+                        className="text-sm hide-arrows p-2 rounded-lg bg-ui-800 max-w-12 text-b6b6b6 focus:outline-none focus:ring focus:border-themetext"
                         name="amount"
                         value={preferences.amount}
                         min="5"

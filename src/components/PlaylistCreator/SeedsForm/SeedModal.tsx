@@ -167,7 +167,7 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
                             <select
                                 name="selectedRange"
                                 onChange={changeFilter}
-                                className="block mt-1 p-2 rounded-lg bg-ui-800 text-themetext/60 focus:outline-none focus:ring focus:border-themetext text-sm"
+                                className="block mt-1 p-2 rounded-lg bg-ui-800 text-b6b6b6 focus:outline-none focus:ring focus:border-themetext text-sm"
                             >
                                 {selectOptions.rangeTypes.map((duration) => (
                                     <option key={duration[0]} value={duration[0]}>

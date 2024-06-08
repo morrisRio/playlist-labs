@@ -44,12 +44,14 @@ function Rules({ rules, onAdd, onRemove, onChange }: RulesProps) {
                 <h3>Rules</h3>
                 <button className="flex items-center justify-center gap-2 self-end" onClick={openModal} type="button">
                     <MdAddCircleOutline size="1.5em" color={interactColor} />
-                    <h4 className="text-themetext/60">Add Rule</h4>
+                    <h4 className="text-b6b6b6">Add Rule</h4>
                 </button>
             </div>
             {rules.length == 0 ? (
-                <div>
-                    <p className="text-zinc-400 text-base self-end flex-grow">Add at least one Rule</p>
+                <div onClick={openModal} className="flex rounded-md bg-ui-950 justify-between items-center p-6">
+                    <p className="mx-auto text-themetext/30 text-center self-center text-lg">
+                        Fine tune your Playlist by adding rules
+                    </p>
                 </div>
             ) : (
                 <div className="flex flex-col gap-8">

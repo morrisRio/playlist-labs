@@ -14,7 +14,7 @@ interface RuleModalProps {
 function RuleModal({ onAdd, onRemove, onClose, rules }: RuleModalProps) {
     //possible rules imported from lib spotifyActions
     return (
-        <div className="absolute h-full w-full inset-0 p-4 bg-gradient">
+        <div className="absoulute h-full w-full inset-0 p-4 bg-gradient">
             <header className="flex items-center gap-4">
                 <button onClick={onClose} type="button">
                     <MdOutlineArrowBackIos size="2em" />

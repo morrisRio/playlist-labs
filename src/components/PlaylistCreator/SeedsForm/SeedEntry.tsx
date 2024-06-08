@@ -28,7 +28,7 @@ export function SeedEntry({ seedObj, onRemove, onAdd, card = false, added = fals
     //@ts-expect-error
     const interactColor = fullConfig.theme.colors.themetext["DEFAULT"] + "a8"; //a8 is 65% opacity
 
-    let imgSize = "size-16";
+    let imgSize = "size-14";
     let imgRound = type === "artist" ? "rounded-full" : "rounded-lg";
     let seedCard = "";
 
