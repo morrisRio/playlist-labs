@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import Modal from "@/components/Modal";
+import UniModal from "@/components/UniModal";
 
 interface NameModalProps {
     name: string;
@@ -7,7 +7,7 @@ interface NameModalProps {
     onClose: () => void;
 }
 
-function InfoModal({ name, onClose, onChange }: NameModalProps) {
+function NameModal({ name, onClose, onChange }: NameModalProps) {
     const inputElement = useRef<HTMLInputElement>(null);
     const [newName, setNewName] = useState(name);
 
@@ -24,39 +24,27 @@ function InfoModal({ name, onClose, onChange }: NameModalProps) {
     };
 
     return (
-        <Modal position="top">
-            <div className="flex flex-col gap-5">
-                <h3 className="text-zinc-300 mb-2">Give your Playlist a name</h3>
-                <input
-                    autoFocus
-                    ref={inputElement}
-                    type="text"
-                    name="name"
-                    value={newName}
-                    onChange={onChangeName}
-                    onFocus={(e) => e.target.select()}
-                    placeholder="Playlist "
-                    className="w-full p-3 bg-ui-800 rounded-lg focus:outline-none placeholder-ui-600 text-lg"
-                />
-                <div className="flex justify-between">
-                    <button
-                        onClick={onClose}
-                        className="p2 min-w-32 bg-transparent text-b6b6b6 rounded-xl text-lg"
-                        type="button"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={saveName}
-                        className="p-2 min-w-32 border border-themetext-nerfed text-themetext text-lg rounded-md text-center"
-                        type="button"
-                    >
-                        Rename
-                    </button>
-                </div>
-            </div>
-        </Modal>
+        <UniModal
+            position="top"
+            title="Give Your Playlist a Name"
+            onClose={onClose}
+            action={saveName}
+            actionTitle="Rename"
+            bodyFullSize={true}
+        >
+            <input
+                autoFocus
+                ref={inputElement}
+                type="text"
+                name="name"
+                value={newName}
+                onChange={onChangeName}
+                onFocus={(e) => e.target.select()}
+                placeholder="Playlist Name"
+                className="p-3 px-6 w-full bg-ui-900 focus:outline-none placeholder-ui-600 text-lg text-ui-400 -mb-3 border border-ui-700 border-x-0"
+            />
+        </UniModal>
     );
 }
 
-export default InfoModal;
+export default NameModal;

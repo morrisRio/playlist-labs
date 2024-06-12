@@ -1,12 +1,13 @@
 "use client";
+import { MdLogout, MdOutlineDelete } from "react-icons/md";
 import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
-import Modal from "./Modal";
+import UniModal from "@/components/UniModal";
 
 const Profile = () => {
     const { data: session } = useSession();
 
-    const [showProfileModal, setShowProfileModal] = useState(false);
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     const initDeleteAccount = () => {
@@ -15,41 +16,65 @@ const Profile = () => {
     };
 
     const deleteAccount = async () => {
-        await fetch("/api/user/delete", {
-            method: "DELETE",
-        });
-        signOut();
+        console.log("Deleting Account");
     };
     return (
-        <header>
-            {showProfileModal && (
-                <Modal onModalBlur={() => setShowProfileModal(false)}>
-                    <div className="flex flex-col items-center">
-                        {session?.user?.image ? (
-                            <img src={session.user.image as string} alt="user image" className="size-8 rounded-full" />
-                        ) : (
-                            <div aria-label="profile" className="h-10 w-10 rounded-full bg-lime-400"></div>
-                        )}
-                        <h5>{session?.user?.name}</h5>
-                        <button
-                            className="text-ui-600 text-left hover:text-neutral-400"
-                            onClick={() => signOut()}
-                            type="button"
-                        >
-                            Sign out
-                        </button>
-                        <button onPointerDown={initDeleteAccount}>Delete my playlistLabs account</button>
-                    </div>
-                </Modal>
+        <>
+            {showProfileMenu && (
+                <div className="absolute inset-0 bg-ui-950/80 z-10" onClick={() => setShowProfileMenu(false)}></div>
             )}
-            <div className="flex gap-3 items-center" onPointerDown={() => setShowProfileModal(true)}>
-                {session?.user?.image ? (
-                    <img src={session.user.image as string} alt="user image" className="size-8 rounded-full" />
-                ) : (
-                    <div aria-label="profile" className="h-10 w-10 rounded-full bg-lime-400"></div>
-                )}
+            {showConfirmModal && (
+                <UniModal
+                    title="Delete Account"
+                    action={() => deleteAccount()}
+                    actionTitle="Delete"
+                    actionDanger={true}
+                    onClose={() => setShowConfirmModal(false)}
+                >
+                    <p>
+                        This action will delete your account and all associated data irreversibly. This includes all
+                        playlists and preferences. In fact that's all we store for you
+                        <br />
+                        <br />
+                        For security reasons we won't delete generated playlists on Spotify.
+                    </p>
+                </UniModal>
+            )}
+            <div className="relative z-20">
+                <div className="flex gap-3 items-center " onPointerDown={() => setShowProfileMenu(true)}>
+                    {showProfileMenu && (
+                        <div className="absolute gap-2 bg-ui-900 border border-ui-700 -right-2 -top-2 rounded-lg p-3">
+                            <div className="text-ui-600 text-sm flex gap-4">
+                                <div className="pl-3 pb-3">
+                                    <span className="text-nowrap">{session?.user?.name}</span>
+                                </div>
+                                <div className="size-6 rounded-full bg-ui-950"></div>
+                            </div>
+                            <hr className="border-ui-700 -mx-2"></hr>
+                            <button
+                                className="text-lg text-themetext text-nowrap flex flex-row items-center gap-2 p-3"
+                                onPointerDown={() => signOut()}
+                            >
+                                <MdLogout />
+                                Sign out
+                            </button>
+                            <button
+                                className="text-lg text-red-800 text-nowrap flex flex-row items-center gap-2 p-3"
+                                onPointerDown={() => initDeleteAccount()}
+                            >
+                                <MdOutlineDelete />
+                                Delete my Account
+                            </button>
+                        </div>
+                    )}
+                    {session?.user?.image ? (
+                        <img src={session.user.image as string} alt="user image" className="size-6 rounded-full z-30" />
+                    ) : (
+                        <div aria-label="profile" className="size-6 rounded-full bg-lime-400 z-30"></div>
+                    )}
+                </div>
             </div>
-        </header>
+        </>
     );
 };
 

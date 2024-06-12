@@ -1,6 +1,3 @@
-import { useState } from "react";
-import { MdModeEdit } from "react-icons/md";
-
 interface PreferencesProps {
     preferences: Preferences;
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;

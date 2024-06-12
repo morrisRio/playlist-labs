@@ -9,6 +9,9 @@ import { headers } from "next/headers";
 import resolveConfig from "tailwindcss/resolveConfig";
 import tailwindConfig from "@/../tailwind.config";
 
+import Image from "next/image";
+import Logo from "../../public/logo.svg";
+
 export default async function Home() {
     let playlists: PlaylistData[] | false = false;
 
@@ -25,18 +28,23 @@ export default async function Home() {
         method: "GET",
         headers: new Headers(headers()),
         next: { tags: ["playlist"] },
-    }).then((res) => res.json());
+    })
+        .then((res) => res.json())
+        .catch((err) => {
+            console.log(err);
+            return { error: err.message };
+        });
     playlists = res;
 
     //TODO: ERROR HANDLING
 
     return (
-        <div className="h-full w-full p-4 flex flex-col gap-6">
-            <div className="flex justify-between">
-                <h2 className="font-normal text-themetext-nerfed">playlistLabs</h2>
+        <div className="h-full w-full p-4 flex flex-col gap-5">
+            <div className="flex justify-between gap-2 mt-8">
+                <Image src={Logo} alt="playlistLabs Logo" width={16}></Image>
+                <h3 className="font-normal text-themetext-nerfed flex grow">playlistLabs</h3>
                 <Profile></Profile>
             </div>
-            <hr className="border-ui-700 -mx-4" />
             <Link href="/pages/create-playlist">
                 <div className="flex gap-4 items-center w-full mb-4 bg-ui-900 border border-ui-700 rounded-lg">
                     <div className="size-20 bg-ui-800 rounded-l-lg flex items-center justify-center">
@@ -46,7 +54,9 @@ export default async function Home() {
                 </div>
             </Link>
             {/* render all playlists found in database for user */}
+            <h4>Your Playlists</h4>
             {playlists &&
+                playlists.length > 0 &&
                 playlists.map((playlist) => (
                     <PlaylistEntry playlist={playlist} key={playlist.playlist_id?.toString()} />
                 ))}

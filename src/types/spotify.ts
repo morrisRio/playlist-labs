@@ -92,7 +92,7 @@ export interface Preferences {
     name: string;
     frequency: string;
     amount: number;
-    hasChanged?: boolean;
+    hue?: number;
 }
 
 export type Rule = BooleanRule | AxisRule | RangeRule;
@@ -148,6 +148,7 @@ export interface PlaylistData {
     preferences: Preferences;
     seeds: Seed[];
     rules?: Rule[];
+    coverUrl?: string;
 }
 
 export interface MongoPlaylistData extends Document {

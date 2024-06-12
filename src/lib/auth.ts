@@ -2,6 +2,8 @@ import { NextAuthOptions, Account, User } from "next-auth";
 import SpotifyProvider from "next-auth/providers/spotify";
 import { dbRegisterUser } from "@/lib/db/dbActions";
 import { JWT } from "next-auth/jwt";
+import { debugLog, setDebugMode } from "./logger";
+import { debug } from "console";
 
 const scopes = [
     "playlist-read-private",
@@ -53,8 +55,11 @@ export const authOptions: NextAuthOptions = {
         },
 
         async jwt({ token, account }: { token: JWT; account: Account | null; user: User }): Promise<JWT> {
+            setDebugMode(false);
+
             //on first sign in add the tokens from account to jwt
             if (account) {
+                debugLog("FIRST SIGN IN");
                 return {
                     ...token,
                     accessToken: account.access_token!,
@@ -66,6 +71,7 @@ export const authOptions: NextAuthOptions = {
 
             //return previous token if it hasn't expired yet
             if (token.accessTokenExpires && Date.now() < token.accessTokenExpires) {
+                debugLog("TOKEN STILL VALID");
                 return token;
             }
 
@@ -86,6 +92,7 @@ export const authOptions: NextAuthOptions = {
 
 async function refreshAccessToken(token: JWT) {
     try {
+        debugLog("REFRESHING TOKEN");
         if (!token.refreshToken) throw new Error("NO_REFRESH_TOKEN_PROVIDED");
 
         //get new access token

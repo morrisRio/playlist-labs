@@ -2,12 +2,10 @@ import { MdRemoveCircleOutline, MdAddCircleOutline, MdInfoOutline } from "react-
 import { Rule } from "@/types/spotify";
 import { useState } from "react";
 import { TwoAxisSlider } from "./TwoAxis";
-import InfoModal from "../../InfoModal";
+import UniModal from "../../UniModal";
 
 import resolveConfig from "tailwindcss/resolveConfig";
 import tailwindConfig from "@/../tailwind.config";
-
-//TODO: Add numeric input for tempo
 
 type RuleEntryProps = {
     rule: Rule;
@@ -50,7 +48,9 @@ export function RuleEntry({
         //it was the backdrop blur that was causing the issue
         <div className={`flex flex-col ${ruleCard} overflow-hidden`}>
             {showInfo && (
-                <InfoModal title={`What is ${rule.name}?`} body={rule.description} onClose={closeModal}></InfoModal>
+                <UniModal title={`Control the ${rule.name}`} onClose={closeModal} closeTitle="Got it" position="center">
+                    <p>{rule.description}</p>
+                </UniModal>
             )}
             <div
                 className={`w-full flex items-center justify-between gap-4 bg-ui-900
@@ -87,6 +87,7 @@ export function RuleEntry({
                     </button>
                 )}
             </div>
+            {/* Controls ___________________________________________________________________ */}
             {control && onChange && (
                 <div>
                     {{

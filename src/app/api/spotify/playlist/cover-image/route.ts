@@ -3,11 +3,9 @@ import { NextRequest } from "next/server";
 import { spotifyGet } from "@/lib/serverUtils";
 import { getToken } from "next-auth/jwt";
 import { debugLog, setDebugMode } from "@/lib/logger";
-import { debug } from "console";
 
 export async function GET(req: NextRequest, res: NextResponse): Promise<NextResponse> {
     setDebugMode(false);
-
     const token = await getToken({ req });
 
     if (!token) {
@@ -19,9 +17,10 @@ export async function GET(req: NextRequest, res: NextResponse): Promise<NextResp
 
     const { accessToken } = token;
     const playlistId = req.nextUrl.searchParams.get("playlist_id");
+    debugLog("getting image for playlist", playlistId);
 
     const validatePlaylistImage = (data: any) => {
-        if (!data || !data[1] || !data[1].url || typeof data[1].url !== "string") {
+        if (!data || !data[0] || !data[0].url || typeof data[0].url !== "string") {
             return { valid: false, message: "No image found", status: 412 };
         }
         return { valid: true };
@@ -40,7 +39,7 @@ export async function GET(req: NextRequest, res: NextResponse): Promise<NextResp
         return NextResponse.json({ message }, { status });
     }
 
-    const { url } = imageResponseData[1];
-    debugLog("API - after fetch", imageResponseData);
+    const { url } = imageResponseData[0];
+    debugLog("API - after fetch", url);
     return NextResponse.json(url, { status: 200 });
 }

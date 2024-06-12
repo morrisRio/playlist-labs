@@ -4,19 +4,14 @@ import PreferencesForm from "./PreferencesForm";
 import Rules from "./RulesForm/Rules";
 import Seeds from "./SeedsForm/Seeds";
 import NameModal from "./NameModal";
+import PlaylistHeader from "./PlaylistHeader";
 import { Seed, Rule, Preferences, RuleInput } from "@/types/spotify";
-import { MdModeEdit } from "react-icons/md";
-import InfoModal from "../InfoModal";
+import { MdModeEdit, MdMoreVert } from "react-icons/md";
+import UniModal from "../UniModal";
 import { PlaylistData } from "@/types/spotify";
 import { completeRules } from "@/lib/spotifyUtils";
 import { useRouter } from "next/navigation";
-
-interface SubmitErrorTypes {
-    name?: string;
-    frequency?: string;
-    amount?: string;
-    seeds?: string;
-}
+import GradientModal from "../GradientModal";
 
 interface PlaylistFormProps {
     playlist?: PlaylistData;
@@ -25,10 +20,10 @@ interface PlaylistFormProps {
 function PlaylistForm({ playlist }: PlaylistFormProps) {
     const router = useRouter();
 
-    const [showNameModal, setShowNameModal] = useState(playlist ? false : true);
     const [showSubmitErrors, setShowSubmittErrors] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-    const [submitErrors, setSubmitErrors] = useState<SubmitErrorTypes>({});
+    const [submitErrors, setSubmitErrors] = useState<string[]>([]);
+    const [showGradient, setShowGradient] = useState(false);
 
     //to differentiate between creating a new playlist and updating an existing one
     const playlist_id = playlist?.playlist_id ? playlist.playlist_id : false;
@@ -40,6 +35,7 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
                   name: "Playlist Name",
                   frequency: "weekly",
                   amount: 25,
+                  hue: Math.floor(Math.random() * 360),
               },
         seeds: playlist?.seeds ? playlist.seeds : [],
         //if the playlist has rules, complete them as the db only stores the name and value
@@ -52,9 +48,7 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
     const handlePrefChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target;
         setPreferences((prevState) => ({
-            //spread the previous state
             ...prevState,
-            //update the changed value
             [name]: value,
         }));
     };
@@ -126,21 +120,22 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
 
     //Form Validation ______________________________________________________________________________________________
     const validateForm = (preferences: Preferences, seeds: Seed[]) => {
-        let errors: any = {};
+        let errors: string[] = [];
         //check if the form is valid
         //check if the preferences are valid
-        if (preferences.name.length < 1) errors.name = "Your Playlist should have a name.\n";
+        if (preferences.name.length < 1) errors.push("Your Playlist should have a name.\n");
         if ((typeof preferences.amount !== "number" && preferences.amount < 5) || preferences.amount > 50)
-            errors.amount = "The amount of tracks should be between 5 and 50.\n";
+            errors.push("The amount of tracks should be between 5 and 50.\n");
         if (
             preferences.frequency !== "daily" &&
             preferences.frequency !== "weekly" &&
             preferences.frequency !== "monthly"
         )
-            errors.frequency =
-                "There's something wrong with the frequency. That's strange 😉\n Try changing it to something supported";
-        if (seeds.length < 1) errors.seeds = "We'll need atleast one Seed for creating the Playlist.\n";
-        if (seeds.length > 5) errors.seeds = "Sorry we can only handle 5 seeds at a time.\n";
+            errors.push(
+                "There's something wrong with the frequency. That's strange 😉\n Try changing it to something supported"
+            );
+        if (seeds.length < 1) errors.push("We'll need atleast one Seed for creating the Playlist.\n");
+        if (seeds.length > 5) errors.push("We can only handle 5 seeds at a time.\n");
         return errors;
     };
 
@@ -148,7 +143,7 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
         e.preventDefault();
 
         const errors = validateForm(preferences, seeds);
-        if (Object.keys(errors).length > 0) {
+        if (errors.length > 0) {
             setSubmitErrors(errors);
             setShowSubmittErrors(true);
             return;
@@ -174,13 +169,14 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
                     const { message } = data;
                     throw new Error(message || "Network response was not ok");
                 }
+                setSubmitErrors([]);
                 setSubmitting(false);
                 router.replace("/pages/edit-playlist/" + data, { scroll: false });
                 router.refresh();
             })
             .catch((err) => {
                 setSubmitting(false);
-                setSubmitErrors({ name: err.message });
+                setSubmitErrors([...submitErrors, err.message]);
                 setShowSubmittErrors(true);
                 console.error(err);
             });
@@ -194,48 +190,42 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
         seeds: seeds,
         rules: rules,
     };
+
     const changed = JSON.stringify(initialState) !== JSON.stringify(currentState);
 
     return (
-        <div className="flex justify-center text-white">
-            <form className="w-full flex flex-col gap-10" onSubmit={handleSubmit}>
+        <div className="flex justify-center text-white mb-8">
+            <form className="w-full flex flex-col gap-8" onSubmit={handleSubmit}>
                 {showSubmitErrors && (
-                    <InfoModal
-                        title="Failed to create the Playlist"
-                        body={Object.values(submitErrors).join("\n")}
+                    <UniModal
+                        title="We ran into some issues"
                         onClose={() => setShowSubmittErrors(false)}
-                    ></InfoModal>
+                        closeTitle="Got it"
+                    >
+                        {submitErrors.map((error, i) => (
+                            <p key={i}>{error}</p>
+                        ))}
+                    </UniModal>
                 )}
-                <div className="flex justify-between p-4">
-                    <h2>{preferences.name}</h2>
-                    <MdModeEdit size="1.5em" onClick={() => setShowNameModal(true)} />
-                    {showNameModal && (
-                        <NameModal
-                            name={preferences.name}
-                            onClose={() => setShowNameModal(false)}
-                            onChange={handlePrefChange}
-                        />
-                    )}
-                </div>
+                <PlaylistHeader
+                    name={preferences.name}
+                    playlist_id={playlist_id}
+                    onChange={handlePrefChange}
+                    coverUrl={playlist?.coverUrl ? playlist.coverUrl : false}
+                    hue={preferences.hue ? preferences.hue : false}
+                />
                 <PreferencesForm preferences={preferences} onChange={handlePrefChange} />
                 <hr className="border-ui-700"></hr>
                 <Seeds seeds={seeds} onRemove={removeSeed} onAdd={addSeed} />
                 <hr className="border-ui-700"></hr>
                 <Rules rules={rules} onAdd={addRule} onRemove={removeRule} onChange={handleRuleChange}></Rules>
-                <div className={`flex ${playlist_id ? "justify-between" : "justify-end"} mx-4 gap-4 mb-14`}>
-                    {playlist_id && (
-                        <button className="p2min-w-32 bg-transparent text-b6b6b6 rounded-xl text-lg" type="submit">
-                            Shuffle
-                        </button>
-                    )}
-                    <button
-                        type="submit"
-                        className={`p-2 px-8 min-w-32 border border-themetext-nerfed text-themetext text-lg rounded-md text-center`}
-                        disabled={submitting || !changed}
-                    >
-                        {!changed ? "Nothing to Save" : playlist_id ? "Save Updates" : "Create Playlist"}
-                    </button>
-                </div>
+                <button
+                    type="submit"
+                    className={`m-4 self-end p-2 px-8 min-w-32 border border-themetext-nerfed text-themetext text-lg rounded-md text-center`}
+                    disabled={submitting}
+                >
+                    {!changed ? "Regenerate" : playlist_id ? "Save Updates" : "Create Playlist"}
+                </button>
             </form>
         </div>
     );
