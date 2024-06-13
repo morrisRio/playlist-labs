@@ -2,12 +2,22 @@
 import { useState, useLayoutEffect, useRef } from "react";
 import Marquee from "react-fast-marquee";
 
+import resolveConfig from "tailwindcss/resolveConfig";
+import tailwindConfig from "@/../tailwind.config";
+
 interface SmartMarqueeProps {
     children: React.ReactNode;
-    title: string;
+    divider?: boolean;
 }
 
-function SmartMarquee({ children, title }: SmartMarqueeProps) {
+function SmartMarquee({ children, divider = false }: SmartMarqueeProps) {
+    const fullConfig = resolveConfig(tailwindConfig);
+    //@ts-expect-error
+    const bgColor = fullConfig.theme.colors.ui[950] || "transparent";
+
+    const bgGradient = `linear-gradient(to right, ${bgColor} 0%, transparent 10%, transparent 90%, ${bgColor} 100%)`;
+    // const bgGradient = `linear-gradient(to right, red 0%, blue 100%)`;
+
     const [childrenTooLong, setChildrenTooLong] = useState(false);
 
     const childRef = useRef<HTMLDivElement>(null);
@@ -18,13 +28,7 @@ function SmartMarquee({ children, title }: SmartMarqueeProps) {
         const containerDiv = containerRef.current;
 
         const checkOverflow = () => {
-            console.log("checkOverflow called");
-
             if (childDiv && containerDiv) {
-                console.log(title, "containerDiv", containerDiv.clientWidth);
-                console.log(title, "childDiv.clientWidth", childDiv.clientWidth);
-                console.log(title, "childDiv.scrollWidth", childDiv.scrollWidth);
-                console.log("tooLong", title, childDiv.scrollWidth > containerDiv.clientWidth);
                 setChildrenTooLong(childDiv.scrollWidth > containerDiv.clientWidth);
             }
         };
@@ -45,17 +49,18 @@ function SmartMarquee({ children, title }: SmartMarqueeProps) {
             }
         };
     }, [children]);
-    console.log(childrenTooLong, "childrenTooLong");
     return (
-        <div ref={containerRef}>
-            {childrenTooLong ? (
-                <Marquee play={true} speed={30} delay={1}>
-                    <div>{children}</div>
-                </Marquee>
-            ) : (
-                <div>{children}</div>
+        <div ref={containerRef} className="relative">
+            {childrenTooLong && (
+                <div className="size-full visible">
+                    <div className="absolute size-full z-10" style={{ backgroundImage: bgGradient }}></div>
+                    <Marquee play={true} speed={30} delay={1}>
+                        {children}
+                        {divider && <span>{"\xa0-\xa0"}</span>}
+                    </Marquee>
+                </div>
             )}
-            <div ref={childRef} className="invisible absolute">
+            <div ref={childRef} className={`${childrenTooLong ? "invisible absolute" : "visible"} size-full`}>
                 {children}
             </div>
         </div>

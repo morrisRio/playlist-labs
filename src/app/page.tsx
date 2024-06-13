@@ -12,6 +12,8 @@ import tailwindConfig from "@/../tailwind.config";
 import Image from "next/image";
 import Logo from "../../public/logo.svg";
 
+import { saveDummyData } from "@/lib/devUtils";
+
 export default async function Home() {
     let playlists: PlaylistData[] | false = false;
 
@@ -37,12 +39,14 @@ export default async function Home() {
     playlists = res;
 
     //TODO: ERROR HANDLING
+    //TODO: remove dev
+    if (playlists && playlists.length > 0) saveDummyData(playlists, "playlistDummyData");
 
     return (
         <div className="h-full w-full p-4 flex flex-col gap-5">
             <div className="flex justify-between gap-2 mt-8">
-                <Image src={Logo} alt="playlistLabs Logo" width={16}></Image>
-                <h3 className="font-normal text-themetext-nerfed flex grow">playlistLabs</h3>
+                <Image src={Logo} alt="playlistLabs Logo" width={16} height={16}></Image>
+                <h3 className="font-normal text-themetext-nerfed flex-grow">playlistLabs</h3>
                 <Profile></Profile>
             </div>
             <Link href="/pages/create-playlist">

@@ -38,51 +38,11 @@
         @apply text-themetext;
     }
 
-    /* .bg-gradient {
-        background: radial-gradient(
-            circle at 50% 30%,
-            hsl(0, 0%, 8%) 0%,
-            hsl(0, 0%, 7.9%) 9.6%,
-            hsl(0, 0%, 7.61%) 18.2%,
-            hsl(0, 0%, 7.17%) 26%,
-            hsl(0, 0%, 6.6%) 32.9%,
-            hsl(0, 0%, 5.93%) 39.3%,
-            hsl(0, 0%, 5.18%) 45.1%,
-            hsl(0, 0%, 4.4%) 50.7%,
-            hsl(0, 0%, 3.6%) 56%,
-            hsl(0, 0%, 2.82%) 61.3%,
-            hsl(0, 0%, 2.07%) 66.7%,
-            hsl(0, 0%, 1.4%) 72.4%,
-            hsl(0, 0%, 0.83%) 78.4%,
-            hsl(0, 0%, 0.39%) 84.9%,
-            hsl(0, 0%, 0.1%) 92%,
-            hsl(0, 0%, 0%) 100%
-        );
-        background-attachment: fixed;
-    } */
-
     .bg-gradient {
         background: var(--gradient);
     }
 }
 
-/* 
-                ui: {
-                    950: "#121212",
-                    900: "#141414",
-                    800: "#292929",
-                    700: "#3a3a3a",
-                    600: "#737373",
-                    500: "#999999",
-                    400: "#b3b3b3",
-                },
-                themetext: {
-                    DEFAULT: "#ffffff",
-                    nerfed: "#f2f2f2",
-                },
-                invertme: {
-                    DEFAULT: "#c9c9c9",
-                }, */
 :root {
     --gradient: radial-gradient(circle at 50vw 30vh, #222121, ease-in-out, #0e0e0e);
     --color-ui-950: #121212;
