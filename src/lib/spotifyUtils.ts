@@ -295,3 +295,11 @@ export const createPlaylistDescription = (preferences: Preferences, seeds: Seed[
     debugLog("Finished Description: ", description);
     return description;
 };
+
+export const getColorGradient = (hue: number) => {
+    return `radial-gradient(circle at 30% 30%, hsl(${
+        (hue - 100) % 360
+    } 100% 50% / 30%), hsl(${hue} 100% 50% / 10%)), linear-gradient(-20deg, hsl(${hue} 80% 50%), hsl(${
+        (hue - 100) % 360
+    } 80% 50%)) `;
+};

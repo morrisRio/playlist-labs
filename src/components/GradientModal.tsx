@@ -4,7 +4,7 @@ import UniModal from "@/components/UniModal";
 import { color } from "html2canvas/dist/types/css/types/color";
 
 interface GradientModalProps {
-    onSave: (HTML) => void;
+    onSave: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onClose: () => void;
 }
 
@@ -18,7 +18,7 @@ const GradientModal = ({ onSave, onClose }: GradientModalProps) => {
             value: color1,
             name: "hue",
         };
-        onSave({ target: pseudoElement }) as unknown as React.ChangeEvent<HTMLInputElement>;
+        onSave({ target: pseudoElement } as unknown as React.ChangeEvent<HTMLInputElement>);
         onClose();
     };
 
