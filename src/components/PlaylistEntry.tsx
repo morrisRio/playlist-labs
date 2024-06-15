@@ -6,6 +6,7 @@ import SmartMarquee from "@/components/SmartMarquee";
 import resolveConfig from "tailwindcss/resolveConfig";
 import tailwindConfig from "@/../tailwind.config";
 import { MdChevronRight } from "react-icons/md";
+import Image from "next/image";
 
 interface PlaylistProps {
     playlist: PlaylistData;
@@ -40,7 +41,7 @@ async function PlaylistEntry({ playlist }: PlaylistProps) {
     return (
         <Link href={`/pages/edit-playlist/${playlist_id}`}>
             <div className="flex gap-4 items-center w-full bg-ui-900 border border-ui-700 rounded-lg">
-                {url && <img src={url} alt="playlist cover image" className="size-24 bg-ui-800 rounded-l-lg" />}
+                {url && <Image src={url} alt="playlist cover image" className="size-24 bg-ui-800 rounded-l-lg" />}
                 {!url && <div className="size-24 bg-ui-800 rounded-l-lg"></div>}
                 <div className="flex flex-col overflow-hidden flex-grow">
                     <SmartMarquee divider={true}>

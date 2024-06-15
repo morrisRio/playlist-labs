@@ -10,6 +10,8 @@ import tailwindConfig from "@/../tailwind.config";
 
 import { useState, useRef, useLayoutEffect } from "react";
 
+import Image from "next/image";
+
 //using marquee. Docs:
 //https://www.react-fast-marquee.com/documentation
 
@@ -93,7 +95,7 @@ export function SeedEntry({ seedObj, onRemove, onAdd, card = false, added = fals
                     <RiMusic2Fill size={card ? "2rem" : "1.2rem"} color={`hsl(${thumbnail} 90 70)`} />
                 </div>
             ) : thumbnail && typeof thumbnail === "string" ? (
-                <img className={`${imgClass} flex-none object-cover`} src={thumbnail} alt={title} />
+                <Image className={`${imgClass} flex-none object-cover`} src={thumbnail} alt={title} />
             ) : (
                 <div className={`${imgClass} flex-none bg-zinc-800`}></div>
             )}
