@@ -68,7 +68,7 @@ const Profile = () => {
                         </div>
                     )}
                     {session?.user?.image ? (
-                        <img src={session.user.image as string} alt="user image" className="size-6 rounded-full z-30" />
+                        <img src={session.user.image as string} alt="user image" className="size-6 rounded-full z-30" /> // eslint-disable-line
                     ) : (
                         <div aria-label="profile" className="size-6 rounded-full bg-lime-400 z-30"></div>
                     )}
