@@ -85,7 +85,7 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
             setSearchResults(data);
         };
         fetchSearch();
-    }, [debouncedSearch]);
+    }, [debouncedSearch, search]);
 
     const inputRef = useRef(null);
     const changeFilter = (e: React.MouseEvent<HTMLButtonElement> | React.ChangeEvent<HTMLSelectElement>) => {

@@ -54,22 +54,21 @@ export function SeedEntry({ seedObj, onRemove, onAdd, card = false, added = fals
     const descRef = useRef<HTMLParagraphElement>(null);
 
     useLayoutEffect(() => {
-        const checkOverflow = () => {
-            const titleElem = titleRef.current;
-            const descElem = descRef.current;
+        const titleElem = titleRef.current;
+        const descElem = descRef.current;
 
+        const checkOverflow = () => {
             if (titleElem) {
                 setTitleTooLong(titleElem.scrollWidth > titleElem.clientWidth);
             }
-
             if (descElem) {
                 setDescTooLong(descElem.scrollWidth > descElem.clientWidth);
             }
         };
 
         const resizeObserver = new ResizeObserver(checkOverflow);
-        if (titleRef.current) {
-            resizeObserver.observe(titleRef.current);
+        if (titleElem) {
+            resizeObserver.observe(titleElem);
         }
 
         // Initial check in case the element is already overflowing
@@ -77,8 +76,8 @@ export function SeedEntry({ seedObj, onRemove, onAdd, card = false, added = fals
 
         // Cleanup observer on component unmount
         return () => {
-            if (titleRef.current) {
-                resizeObserver.unobserve(titleRef.current);
+            if (titleElem) {
+                resizeObserver.unobserve(titleElem);
             }
         };
     }, [title, description]);
@@ -95,7 +94,9 @@ export function SeedEntry({ seedObj, onRemove, onAdd, card = false, added = fals
                     <RiMusic2Fill size={card ? "2rem" : "1.2rem"} color={`hsl(${thumbnail} 90 70)`} />
                 </div>
             ) : thumbnail && typeof thumbnail === "string" ? (
-                <Image className={`${imgClass} flex-none object-cover`} src={thumbnail} alt={title} />
+                <div className={`${imgClass} flex-none object-cover relative`}>
+                    <Image src={thumbnail} alt={title} fill={true} />
+                </div>
             ) : (
                 <div className={`${imgClass} flex-none bg-zinc-800`}></div>
             )}

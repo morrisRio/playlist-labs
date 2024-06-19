@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { AxisRule } from "@/types/spotify";
 
 interface TwoAxisSliderProps {
@@ -11,15 +11,6 @@ export const TwoAxisSlider = ({ rule, onChange }: TwoAxisSliderProps): any => {
     const [dragging, setDragging] = useState(false);
 
     const height = 20;
-
-    useEffect(() => {
-        // Clean up the event listeners when component unmounts
-        return () => {
-            document.removeEventListener("pointermove", handlePointerMove);
-            document.removeEventListener("pointerleave", handlePointerLeave);
-            document.removeEventListener("pointerup", handlePointerUp);
-        };
-    }, []);
 
     // Function to calculate the new values based on mouse position
     const calculateValues = (clientX: number, clientY: number) => {
@@ -55,22 +46,22 @@ export const TwoAxisSlider = ({ rule, onChange }: TwoAxisSliderProps): any => {
     };
 
     // Event handlers for mouse events _______________________________________________________
-    const handlePointerMove = (moveEvent: PointerEvent) => {
+    const handlePointerMove = useCallback((moveEvent: PointerEvent) => {
         calculateValues(moveEvent.clientX, moveEvent.clientY);
-    };
+    }, []);
 
-    const handlePointerUp = () => {
+    const handlePointerUp = useCallback(() => {
         setDragging(false);
         document.removeEventListener("pointermove", handlePointerMove);
         document.removeEventListener("pointerleave", handlePointerLeave);
         document.removeEventListener("pointerup", handlePointerUp);
-    };
+    }, []);
 
-    const handlePointerLeave = () => {
+    const handlePointerLeave = useCallback(() => {
         if (dragging) {
             handlePointerUp();
         }
-    };
+    }, [dragging]);
 
     const handlePointerDown = (e: React.PointerEvent) => {
         e.preventDefault();
@@ -81,6 +72,15 @@ export const TwoAxisSlider = ({ rule, onChange }: TwoAxisSliderProps): any => {
         document.addEventListener("pointerup", handlePointerUp);
         document.addEventListener("pointerleave", handlePointerLeave);
     };
+
+    useEffect(() => {
+        // Clean up the event listeners when component unmounts
+        return () => {
+            document.removeEventListener("pointermove", handlePointerLeave);
+            document.removeEventListener("pointerleave", handlePointerMove);
+            document.removeEventListener("pointerup", handlePointerUp);
+        };
+    }, [handlePointerLeave, handlePointerMove, handlePointerUp]);
 
     return (
         <div className="relative w-full h-44 bg-ui-800 rounded-b-lg" style={{ padding: `${height / 2}px` }}>
