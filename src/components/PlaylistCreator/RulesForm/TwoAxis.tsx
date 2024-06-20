@@ -12,82 +12,90 @@ export const TwoAxisSlider = ({ rule, onChange }: TwoAxisSliderProps): any => {
 
     const height = 20;
 
-    // Function to calculate the new values based on mouse position
-    const calculateValues = (clientX: number, clientY: number) => {
-        const container = containerRef.current;
-        if (container !== null) {
-            const rect = container.getBoundingClientRect();
-            // Calculate the percentage of the mouse position relative to the container
-            const x = ((clientX - rect.left) / rect.width) * 100;
-            const y = ((clientY - rect.top) / rect.height) * 100;
-
-            // Make sure the values are within the bounds of the container
-            // 0% is the left/top edge, 100% is the right/bottom edge
-            const cappedX = Math.min(100, Math.max(0, x));
-            const cappedY = Math.min(100, Math.max(0, y));
-
-            setValues(cappedX, cappedY);
-        }
-    };
-
-    // Function to set the new values in the parent component
-    const setValues = (x: number, y: number) => {
-        //this is a bit hacky, but it works
-        //we need to create a fake event object to pass to the onChange function
-        const pseudoElement = {
-            value: [x, y],
-            name: rule.name,
-            type: "axis",
-        };
-
-        onChange({
-            target: pseudoElement,
-        } as unknown as React.ChangeEvent<HTMLInputElement>);
-    };
-
     // Event handlers for mouse events _______________________________________________________
-    const handlePointerMove = useCallback((moveEvent: PointerEvent) => {
-        calculateValues(moveEvent.clientX, moveEvent.clientY);
-    }, []);
-
-    const handlePointerUp = useCallback(() => {
-        setDragging(false);
-        document.removeEventListener("pointermove", handlePointerMove);
-        document.removeEventListener("pointerleave", handlePointerLeave);
-        document.removeEventListener("pointerup", handlePointerUp);
-    }, []);
-
-    const handlePointerLeave = useCallback(() => {
-        if (dragging) {
-            handlePointerUp();
-        }
-    }, [dragging]);
-
-    const handlePointerDown = (e: React.PointerEvent) => {
-        e.preventDefault();
-        calculateValues(e.clientX, e.clientY);
-        setDragging(true);
-
-        document.addEventListener("pointermove", handlePointerMove);
-        document.addEventListener("pointerup", handlePointerUp);
-        document.addEventListener("pointerleave", handlePointerLeave);
-    };
 
     useEffect(() => {
         // Clean up the event listeners when component unmounts
+        if (!containerRef.current) return;
+
+        console.log("effect");
+
+        // Function to calculate the new values based on mouse position and set the state in parent component
+        const setValues = (clientX: number, clientY: number) => {
+            const container = containerRef.current;
+            if (container !== null) {
+                const rect = container.getBoundingClientRect();
+                // Calculate the percentage of the mouse position relative to the container
+                const x = ((clientX - rect.left) / rect.width) * 100;
+                const y = ((clientY - rect.top) / rect.height) * 100;
+
+                // Make sure the values are within the bounds of the container
+                // 0% is the left/top edge, 100% is the right/bottom edge
+                const cappedX = Math.min(100, Math.max(0, x));
+                const cappedY = Math.min(100, Math.max(0, y));
+
+                //this is a bit hacky, but it works
+                //we need to create a fake event object to pass to the onChange function
+
+                const pseudoElement = {
+                    value: [cappedX, cappedY],
+                    name: rule.name,
+                    type: "axis",
+                };
+
+                onChange({
+                    target: pseudoElement,
+                } as unknown as React.ChangeEvent<HTMLInputElement>);
+            }
+        };
+
+        const handlePointerMove = (moveEvent: PointerEvent) => {
+            console.log("pointer move");
+            setValues(moveEvent.clientX, moveEvent.clientY);
+        };
+
+        const handlePointerLeave = () => {
+            handlePointerUp();
+        };
+
+        const handlePointerUp = () => {
+            console.log("pointer up");
+            setDragging(false);
+            document.removeEventListener("pointermove", handlePointerMove);
+            document.removeEventListener("pointerleave", handlePointerLeave);
+            document.removeEventListener("pointerup", handlePointerUp);
+        };
+
+        // When the Pointer is down on the container, start dragging and add event listeners
+
+        const handlePointerDown = (event: PointerEvent) => {
+            console.log("pointer down");
+            event.preventDefault();
+            setValues(event.clientX, event.clientY);
+            setDragging(true);
+
+            document.addEventListener("pointermove", handlePointerMove);
+            document.addEventListener("pointerup", handlePointerUp);
+            document.addEventListener("pointerleave", handlePointerLeave);
+        };
+
+        const container = containerRef.current;
+
+        container.addEventListener("pointerdown", handlePointerDown);
+
         return () => {
+            console.log("cleanup");
             document.removeEventListener("pointermove", handlePointerLeave);
             document.removeEventListener("pointerleave", handlePointerMove);
             document.removeEventListener("pointerup", handlePointerUp);
         };
-    }, [handlePointerLeave, handlePointerMove, handlePointerUp]);
+    }, [onChange, rule.name]);
 
     return (
         <div className="relative w-full h-44 bg-ui-800 rounded-b-lg" style={{ padding: `${height / 2}px` }}>
             <div
                 ref={containerRef}
                 className="relative w-full h-full bg-ui-800 rounded-b-lg"
-                onPointerDown={handlePointerDown}
                 style={{ touchAction: "none" }}
             >
                 <hr className="relative top-1/2 border-invertme/60 mix-blend-difference" />

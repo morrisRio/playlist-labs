@@ -23,7 +23,6 @@ function PlaylistHeader({ playlist_id, onChange, name, hue, coverUrl }: Playlist
 
     if (!hue && coverUrl) {
         imgSource = `${blackGradient}, url(${coverUrl})`;
-        console.log("Image source", imgSource);
     } else if (hue) {
         blackGradient = "linear-gradient(to bottom, rgba(0, 0, 0, 0.0) 0%, rgba(0, 0, 0, 0.4) 100%)";
         imgSource = `${blackGradient}, ${getColorGradient(hue)}`;

@@ -33,10 +33,10 @@ const Profile = () => {
                 >
                     <p>
                         This action will delete your account and all associated data irreversibly. This includes all
-                        playlists and preferences. In fact that's all we store for you
+                        playlists and preferences. In fact that&apos;s all we store for you
                         <br />
                         <br />
-                        For security reasons we won't delete generated playlists on Spotify.
+                        For security reasons we won&apos;t delete generated playlists on Spotify.
                     </p>
                 </UniModal>
             )}

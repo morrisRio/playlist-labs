@@ -1,17 +1,14 @@
 "use client";
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useCallback } from "react";
 import PreferencesForm from "./PreferencesForm";
 import Rules from "./RulesForm/Rules";
 import Seeds from "./SeedsForm/Seeds";
-import NameModal from "./NameModal";
 import PlaylistHeader from "./PlaylistHeader";
 import { Seed, Rule, Preferences, RuleInput } from "@/types/spotify";
-import { MdModeEdit, MdMoreVert } from "react-icons/md";
 import UniModal from "../UniModal";
 import { PlaylistData } from "@/types/spotify";
 import { completeRules } from "@/lib/spotifyUtils";
 import { useRouter } from "next/navigation";
-import GradientModal from "../GradientModal";
 
 interface PlaylistFormProps {
     playlist?: PlaylistData;
@@ -78,30 +75,33 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
     //Rules ______________________________________________________________________________________________
     const [rules, setRules] = useState<Rule[]>(initialState.rules);
 
-    const handleRuleChange = (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {
-        const { name, value, type } = e.target as RuleInput;
-        setRules((prevState) => {
-            const newRules = [...prevState];
-            const i = newRules.findIndex((r) => r.name === name);
-            //parse the value to the correct type
-            //if the type is range, parse it to a float
-            //if the type is "axis" (manually set), keep it (value is an array)
-            //now it can only be boolean
-            //if the type is boolean (value is true), return true, else return false
-            const valueParsed =
-                type === "range" && typeof value === "string"
-                    ? parseFloat(value)
-                    : type === "axis"
-                    ? value
-                    : value === "true"
-                    ? true
-                    : false;
+    const handleRuleChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {
+            const { name, value, type } = e.target as RuleInput;
+            setRules((prevState) => {
+                const newRules = [...prevState];
+                const i = newRules.findIndex((r) => r.name === name);
+                //parse the value to the correct type
+                //if the type is range, parse it to a float
+                //if the type is "axis" (manually set), keep it (value is an array)
+                //now it can only be boolean
+                //if the type is boolean (value is true), return true, else return false
+                const valueParsed =
+                    type === "range" && typeof value === "string"
+                        ? parseFloat(value)
+                        : type === "axis"
+                        ? value
+                        : value === "true"
+                        ? true
+                        : false;
 
-            newRules[i].value = valueParsed;
-            return newRules;
-        });
-        // }
-    };
+                newRules[i].value = valueParsed;
+                return newRules;
+            });
+            // }
+        },
+        []
+    );
 
     const addRule = (rule: any) => {
         setRules((prevState) => {
