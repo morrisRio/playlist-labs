@@ -234,8 +234,8 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
  */
 
 export async function GET(req: NextRequest, res: NextResponse): Promise<NextResponse> {
-    setDebugMode(false);
-
+    setDebugMode(true);
+    debugLog("API: PLAYLIST GET - fetching playlists for user");
     const session = await auth();
     debugLog("got session", session);
 

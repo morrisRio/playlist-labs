@@ -24,7 +24,7 @@ if (!cached) {
 }
 
 export const connectMongoDB = async () => {
-    setDebugMode(false);
+    setDebugMode(true);
     if (cached.conn) {
         debugLog("DB: Using cached connection");
         return cached.conn;
