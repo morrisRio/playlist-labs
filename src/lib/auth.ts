@@ -3,7 +3,6 @@ import SpotifyProvider from "next-auth/providers/spotify";
 import { dbRegisterUser } from "@/lib/db/dbActions";
 import { JWT } from "next-auth/jwt";
 import { debugLog, setDebugMode } from "./logger";
-import { debug } from "console";
 
 const scopes = [
     "playlist-read-private",
