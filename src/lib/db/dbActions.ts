@@ -63,7 +63,7 @@ interface PlaylistResponseDB {
 }
 
 export async function dbGetUsersPlaylists(userId: string): Promise<PlaylistResponseDB> {
-    setDebugMode(true);
+    setDebugMode(false);
     await connectMongoDB();
     try {
         debugLog("searching for user", userId);

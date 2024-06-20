@@ -20,7 +20,6 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
     const [showSubmitErrors, setShowSubmittErrors] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [submitErrors, setSubmitErrors] = useState<string[]>([]);
-    const [showGradient, setShowGradient] = useState(false);
 
     //to differentiate between creating a new playlist and updating an existing one
     const playlist_id = playlist?.playlist_id ? playlist.playlist_id : false;

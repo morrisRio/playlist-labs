@@ -14,9 +14,8 @@ export async function middleware(req: NextRequest) {
         debugLog("TOKEN FOUND");
         return NextResponse.next();
     }
-    //TODO: BUG this gets called on every page load
+    //TODO: BUG this gets called on every page load even if the user is signed in and no redirect is performed
     debugLog("NO TOKEN, REDIRECTING TO SIGN IN");
-    debugLog("APP URL:", getAppUrl());
     //TODO: PRODUCTION: SET PRODUCTION URL
     return NextResponse.redirect(getAppUrl() + "/api/auth/signin");
 }

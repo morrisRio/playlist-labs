@@ -2,7 +2,6 @@ import PlaylistCreator from "@/components/PlaylistCreator/PlaylistCreator";
 import Profile from "@/components/Profile";
 import Link from "next/link";
 import { MdChevronLeft } from "react-icons/md";
-// import Center from "@/components/Dashboard";
 
 export default async function createPlaylist() {
     return (

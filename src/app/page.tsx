@@ -25,7 +25,6 @@ export default async function Home() {
         tagged data cache
         //TODO: wait for unstable_cache to be stable to use for revalidation on demand (submit trigger)
     */
-    console.log("GETTING PLAYLISTS", getAppUrl() + "/api/spotify/playlist");
     const res = await fetch(getAppUrl() + "/api/spotify/playlist", {
         method: "GET",
         headers: new Headers(headers()),

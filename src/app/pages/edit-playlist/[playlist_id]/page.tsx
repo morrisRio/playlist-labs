@@ -5,6 +5,7 @@ import { dbGetOnePlaylist } from "@/lib/db/dbActions";
 import { MdChevronLeft } from "react-icons/md";
 import Link from "next/link";
 import { headers } from "next/headers";
+import { getAppUrl } from "@/lib/utils";
 
 async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
     const { playlist_id } = params;
@@ -14,14 +15,11 @@ async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
     let playlist: PlaylistData | null = null;
 
     const getCoverUrl = async (playlist_id: string): Promise<string | undefined> => {
-        const coverUrl = await fetch(
-            process.env.NEXTAUTH_URL + `/api/spotify/playlist/cover-image?playlist_id=${playlist_id}`,
-            {
-                method: "GET",
-                headers: new Headers(headers()),
-                next: { tags: ["playlist"] },
-            }
-        )
+        const coverUrl = await fetch(getAppUrl() + `/api/spotify/playlist/cover-image?playlist_id=${playlist_id}`, {
+            method: "GET",
+            headers: new Headers(headers()),
+            next: { tags: ["playlist"] },
+        })
             .then(async (res) => {
                 const url = await res.json();
                 if (!res.ok) {

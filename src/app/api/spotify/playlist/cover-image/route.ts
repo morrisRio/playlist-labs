@@ -5,7 +5,7 @@ import { getToken } from "next-auth/jwt";
 import { debugLog, setDebugMode } from "@/lib/utils";
 
 export async function GET(req: NextRequest, res: NextResponse): Promise<NextResponse> {
-    setDebugMode(true);
+    setDebugMode(false);
     const token = await getToken({ req });
 
     if (!token) {
