@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { debugLog, setDebugMode } from "./lib/logger";
+import { debugLog, setDebugMode } from "./lib/utils";
 import { sign } from "crypto";
 
 // This function can be marked `async` if using `await` inside

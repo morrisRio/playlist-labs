@@ -12,7 +12,7 @@ import tailwindConfig from "@/../tailwind.config";
 import Image from "next/image";
 import Logo from "../../public/logo.svg";
 
-import { saveDummyData } from "@/lib/devUtils";
+import { getAppUrl } from "@/lib/utils";
 
 export default async function Home() {
     let playlists: PlaylistData[] | false = false;
@@ -26,7 +26,7 @@ export default async function Home() {
         //TODO: wait for unstable_cache to be stable to use for revalidation on demand (submit trigger)
     */
 
-    const res = await fetch(process.env.NEXTAUTH_URL + "/api/spotify/playlist", {
+    const res = await fetch(getAppUrl() + "/api/spotify/playlist", {
         method: "GET",
         headers: new Headers(headers()),
         next: { tags: ["playlist"] },

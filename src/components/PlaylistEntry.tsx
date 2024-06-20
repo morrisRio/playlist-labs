@@ -7,6 +7,7 @@ import resolveConfig from "tailwindcss/resolveConfig";
 import tailwindConfig from "@/../tailwind.config";
 import { MdChevronRight } from "react-icons/md";
 import Image from "next/image";
+import { getAppUrl } from "@/lib/utils";
 
 interface PlaylistProps {
     playlist: PlaylistData;
@@ -20,7 +21,7 @@ async function PlaylistEntry({ playlist }: PlaylistProps) {
     //@ts-expect-error
     const interactColor = fullConfig.theme.colors.ui[600] || "#fff";
 
-    const url = await fetch(process.env.NEXTAUTH_URL + `/api/spotify/playlist/cover-image?playlist_id=${playlist_id}`, {
+    const url = await fetch(getAppUrl() + `/api/spotify/playlist/cover-image?playlist_id=${playlist_id}`, {
         method: "GET",
         headers: new Headers(headers()),
         next: { tags: ["playlist"] },
