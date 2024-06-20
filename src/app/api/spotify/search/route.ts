@@ -7,7 +7,7 @@ import { allGenresSeeds } from "@/lib/spotifyConstants";
 import { Seed } from "@/types/spotify";
 import { Track, Artist } from "@/types/spotify";
 import { distance } from "fastest-levenshtein";
-import { debugLog, setDebugMode } from "@/lib/logger";
+import { debugLog, setDebugMode } from "@/lib/utils";
 
 interface SearchResults {
     artists: { items: Artist[] };

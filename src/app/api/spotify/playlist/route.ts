@@ -5,9 +5,8 @@ import { getRecommendations, createPlaylistDescription } from "@/lib/spotifyUtil
 import { getToken } from "next-auth/jwt";
 import { PlaylistData } from "@/types/spotify";
 import { dbCreatePlaylist, dbGetUsersPlaylists, dbUpdatePlaylist } from "@/lib/db/dbActions";
-import { debugLog, setDebugMode } from "@/lib/logger";
+import { debugLog, setDebugMode } from "@/lib/utils";
 import { revalidateTag } from "next/cache";
-import { debug } from "console";
 
 export async function POST(req: NextRequest, res: NextResponse): Promise<NextResponse> {
     setDebugMode(false);

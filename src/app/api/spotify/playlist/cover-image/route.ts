@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { spotifyGet } from "@/lib/serverUtils";
 import { getToken } from "next-auth/jwt";
-import { debugLog, setDebugMode } from "@/lib/logger";
+import { debugLog, setDebugMode } from "@/lib/utils";
 
 export async function GET(req: NextRequest, res: NextResponse): Promise<NextResponse> {
     setDebugMode(false);

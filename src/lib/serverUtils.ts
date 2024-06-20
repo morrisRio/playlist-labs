@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import type { GetServerSidePropsContext, NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
-import { debugLog, setDebugMode } from "@/lib/logger";
+import { debugLog, setDebugMode } from "@/lib/utils";
 import { fetchFromSpotify, ValidationFunction } from "@/lib/spotifyApiUtils";
 
 /* helper function for getServerSession() to avoid passing authOptions around */

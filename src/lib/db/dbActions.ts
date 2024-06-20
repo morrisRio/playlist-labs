@@ -5,7 +5,7 @@ import { PlaylistData, MongoPlaylistData } from "@/types/spotify";
 import User from "@/models/userModel";
 import UserModel from "@/models/userModel";
 import { Document } from "mongoose";
-import { debugLog, setDebugMode } from "@/lib/logger";
+import { debugLog, setDebugMode } from "@/lib/utils";
 
 interface MongoUserData extends Document {
     name: string;

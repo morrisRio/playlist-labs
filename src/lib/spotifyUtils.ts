@@ -3,7 +3,7 @@ import { Seed, Rule, Preferences, Track, Artist } from "@/types/spotify";
 import { allRules } from "@/lib/spotifyConstants";
 import { spotifyGet } from "@/lib/serverUtils";
 import { ErrorRes } from "@/types/spotify";
-import { debugLog, setDebugMode } from "@/lib/logger";
+import { debugLog, setDebugMode } from "@/lib/utils";
 
 /**
  * Generates a description for a given item (Track or Artist).

@@ -1,6 +1,6 @@
 import { ServerApiVersion } from "mongodb";
 import mongoose from "mongoose";
-import { debugLog, setDebugMode } from "@/lib/logger";
+import { debugLog, setDebugMode } from "@/lib/utils";
 
 declare global {
     var mongoose: any;
