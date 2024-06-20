@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { debugLog, setDebugMode } from "./lib/utils";
-import { sign } from "crypto";
+import { getAppUrl } from "@/lib/utils";
 
 // This function can be marked `async` if using `await` inside
 export async function middleware(req: NextRequest) {
-    setDebugMode(false);
+    setDebugMode(true);
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     const { pathname } = req.nextUrl;
 
@@ -16,23 +16,9 @@ export async function middleware(req: NextRequest) {
     }
     //TODO: BUG this gets called on every page load
     debugLog("NO TOKEN, REDIRECTING TO SIGN IN");
-
+    debugLog("APP URL:", getAppUrl());
     //TODO: PRODUCTION: SET PRODUCTION URL
-    let signInURL = "";
-    if (process.env.NEXTAUTH_URL) {
-        signInURL = `${process.env.NEXTAUTH_URL}/api/auth/signin`;
-    } else if (process.env.VERCEL_URL) {
-        signInURL = `https://${process.env.VERCEL_URL}/api/auth/signin`;
-        console.log("VERCEL_URL", process.env.VERCEL_URL);
-        console.log("VERCEL_ENV", process.env.VERCEL_ENV);
-        if (process.env.VERCEL_ENV === "preview")
-            signInURL = `https://playlist-labs-git-dev-maurices-projects-1e3466ea.vercel.app/api/auth/signin`;
-    } else {
-        signInURL = "missing-url/api/auth/signin";
-        throw new Error("No URL found for sign in");
-    }
-
-    return NextResponse.redirect(signInURL);
+    return NextResponse.redirect(getAppUrl() + "/api/auth/signin");
 }
 
 // See "Matching Paths" below to learn more

@@ -21,6 +21,10 @@ async function PlaylistEntry({ playlist }: PlaylistProps) {
     //@ts-expect-error
     const interactColor = fullConfig.theme.colors.ui[600] || "#fff";
 
+    console.log(
+        "GETTING PLAYLIST COVER IMAGE",
+        getAppUrl() + `/api/spotify/playlist/cover-image?playlist_id=${playlist_id}`
+    );
     const url = await fetch(getAppUrl() + `/api/spotify/playlist/cover-image?playlist_id=${playlist_id}`, {
         method: "GET",
         headers: new Headers(headers()),
