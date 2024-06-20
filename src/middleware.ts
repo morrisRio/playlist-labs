@@ -17,11 +17,16 @@ export async function middleware(req: NextRequest) {
     //TODO: BUG this gets called on every page load
     debugLog("NO TOKEN, REDIRECTING TO SIGN IN");
 
+    //TODO: PRODUCTION: SET PRODUCTION URL
     let signInURL = "";
     if (process.env.NEXTAUTH_URL) {
         signInURL = `${process.env.NEXTAUTH_URL}/api/auth/signin`;
     } else if (process.env.VERCEL_URL) {
         signInURL = `https://${process.env.VERCEL_URL}/api/auth/signin`;
+        console.log("VERCEL_URL", process.env.VERCEL_URL);
+        console.log("VERCEL_ENV", process.env.VERCEL_ENV);
+        if (process.env.VERCEL_ENV === "preview")
+            signInURL = `https://playlist-labs-git-dev-maurices-projects-1e3466ea.vercel.app/api/auth/signin`;
     } else {
         signInURL = "missing-url/api/auth/signin";
         throw new Error("No URL found for sign in");
