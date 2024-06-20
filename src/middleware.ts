@@ -21,7 +21,7 @@ export async function middleware(req: NextRequest) {
     if (process.env.NEXTAUTH_URL) {
         signInURL = `${process.env.NEXTAUTH_URL}/api/auth/signin`;
     } else if (process.env.VERCEL_URL) {
-        signInURL = `${process.env.VERCEL_URL}/api/auth/signin`;
+        signInURL = `https://${process.env.VERCEL_URL}/api/auth/signin`;
     } else {
         signInURL = "missing-url/api/auth/signin";
         throw new Error("No URL found for sign in");
