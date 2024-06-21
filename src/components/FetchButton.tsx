@@ -1,6 +1,6 @@
 "use client";
 
-function TestComponent() {
+function FetchButton() {
     const testFunction = async () => {
         console.log("Test started");
         const res = await fetch("/api/spotify/playlist/cover-image", {
@@ -33,4 +33,4 @@ function TestComponent() {
     );
 }
 
-export default TestComponent;
+export default FetchButton;
