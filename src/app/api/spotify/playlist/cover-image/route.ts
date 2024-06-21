@@ -3,6 +3,10 @@ import { NextRequest } from "next/server";
 import { spotifyGet } from "@/lib/serverUtils";
 import { getToken } from "next-auth/jwt";
 import { debugLog, setDebugMode } from "@/lib/utils";
+import { createCanvas } from "@napi-rs/canvas";
+import { writeFileSync } from "fs";
+import { NextApiResponse, NextApiRequest } from "next";
+import { set } from "mongoose";
 
 export async function GET(req: NextRequest, res: NextResponse): Promise<NextResponse> {
     setDebugMode(false);
@@ -42,4 +46,22 @@ export async function GET(req: NextRequest, res: NextResponse): Promise<NextResp
     const { url } = imageResponseData[0];
     debugLog("API - after fetch", url);
     return NextResponse.json(url, { status: 200 });
+}
+
+export async function POST(req: NextRequest, res: NextResponse): Promise<NextResponse> {
+    setDebugMode(true);
+    const body = await req.json();
+    debugLog("body", body);
+    const canvas = createCanvas(640, 640);
+    const ctx = canvas.getContext("2d");
+
+    ctx.fillStyle = "green";
+    ctx.fillRect(0, 0, 640, 640);
+    const buffer = canvas.toBuffer("image/png");
+
+    debugLog("buffer", buffer);
+
+    writeFileSync("test.png", buffer);
+
+    return NextResponse.json({ message: "success" }, { status: 200 });
 }

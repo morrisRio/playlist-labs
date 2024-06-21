@@ -13,7 +13,6 @@ export default async function createPlaylist() {
                 <h3> Create Playlist</h3>
             </div>
             <PlaylistCreator></PlaylistCreator>
-            <Profile></Profile>
         </div>
     );
 }
