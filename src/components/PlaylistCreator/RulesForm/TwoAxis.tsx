@@ -13,12 +13,8 @@ export const TwoAxisSlider = ({ rule, onChange }: TwoAxisSliderProps): any => {
     const height = 20;
 
     // Event handlers for mouse events _______________________________________________________
-
     useEffect(() => {
-        // Clean up the event listeners when component unmounts
         if (!containerRef.current) return;
-
-        console.log("effect");
 
         // Function to calculate the new values based on mouse position and set the state in parent component
         const setValues = (clientX: number, clientY: number) => {
@@ -50,7 +46,6 @@ export const TwoAxisSlider = ({ rule, onChange }: TwoAxisSliderProps): any => {
         };
 
         const handlePointerMove = (moveEvent: PointerEvent) => {
-            console.log("pointer move");
             setValues(moveEvent.clientX, moveEvent.clientY);
         };
 
@@ -59,17 +54,13 @@ export const TwoAxisSlider = ({ rule, onChange }: TwoAxisSliderProps): any => {
         };
 
         const handlePointerUp = () => {
-            console.log("pointer up");
             setDragging(false);
             document.removeEventListener("pointermove", handlePointerMove);
             document.removeEventListener("pointerleave", handlePointerLeave);
             document.removeEventListener("pointerup", handlePointerUp);
         };
 
-        // When the Pointer is down on the container, start dragging and add event listeners
-
         const handlePointerDown = (event: PointerEvent) => {
-            console.log("pointer down");
             event.preventDefault();
             setValues(event.clientX, event.clientY);
             setDragging(true);
@@ -84,7 +75,6 @@ export const TwoAxisSlider = ({ rule, onChange }: TwoAxisSliderProps): any => {
         container.addEventListener("pointerdown", handlePointerDown);
 
         return () => {
-            console.log("cleanup");
             document.removeEventListener("pointermove", handlePointerLeave);
             document.removeEventListener("pointerleave", handlePointerMove);
             document.removeEventListener("pointerup", handlePointerUp);
@@ -123,7 +113,7 @@ export const TwoAxisSlider = ({ rule, onChange }: TwoAxisSliderProps): any => {
                         transform: "translate(-50%, -50%)",
                     }}
                 />
-            </div>{" "}
+            </div>
         </div>
     );
 };
