@@ -59,6 +59,8 @@ export async function POST(req: NextRequest, res: NextResponse): Promise<NextRes
     ctx.fillRect(0, 0, 640, 640);
     const buffer = canvas.toBuffer("image/png");
 
+    debugLog("buffer", buffer);
+
     writeFileSync("test.png", buffer);
 
     return NextResponse.json({ message: "success" }, { status: 200 });

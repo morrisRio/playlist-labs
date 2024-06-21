@@ -1,7 +1,5 @@
 import { useState, useRef } from "react";
-import html2canvas from "html2canvas";
 import UniModal from "@/components/UniModal";
-import { color } from "html2canvas/dist/types/css/types/color";
 
 interface GradientModalProps {
     onSave: (e: React.ChangeEvent<HTMLInputElement>) => void;
