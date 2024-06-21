@@ -14,6 +14,8 @@ import Logo from "../../public/logo.svg";
 
 import { getAppUrl } from "@/lib/utils";
 
+import TestComponent from "@/components/TestComponent";
+
 export default async function Home() {
     let playlists: PlaylistData[] | false = false;
 
@@ -52,6 +54,7 @@ export default async function Home() {
                     <h4 className="text-b6b6b6">Create New Playlist</h4>
                 </div>
             </Link>
+            <TestComponent></TestComponent>
             {/* render all playlists found in database for user */}
             <h4>Your Playlists</h4>
             {playlists &&
