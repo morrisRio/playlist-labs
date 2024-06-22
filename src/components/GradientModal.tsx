@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import UniModal from "@/components/UniModal";
+import { getCssGradient } from "@/lib/spotifyUtils";
 
 interface GradientModalProps {
     onSave: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -7,13 +8,12 @@ interface GradientModalProps {
 }
 
 const GradientModal = ({ onSave, onClose }: GradientModalProps) => {
-    const [color1, setColor1] = useState(180);
-    const color1Ref = useRef<HTMLInputElement>(null);
+    const [hue, setHue] = useState(180);
 
     const handleSave = async () => {
-        //workarround to only chnage settings on save
+        //workarround to only change settings on save
         const pseudoElement = {
-            value: color1,
+            value: hue,
             name: "hue",
         };
         onSave({ target: pseudoElement } as unknown as React.ChangeEvent<HTMLInputElement>);
@@ -31,11 +31,7 @@ const GradientModal = ({ onSave, onClose }: GradientModalProps) => {
             <div
                 className="w-full aspect-square mb-5"
                 style={{
-                    background: `radial-gradient(circle at 30% 30%, hsl(${
-                        (color1 - 100) % 360
-                    } 100% 50% / 30%), hsl(${color1} 100% 50% / 10%)), linear-gradient(-20deg, hsl(${color1} 80% 50%), hsl(${
-                        (color1 - 100) % 360
-                    } 80% 50%)) `,
+                    background: `${getCssGradient(hue)}`,
                 }}
             />
             <div className="p-6">
@@ -44,8 +40,8 @@ const GradientModal = ({ onSave, onClose }: GradientModalProps) => {
                     type="range"
                     min="0"
                     max="360"
-                    value={color1}
-                    onChange={(e) => setColor1(parseInt(e.target.value))}
+                    value={hue}
+                    onChange={(e) => setHue(parseInt(e.target.value))}
                     style={{ background: `linear-gradient(in hsl longer hue 45deg, hsl(0 70 40) 0 0)` }}
                 />
             </div>

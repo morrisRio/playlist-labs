@@ -17,6 +17,7 @@ const scopes = [
     "user-read-recently-played",
     "user-library-read",
     "user-read-email",
+    "ugc-image-upload",
 ];
 
 const params = {
@@ -109,7 +110,6 @@ async function refreshAccessToken(token: JWT) {
                 refresh_token: token.refreshToken,
             }),
         });
-
         const refreshedToken = await response.json();
 
         if (!response.ok) throw new Error("NETWORK RESPONSE ERROR");

@@ -26,11 +26,23 @@ function UniModal({
         center: "items-center",
         bottom: "items-end",
     };
+    const triggerClose = (e: React.PointerEvent) => {
+        e.stopPropagation();
+        e.preventDefault;
+        onClose();
+    };
+
+    const triggerAction = (e: React.PointerEvent) => {
+        if (!action) return;
+        e.stopPropagation();
+        e.preventDefault;
+        action();
+    };
+
     return (
-        //TODO: fix onClose
         <div
             className={`${positionClasses[position]} fixed inset-0 w-full h-screen p-6 flex justify-center bg-ui-950/40 backdrop-brightness-50 backdrop-saturate-50`}
-            onPointerDown={onClose}
+            onPointerDown={(e) => triggerClose(e)}
         >
             <div
                 className={`w-full md:max-w-96 md:m-auto h-fit px-6 py-5 bg-ui-900 border border-ui-700 rounded-xl z-50`}
@@ -44,7 +56,7 @@ function UniModal({
                         className={`p-2 px-8 min-w-32 text-ui-600 text-base rounded-md text-center ${
                             action && !actionDanger ? "" : "bg-ui-900 border border-ui-700"
                         }`}
-                        onClick={onClose}
+                        onPointerDown={(e) => triggerClose(e)}
                     >
                         {closeTitle}
                     </button>
@@ -54,7 +66,7 @@ function UniModal({
                             className={`p-2 px-8 min-w-32 bg-ui-900 border border-ui-700 text-base rounded-md text-center ${
                                 actionDanger ? "border-red-800 text-red-800" : "text-themetext"
                             }`}
-                            onClick={action}
+                            onPointerDown={(e) => triggerAction(e)}
                         >
                             {actionTitle}
                         </button>

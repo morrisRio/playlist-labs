@@ -14,8 +14,6 @@ import Logo from "../../public/logo.svg";
 
 import { getAppUrl } from "@/lib/utils";
 
-import FetchButton from "@/components/FetchButton";
-
 export default async function Home() {
     let playlists: PlaylistData[] | false = false;
 
@@ -46,7 +44,6 @@ export default async function Home() {
                 <h3 className="font-normal text-themetext-nerfed flex-grow">playlistLabs</h3>
                 <Profile></Profile>
             </div>
-            <FetchButton></FetchButton>
             <Link href="/pages/create-playlist">
                 <div className="flex gap-4 items-center w-full mb-4 bg-ui-900 border border-ui-700 rounded-lg">
                     <div className="size-20 bg-ui-800 rounded-l-lg flex items-center justify-center">

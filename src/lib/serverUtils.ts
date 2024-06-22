@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 import { debugLog, setDebugMode } from "@/lib/utils";
 import { fetchFromSpotify, ValidationFunction } from "@/lib/spotifyApiUtils";
+import { IncomingHttpHeaders } from "http";
 
 /* helper function for getServerSession() to avoid passing authOptions around */
 export async function auth(
@@ -86,16 +87,22 @@ export const spotifyPut = async (
     url: string,
     token: string,
     body: any,
+    header?: HeadersInit,
     validationFunction?: ValidationFunction,
     debug: boolean = false
 ): Promise<any> => {
+    const requestHeader = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        ...header,
+    };
+
+    if (debug) console.log("spotifyPut requestHeader", requestHeader);
+
     const options = {
         method: "PUT",
-        headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
+        headers: requestHeader,
+        body: typeof body === "string" ? body : JSON.stringify(body),
     };
 
     return fetchFromSpotify(url, options, validationFunction, debug);

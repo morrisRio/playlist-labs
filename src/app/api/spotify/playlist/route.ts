@@ -1,12 +1,42 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { auth, spotifyPost, spotifyPut, spotifyGet } from "@/lib/serverUtils";
-import { getRecommendations, createPlaylistDescription } from "@/lib/spotifyUtils";
+import { getRecommendations, createPlaylistDescription, createCanvasGradient } from "@/lib/spotifyUtils";
 import { getToken } from "next-auth/jwt";
 import { PlaylistData } from "@/types/spotify";
 import { dbCreatePlaylist, dbGetUsersPlaylists, dbUpdatePlaylist } from "@/lib/db/dbActions";
 import { debugLog, setDebugMode } from "@/lib/utils";
 import { revalidateTag } from "next/cache";
+import { createCanvas } from "@napi-rs/canvas";
+
+const updateCoverImage = async (
+    playlistId: string,
+    hue: number = Math.floor(Math.random() * 360),
+    accessToken: string,
+    debug: boolean = false
+) => {
+    const canvas = createCanvas(640, 640);
+    createCanvasGradient(canvas, hue);
+    const buffer = canvas.toDataURL("image/jpeg");
+    const base64JpegData = buffer.replace(/^data:image\/\w+;base64,/, "");
+
+    const putData = await spotifyPut(
+        `https://api.spotify.com/v1/playlists/${playlistId}/images`,
+        accessToken,
+        base64JpegData,
+        { "Content-Type": "image/jpeg" },
+        undefined,
+        debug
+    );
+
+    if (putData.error) {
+        //not critical, just log the error
+        const { message, status } = putData.error;
+        console.error("Failed to add Cover Image to Playlist", message, status);
+    }
+
+    debugLog("API: Added Cover Image to Playlist:", putData);
+};
 
 export async function POST(req: NextRequest, res: NextResponse): Promise<NextResponse> {
     setDebugMode(false);
@@ -84,6 +114,11 @@ export async function POST(req: NextRequest, res: NextResponse): Promise<NextRes
 
     debugLog("API: Added Tracks to Playlist:", addRes);
 
+    //add the cover image to the playlist
+    const hue = preferences.hue || Math.floor(Math.random() * 360);
+    delete preferences.hue;
+    updateCoverImage(idToWriteTo, hue, accessToken);
+
     //add playlist to user document DB
     const dbSuccess = await dbCreatePlaylist(userId, {
         playlist_id: idToWriteTo,
@@ -106,9 +141,13 @@ export async function POST(req: NextRequest, res: NextResponse): Promise<NextRes
 
 //TODO: check if playlist exists in spotify (could be deleted by user) -> if there is no playlist id mathing the one in db call post
 export async function PUT(req: NextRequest): Promise<NextResponse> {
-    setDebugMode(true);
+    setDebugMode(false);
 
     const data = await req.json();
+    if (!data.playlist_id) {
+        return NextResponse.json({ message: "No Playlist ID provided" }, { status: 400 });
+    }
+
     const { playlist_id, preferences, seeds, rules }: PlaylistData = data;
 
     debugLog("API: PLAYLIST PUT - updating playlist " + preferences.name);
@@ -132,9 +171,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
         const followRes = await spotifyPut(
             `https://api.spotify.com/v1/playlists/${playlist_id}/followers`,
             accessToken,
-            { public: false },
-            undefined,
-            true
+            { public: false }
         );
         if (followRes.error) {
             const { status } = followRes.error;
@@ -153,9 +190,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     const updatePlaylistDetails = await spotifyPut(
         `https://api.spotify.com/v1/playlists/${playlist_id}`,
         accessToken,
-        preferencesBody,
-        undefined,
-        true
+        preferencesBody
     );
 
     if (updatePlaylistDetails.error) {
@@ -165,15 +200,9 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
     //flush the playlist
     debugLog(" - flushing the playlist");
-    const flushRes = await spotifyPut(
-        `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
-        accessToken,
-        {
-            uris: [],
-        },
-        undefined,
-        true
-    );
+    const flushRes = await spotifyPut(`https://api.spotify.com/v1/playlists/${playlist_id}/tracks`, accessToken, {
+        uris: [],
+    });
 
     if (flushRes.error) {
         const { message, status } = flushRes.error;
@@ -205,7 +234,10 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
         return NextResponse.json({ message: "Failed adding new Tracks.\n" + message }, { status });
     }
 
-    // debugLog("API: Added Tracks to Playlist:", addRes);
+    if (preferences.hue) {
+        updateCoverImage(playlist_id, preferences.hue, accessToken);
+        delete preferences.hue;
+    }
 
     const dbSuccess = await dbUpdatePlaylist(userId, {
         playlist_id,

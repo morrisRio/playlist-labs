@@ -4,6 +4,7 @@ import { allRules } from "@/lib/spotifyConstants";
 import { spotifyGet } from "@/lib/serverUtils";
 import { ErrorRes } from "@/types/spotify";
 import { debugLog, setDebugMode } from "@/lib/utils";
+import { Canvas } from "@napi-rs/canvas";
 
 /**
  * Generates a description for a given item (Track or Artist).
@@ -296,10 +297,36 @@ export const createPlaylistDescription = (preferences: Preferences, seeds: Seed[
     return description;
 };
 
-export const getColorGradient = (hue: number) => {
+export const getCssGradient = (hue: number) => {
     return `radial-gradient(circle at 30% 30%, hsl(${
         (hue - 100) % 360
-    } 100% 50% / 30%), hsl(${hue} 100% 50% / 10%)), linear-gradient(-20deg, hsl(${hue} 80% 50%), hsl(${
+    } 100% 50% / 30%), hsl(${hue} 100% 50% / 10%)), linear-gradient(-20deg, hsl(${hue} 90% 50%), hsl(${
         (hue - 100) % 360
-    } 80% 50%)) `;
+    } 90% 50%)) `;
+};
+
+export const createCanvasGradient = (canvas: Canvas, hue: number) => {
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // Clear the canvas
+    ctx.clearRect(0, 0, width, height);
+
+    // Draw linear gradient
+    const linearGradient = ctx.createLinearGradient(0.364 * width, 0, width, height);
+    linearGradient.addColorStop(0, `hsl(${(hue - 100) % 360}, 90%, 50%)`);
+    linearGradient.addColorStop(1, `hsl(${hue}, 90%, 50%)`);
+
+    ctx.fillStyle = linearGradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Draw radial gradient
+    const radialGradient = ctx.createRadialGradient(0.3 * width, 0.3 * height, 0, 0.3 * width, 0.3 * height, width);
+    radialGradient.addColorStop(0, `hsl(${(hue - 100) % 360}, 100%, 50%, 0.3)`);
+    radialGradient.addColorStop(1, `hsl(${hue}, 100%, 50%, 0.1)`);
+    ctx.fillStyle = radialGradient;
+    ctx.fillRect(0, 0, width, height);
 };

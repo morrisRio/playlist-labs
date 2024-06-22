@@ -3,7 +3,7 @@ import { MdModeEdit, MdMoreVert } from "react-icons/md";
 import NameModal from "./NameModal";
 import GradientModal from "../GradientModal";
 import { useState, useEffect } from "react";
-import { getColorGradient } from "@/lib/spotifyUtils";
+import { getCssGradient } from "@/lib/spotifyUtils";
 
 interface PlaylistHeaderProps {
     playlist_id: string | false;
@@ -25,7 +25,7 @@ function PlaylistHeader({ playlist_id, onChange, name, hue, coverUrl }: Playlist
         imgSource = `${blackGradient}, url(${coverUrl})`;
     } else if (hue) {
         blackGradient = "linear-gradient(to bottom, rgba(0, 0, 0, 0.0) 0%, rgba(0, 0, 0, 0.4) 100%)";
-        imgSource = `${blackGradient}, ${getColorGradient(hue)}`;
+        imgSource = `${blackGradient}, ${getCssGradient(hue)}`;
     }
     return (
         <div className="flex justify-between">

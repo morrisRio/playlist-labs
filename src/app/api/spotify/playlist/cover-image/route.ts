@@ -1,12 +1,13 @@
+import { put } from "./../../../../../../node_modules/@jridgewell/set-array/src/set-array";
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
-import { spotifyGet } from "@/lib/serverUtils";
+import { spotifyGet, spotifyPut } from "@/lib/serverUtils";
 import { getToken } from "next-auth/jwt";
 import { debugLog, setDebugMode } from "@/lib/utils";
 import { createCanvas } from "@napi-rs/canvas";
+import { createCanvasGradient } from "@/lib/spotifyUtils";
 import { writeFileSync } from "fs";
-import { NextApiResponse, NextApiRequest } from "next";
-import { set } from "mongoose";
+import { debug } from "console";
 
 export async function GET(req: NextRequest, res: NextResponse): Promise<NextResponse> {
     setDebugMode(false);
@@ -50,18 +51,32 @@ export async function GET(req: NextRequest, res: NextResponse): Promise<NextResp
 
 export async function POST(req: NextRequest, res: NextResponse): Promise<NextResponse> {
     setDebugMode(true);
+
+    const token = await getToken({ req });
+    if (!token) {
+        console.error("No token found");
+        return NextResponse.json({ error: "No token found" }, { status: 401 });
+    }
+    const { accessToken } = token;
+
     const body = await req.json();
-    debugLog("body", body);
+    if (!body.hue) return NextResponse.json({ error: "No hue provided" }, { status: 400 });
+
+    const { hue } = body;
+    debugLog("hue", hue);
+
     const canvas = createCanvas(640, 640);
-    const ctx = canvas.getContext("2d");
+    createCanvasGradient(canvas, hue);
+    const buffer = canvas.toDataURL("image/jpeg");
+    const base64JpegData = buffer.replace(/^data:image\/\w+;base64,/, "");
 
-    ctx.fillStyle = "green";
-    ctx.fillRect(0, 0, 640, 640);
-    const buffer = canvas.toBuffer("image/png");
-
-    debugLog("buffer", buffer);
-
-    writeFileSync("test.png", buffer);
+    const putData = await spotifyPut(
+        "https://api.spotify.com/v1/playlists/0cR8yG1lBbovFlunojhGXF/images",
+        accessToken,
+        base64JpegData,
+        { "Content-Type": "image/jpeg" }
+    );
+    debugLog("API - after fetch", putData);
 
     return NextResponse.json({ message: "success" }, { status: 200 });
 }

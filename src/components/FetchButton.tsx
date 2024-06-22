@@ -5,7 +5,7 @@ function FetchButton() {
         console.log("Test started");
         const res = await fetch("/api/spotify/playlist/cover-image", {
             method: "POST",
-            body: JSON.stringify({ test: "test" }),
+            body: JSON.stringify({ hue: 360 }),
             headers: {
                 "Content-Type": "application/json",
             },
@@ -17,6 +17,7 @@ function FetchButton() {
                 return data;
             })
             .catch((err) => console.error(err));
+
         console.log("Test ended", res);
     };
     return (
