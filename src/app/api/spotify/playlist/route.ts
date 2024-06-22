@@ -39,7 +39,7 @@ const updateCoverImage = async (
 };
 
 export async function POST(req: NextRequest, res: NextResponse): Promise<NextResponse> {
-    setDebugMode(false);
+    setDebugMode(true);
 
     const data = await req.json();
     const { preferences, seeds, rules }: PlaylistData = data;
@@ -115,9 +115,13 @@ export async function POST(req: NextRequest, res: NextResponse): Promise<NextRes
     debugLog("API: Added Tracks to Playlist:", addRes);
 
     //add the cover image to the playlist
-    const hue = preferences.hue || Math.floor(Math.random() * 360);
-    delete preferences.hue;
-    updateCoverImage(idToWriteTo, hue, accessToken);
+    try {
+        const hue = preferences.hue || Math.floor(Math.random() * 360);
+        delete preferences.hue;
+        updateCoverImage(idToWriteTo, hue, accessToken);
+    } catch (error) {
+        console.error("Failed to create Cover Image", error);
+    }
 
     //add playlist to user document DB
     const dbSuccess = await dbCreatePlaylist(userId, {
@@ -141,7 +145,7 @@ export async function POST(req: NextRequest, res: NextResponse): Promise<NextRes
 
 //TODO: check if playlist exists in spotify (could be deleted by user) -> if there is no playlist id mathing the one in db call post
 export async function PUT(req: NextRequest): Promise<NextResponse> {
-    setDebugMode(false);
+    setDebugMode(true);
 
     const data = await req.json();
     if (!data.playlist_id) {
@@ -235,8 +239,12 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     }
 
     if (preferences.hue) {
-        updateCoverImage(playlist_id, preferences.hue, accessToken);
-        delete preferences.hue;
+        try {
+            updateCoverImage(playlist_id, preferences.hue, accessToken);
+            delete preferences.hue;
+        } catch (error) {
+            console.error("Failed to update Cover Image", error);
+        }
     }
 
     const dbSuccess = await dbUpdatePlaylist(userId, {

@@ -1,4 +1,3 @@
-import { put } from "./../../../../../../node_modules/@jridgewell/set-array/src/set-array";
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { spotifyGet, spotifyPut } from "@/lib/serverUtils";
@@ -6,8 +5,6 @@ import { getToken } from "next-auth/jwt";
 import { debugLog, setDebugMode } from "@/lib/utils";
 import { createCanvas } from "@napi-rs/canvas";
 import { createCanvasGradient } from "@/lib/spotifyUtils";
-import { writeFileSync } from "fs";
-import { debug } from "console";
 
 export async function GET(req: NextRequest, res: NextResponse): Promise<NextResponse> {
     setDebugMode(false);
@@ -47,36 +44,4 @@ export async function GET(req: NextRequest, res: NextResponse): Promise<NextResp
     const { url } = imageResponseData[0];
     debugLog("API - after fetch", url);
     return NextResponse.json(url, { status: 200 });
-}
-
-export async function POST(req: NextRequest, res: NextResponse): Promise<NextResponse> {
-    setDebugMode(true);
-
-    const token = await getToken({ req });
-    if (!token) {
-        console.error("No token found");
-        return NextResponse.json({ error: "No token found" }, { status: 401 });
-    }
-    const { accessToken } = token;
-
-    const body = await req.json();
-    if (!body.hue) return NextResponse.json({ error: "No hue provided" }, { status: 400 });
-
-    const { hue } = body;
-    debugLog("hue", hue);
-
-    const canvas = createCanvas(640, 640);
-    createCanvasGradient(canvas, hue);
-    const buffer = canvas.toDataURL("image/jpeg");
-    const base64JpegData = buffer.replace(/^data:image\/\w+;base64,/, "");
-
-    const putData = await spotifyPut(
-        "https://api.spotify.com/v1/playlists/0cR8yG1lBbovFlunojhGXF/images",
-        accessToken,
-        base64JpegData,
-        { "Content-Type": "image/jpeg" }
-    );
-    debugLog("API - after fetch", putData);
-
-    return NextResponse.json({ message: "success" }, { status: 200 });
 }
