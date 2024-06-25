@@ -1,5 +1,5 @@
 "use client";
-import { useState, FormEvent, useCallback } from "react";
+import { useState, FormEvent, useCallback, PointerEventHandler } from "react";
 import PreferencesForm from "./PreferencesForm";
 import Rules from "./RulesForm/Rules";
 import Seeds from "./SeedsForm/Seeds";
@@ -11,10 +11,11 @@ import { completeRules } from "@/lib/spotifyUtils";
 import { useRouter } from "next/navigation";
 
 interface PlaylistFormProps {
+    pageTitle: string;
     playlist?: PlaylistData;
 }
 
-function PlaylistForm({ playlist }: PlaylistFormProps) {
+function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
     const router = useRouter();
 
     const [showSubmitErrors, setShowSubmittErrors] = useState(false);
@@ -138,8 +139,10 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
         return errors;
     };
 
+    //TODO: feauture: differentiate saving the settings and regenerating the playlist
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        e.stopPropagation();
 
         const errors = validateForm(preferences, seeds);
         if (errors.length > 0) {
@@ -193,8 +196,24 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
     const changed = JSON.stringify(initialState) !== JSON.stringify(currentState);
 
     return (
-        <div className="flex justify-center text-white mb-8">
-            <form className="w-full flex flex-col gap-8" onSubmit={handleSubmit}>
+        <>
+            <PlaylistHeader
+                pageTitle={pageTitle}
+                name={preferences.name}
+                playlist_id={playlist_id}
+                onChange={handlePrefChange}
+                coverUrl={playlist?.coverUrl ? playlist.coverUrl : false}
+                hue={preferences.hue ? preferences.hue : false}
+                submitting={submitting}
+                actionTitle={!changed ? "Regenerate" : playlist_id ? "Save Changes" : "Create Playlist"}
+                action={handleSubmit}
+            ></PlaylistHeader>
+
+            <form
+                id="playlist-form"
+                className="w-full flex flex-col gap-8 justify-center text-white mb-8"
+                onSubmit={handleSubmit}
+            >
                 {showSubmitErrors && (
                     <UniModal
                         title="We ran into some issues"
@@ -206,27 +225,14 @@ function PlaylistForm({ playlist }: PlaylistFormProps) {
                         ))}
                     </UniModal>
                 )}
-                <PlaylistHeader
-                    name={preferences.name}
-                    playlist_id={playlist_id}
-                    onChange={handlePrefChange}
-                    coverUrl={playlist?.coverUrl ? playlist.coverUrl : false}
-                    hue={preferences.hue ? preferences.hue : false}
-                />
+
                 <PreferencesForm preferences={preferences} onChange={handlePrefChange} />
                 <hr className="border-ui-700"></hr>
                 <Seeds seeds={seeds} onRemove={removeSeed} onAdd={addSeed} />
                 <hr className="border-ui-700"></hr>
                 <Rules rules={rules} onAdd={addRule} onRemove={removeRule} onChange={handleRuleChange}></Rules>
-                <button
-                    type="submit"
-                    className={`m-4 self-end p-2 px-8 min-w-32 border border-themetext-nerfed text-themetext text-lg rounded-md text-center`}
-                    disabled={submitting}
-                >
-                    {!changed ? "Regenerate" : playlist_id ? "Save Updates" : "Create Playlist"}
-                </button>
             </form>
-        </div>
+        </>
     );
 }
 

@@ -51,14 +51,8 @@ async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
     }
 
     return (
-        <div className="h-full w-full flex flex-col gap-4">
-            <div className="flex items-center">
-                <Link href="/" replace={true}>
-                    <MdChevronLeft size="2rem"></MdChevronLeft>
-                </Link>
-                <h3> Edit Playlist</h3>
-            </div>
-            {playlist && <PlaylistCreator playlist={playlist}></PlaylistCreator>}
+        <div className="h-full w-full">
+            {playlist && <PlaylistCreator pageTitle="Edit Playlist" playlist={playlist}></PlaylistCreator>}
         </div>
     );
 }

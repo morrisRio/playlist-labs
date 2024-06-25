@@ -41,7 +41,7 @@ function UniModal({
 
     return (
         <div
-            className={`${positionClasses[position]} fixed inset-0 w-full h-screen p-6 flex justify-center bg-ui-950/40 backdrop-brightness-50 backdrop-saturate-50`}
+            className={`${positionClasses[position]} fixed inset-0 w-full h-screen p-6 flex justify-center bg-ui-950/40 backdrop-brightness-50 backdrop-saturate-50 z-40`}
             onPointerDown={(e) => triggerClose(e)}
         >
             <div

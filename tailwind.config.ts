@@ -14,8 +14,9 @@ const config: Config = {
             colors: {
                 ui: {
                     950: "#000000", //bg
-                    900: "#000202", //card
-                    800: "#1F1F1F", //bg-rule input-bg
+                    900: "#090909", //bg-card
+                    850: "#0f0f0f", //input-bg
+                    800: "#1F1F1F", //bg-rule input
                     700: "#333333", //border
                     650: "#4D4D4D", //tags
                     600: "#878787", //desc text

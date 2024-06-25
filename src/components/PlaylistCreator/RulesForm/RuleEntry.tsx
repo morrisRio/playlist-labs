@@ -83,7 +83,7 @@ export function RuleEntry({
                 )}
                 {!added && onAdd && (
                     <button onClick={() => onAdd(rule)} type="button">
-                        <MdAddCircleOutline size="1.5em" />
+                        <MdAddCircleOutline size="1.5em" color={interactColor} />
                     </button>
                 )}
             </div>

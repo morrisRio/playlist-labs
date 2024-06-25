@@ -55,7 +55,7 @@ export default function Seeds({ seeds, onRemove, onAdd }: SeedsProps) {
                 </div>
             ) : (
                 <div className="flex flex-col gap-5 mb-4">
-                    {seeds.map((seed, index) => (
+                    {seeds.map((seed) => (
                         <SeedEntry seedObj={seed} onRemove={onRemove} key={seed.id} card={true} added={true} />
                     ))}
                 </div>

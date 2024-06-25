@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import { MdLogout, MdOutlineDelete } from "react-icons/md";
 import { signOut, useSession } from "next-auth/react";
@@ -20,9 +21,6 @@ const Profile = () => {
     };
     return (
         <>
-            {showProfileMenu && (
-                <div className="absolute inset-0 bg-ui-950/80 z-10" onClick={() => setShowProfileMenu(false)}></div>
-            )}
             {showConfirmModal && (
                 <UniModal
                     title="Delete Account"
@@ -40,8 +38,11 @@ const Profile = () => {
                     </p>
                 </UniModal>
             )}
-            <div className="relative z-20">
-                <div className="flex gap-3 items-center " onPointerDown={() => setShowProfileMenu(true)}>
+            <div className="flex gap-3 items-center" onPointerDown={() => setShowProfileMenu(true)}>
+                {showProfileMenu && (
+                    <div className="absolute inset-0 bg-ui-950/50 z-10" onClick={() => setShowProfileMenu(false)}></div>
+                )}
+                <div className="size-6 z-20 relative">
                     {showProfileMenu && (
                         <div className="absolute gap-2 bg-ui-900 border border-ui-700 -right-2 -top-2 rounded-lg p-3">
                             <div className="text-ui-600 text-sm flex gap-4">
@@ -67,11 +68,13 @@ const Profile = () => {
                             </button>
                         </div>
                     )}
-                    {session?.user?.image ? (
-                        <img src={session.user.image as string} alt="user image" className="size-6 rounded-full z-30" /> // eslint-disable-line
-                    ) : (
-                        <div aria-label="profile" className="size-6 rounded-full bg-lime-400 z-30"></div>
-                    )}
+                    <div className="relative">
+                        {session?.user?.image ? (
+                            <img src={session.user.image as string} alt="user image" className="size-6 rounded-full" />
+                        ) : (
+                            <div aria-label="profile" className="size-6 rounded-full bg-lime-400"></div>
+                        )}
+                    </div>
                 </div>
             </div>
         </>

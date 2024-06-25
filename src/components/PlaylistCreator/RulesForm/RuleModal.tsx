@@ -3,6 +3,7 @@ import { Rule } from "@/types/spotify";
 import { MdOutlineArrowBackIos } from "react-icons/md";
 import { RuleEntry } from "./RuleEntry";
 import { allRules } from "@/lib/spotifyConstants";
+import { useEffect } from "react";
 
 interface RuleModalProps {
     onAdd: (rule: Rule) => void;
@@ -13,13 +14,21 @@ interface RuleModalProps {
 
 function RuleModal({ onAdd, onRemove, onClose, rules }: RuleModalProps) {
     //possible rules imported from lib spotifyActions
+
+    useEffect(() => {
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = "auto";
+        };
+    }, []);
+
     return (
-        <div className="absoulute h-full w-full inset-0 p-4 bg-gradient">
-            <header className="flex items-center gap-4">
+        <div className="bg-ui-950 fixed h-screen w-full overflow-scroll top-0 left-0 p-4 z-50">
+            <header className="flex items-center gap-2">
                 <button onClick={onClose} type="button">
-                    <MdOutlineArrowBackIos size="2em" />
+                    <MdOutlineArrowBackIos />
                 </button>
-                <h2>Add Rule</h2>
+                <h3>Add Rule</h3>
             </header>
             <div className="relative mt-8">
                 {allRules.map(

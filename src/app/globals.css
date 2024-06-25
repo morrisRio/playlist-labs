@@ -47,11 +47,11 @@
     --gradient: radial-gradient(circle at 50vw 30vh, #222121, ease-in-out, #0e0e0e);
     --color-ui-950: #121212;
     --color-ui-900: #141414;
-    --color-ui-800: #292929;
-    --color-ui-700: #3a3a3a;
-    --color-ui-600: #737373;
-    --color-ui-500: #999999;
-    --color-ui-400: #b3b3b3;
+    --color-ui-800: #1f1f1f;
+    --color-ui-700: #333333;
+    --color-ui-600: #878787;
+    --color-ui-500: #bebebe;
+    --color-ui-400: #cccccc;
     --color-themetext: #ffffff;
     --color-themetext-nerfed: #f2f2f2;
     --color-invertme: #c9c9c9;

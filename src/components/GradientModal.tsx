@@ -35,7 +35,7 @@ const GradientModal = ({ onSave, onClose }: GradientModalProps) => {
                 }}
             />
             <div className="p-6">
-                <label>Color 1: </label>
+                <label>Thumbnail Color </label>
                 <input
                     type="range"
                     min="0"

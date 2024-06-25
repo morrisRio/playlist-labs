@@ -118,7 +118,7 @@ export async function POST(req: NextRequest, res: NextResponse): Promise<NextRes
     try {
         const hue = preferences.hue || Math.floor(Math.random() * 360);
         delete preferences.hue;
-        updateCoverImage(idToWriteTo, hue, accessToken);
+        updateCoverImage(idToWriteTo, hue, accessToken, true);
     } catch (error) {
         console.error("Failed to create Cover Image", error);
     }

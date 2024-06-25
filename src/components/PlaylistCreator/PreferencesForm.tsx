@@ -11,12 +11,11 @@ interface Preferences {
 
 export default function PreferencesForm({ preferences, onChange }: PreferencesProps) {
     return (
-        <div className="flex flex-col gap-6 rounded-xl p-4">
-            <h3 className="font-semibold">Preferences</h3>
-            <label className="flex space-between items-center justify-between text-base">
+        <div className="flex flex-col gap-4 rounded-xl p-4">
+            <label className="flex space-between items-center justify-between text-base text-ui-500">
                 Update Frequency
                 <select
-                    className="block p-2 rounded-lg bg-ui-800 text-b6b6b6 focus:outline-none focus:ring focus:border-themetext text-sm"
+                    className="block p-2 rounded-lg border border-ui-700 bg-ui-850 text-ui-500 focus:outline-none focus:ring focus:border-themetext text-sm"
                     name="frequency"
                     value={preferences.frequency}
                     onChange={onChange}
@@ -28,11 +27,11 @@ export default function PreferencesForm({ preferences, onChange }: PreferencesPr
                 </select>
             </label>
             <div>
-                <label htmlFor="amount" className="flex items-center justify-between text-base">
+                <label htmlFor="amount" className="flex items-center justify-between text-base  text-ui-500">
                     Number of Tracks
                     <input
                         type="number"
-                        className="text-sm hide-arrows p-2 rounded-lg bg-ui-800 max-w-12 text-b6b6b6 focus:outline-none focus:ring focus:border-themetext"
+                        className="text-sm hide-arrows p-2 rounded-lg border border-ui-700 bg-ui-850 max-w-12  text-ui-500 focus:outline-none focus:ring focus:border-themetext"
                         name="amount"
                         value={preferences.amount}
                         min="5"

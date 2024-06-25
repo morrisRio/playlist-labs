@@ -83,7 +83,7 @@ export function SeedEntry({ seedObj, onRemove, onAdd, card = false, added = fals
     }, [title, description]);
 
     return (
-        <div className={`flex gap-4 items-center justify-between ${seedCard} overflow-hidden`}>
+        <div className={`flex gap-4 items-center justify-between ${seedCard}`}>
             {seedObj.type === "genre" ? (
                 <div
                     className={`${imgClass} flex items-center justify-center`}
@@ -94,8 +94,8 @@ export function SeedEntry({ seedObj, onRemove, onAdd, card = false, added = fals
                     <RiMusic2Fill size={card ? "2rem" : "1.2rem"} color={`hsl(${thumbnail} 90 70)`} />
                 </div>
             ) : thumbnail && typeof thumbnail === "string" ? (
-                <div className={`${imgClass} flex-none object-cover relative`}>
-                    <Image src={thumbnail} alt={title} fill={true} />
+                <div className={`${imgClass} flex-none relative overflow-hidden`}>
+                    <Image src={thumbnail} alt={title} fill />
                 </div>
             ) : (
                 <div className={`${imgClass} flex-none bg-zinc-800`}></div>

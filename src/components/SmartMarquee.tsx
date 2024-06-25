@@ -13,7 +13,7 @@ interface SmartMarqueeProps {
 function SmartMarquee({ children, divider = false }: SmartMarqueeProps) {
     const fullConfig = resolveConfig(tailwindConfig);
     //@ts-expect-error
-    const bgColor = fullConfig.theme.colors.ui[950] || "transparent";
+    const bgColor = fullConfig.theme.colors.ui[900] || "transparent";
 
     const bgGradient = `linear-gradient(to right, ${bgColor} 0%, transparent 10%, transparent 90%, ${bgColor} 100%)`;
     // const bgGradient = `linear-gradient(to right, red 0%, blue 100%)`;

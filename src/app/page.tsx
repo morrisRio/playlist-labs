@@ -10,7 +10,7 @@ import resolveConfig from "tailwindcss/resolveConfig";
 import tailwindConfig from "@/../tailwind.config";
 
 import Image from "next/image";
-import Logo from "../../public/logo.svg";
+import Logo from "../../public/logo-small.svg";
 
 import { getAppUrl } from "@/lib/utils";
 
@@ -19,7 +19,7 @@ export default async function Home() {
 
     const fullConfig = resolveConfig(tailwindConfig);
     //@ts-expect-error
-    const bgColor = fullConfig.theme.colors.ui[950];
+    const interactColor = fullConfig.theme.colors.ui[600];
     /* 
         This is workaround to get the playlists from a database with a fetch to be able to use 
         tagged data cache
@@ -40,16 +40,16 @@ export default async function Home() {
     return (
         <div className="h-full w-full p-4 flex flex-col gap-5">
             <div className="flex justify-between gap-2 mt-8">
-                <Image src={Logo} alt="playlistLabs Logo" width={16} height={16}></Image>
+                <Image src={Logo} alt="playlistLabs Logo" width={14} height={14}></Image>
                 <h3 className="font-normal text-themetext-nerfed flex-grow">playlistLabs</h3>
                 <Profile></Profile>
             </div>
             <Link href="/pages/create-playlist">
                 <div className="flex gap-4 items-center w-full mb-4 bg-ui-900 border border-ui-700 rounded-lg">
-                    <div className="size-20 bg-ui-800 rounded-l-lg flex items-center justify-center">
-                        <MdAdd size="3rem" color={bgColor}></MdAdd>
+                    <div className="size-24 rounded-l-lg flex items-center justify-center border-r border-ui-700">
+                        <MdAdd size="1rem" color={interactColor}></MdAdd>
                     </div>
-                    <h4 className="text-b6b6b6">Create New Playlist</h4>
+                    <h4 className="text-ui-600">Create New Playlist</h4>
                 </div>
             </Link>
             {/* render all playlists found in database for user */}

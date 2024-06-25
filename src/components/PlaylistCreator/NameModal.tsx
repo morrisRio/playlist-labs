@@ -41,7 +41,7 @@ function NameModal({ name, onClose, onChange }: NameModalProps) {
                 onChange={onChangeName}
                 onFocus={(e) => e.target.select()}
                 placeholder="Playlist Name"
-                className="p-3 px-6 w-full bg-ui-900 focus:outline-none placeholder-ui-600 text-lg text-ui-400 -mb-3 border border-ui-700 border-x-0"
+                className="p-3 px-6 w-full bg-ui-850 focus:outline-none placeholder-ui-600 text-lg text-ui-400 -mb-3 border border-ui-700 border-x-0"
             />
         </UniModal>
     );
