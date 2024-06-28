@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import UniModal from "@/components/UniModal";
-import { getCssGradient } from "@/lib/spotifyUtils";
+import { getCssHueGradient } from "@/lib/utils";
 
 interface GradientModalProps {
     onSave: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -31,7 +31,7 @@ const GradientModal = ({ onSave, onClose }: GradientModalProps) => {
             <div
                 className="w-full aspect-square mb-5"
                 style={{
-                    background: `${getCssGradient(hue)}`,
+                    background: `${getCssHueGradient(hue)}`,
                 }}
             />
             <div className="p-6">

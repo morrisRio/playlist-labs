@@ -4,27 +4,32 @@ import { MdLogout, MdOutlineDelete } from "react-icons/md";
 import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
 import UniModal from "@/components/UniModal";
+import ContextMenu from "./Context";
 
 const Profile = () => {
     const { data: session } = useSession();
-
-    const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
-
-    const initDeleteAccount = () => {
-        setShowConfirmModal(true);
-        deleteAccount();
-    };
 
     const deleteAccount = async () => {
         console.log("Deleting Account");
     };
+
+    const UserImage = (
+        <div className="relative">
+            {session?.user?.image ? (
+                <img src={session.user.image as string} alt="user image" className="size-6 rounded-full" />
+            ) : (
+                <div aria-label="profile" className="size-6 rounded-full bg-lime-400"></div>
+            )}
+        </div>
+    );
+
     return (
         <>
             {showConfirmModal && (
                 <UniModal
                     title="Delete Account"
-                    action={() => deleteAccount()}
+                    action={deleteAccount}
                     actionTitle="Delete"
                     actionDanger={true}
                     onClose={() => setShowConfirmModal(false)}
@@ -38,45 +43,21 @@ const Profile = () => {
                     </p>
                 </UniModal>
             )}
-            <div className="flex gap-3 items-center" onPointerDown={() => setShowProfileMenu(true)}>
-                {showProfileMenu && (
-                    <div className="absolute inset-0 bg-ui-950/50 z-10" onClick={() => setShowProfileMenu(false)}></div>
-                )}
-                <div className="size-6 z-20 relative">
-                    {showProfileMenu && (
-                        <div className="absolute gap-2 bg-ui-900 border border-ui-700 -right-2 -top-2 rounded-lg p-3">
-                            <div className="text-ui-600 text-sm flex gap-4">
-                                <div className="pl-3 pb-3">
-                                    <span className="text-nowrap">{session?.user?.name}</span>
-                                </div>
-                                <div className="size-6 rounded-full bg-ui-950"></div>
-                            </div>
-                            <hr className="border-ui-700 -mx-2"></hr>
-                            <button
-                                className="text-lg text-themetext text-nowrap flex flex-row items-center gap-2 p-3"
-                                onPointerDown={() => signOut()}
-                            >
-                                <MdLogout />
-                                Sign out
-                            </button>
-                            <button
-                                className="text-lg text-red-800 text-nowrap flex flex-row items-center gap-2 p-3"
-                                onPointerDown={() => initDeleteAccount()}
-                            >
-                                <MdOutlineDelete />
-                                Delete my Account
-                            </button>
-                        </div>
-                    )}
-                    <div className="relative">
-                        {session?.user?.image ? (
-                            <img src={session.user.image as string} alt="user image" className="size-6 rounded-full" />
-                        ) : (
-                            <div aria-label="profile" className="size-6 rounded-full bg-lime-400"></div>
-                        )}
-                    </div>
-                </div>
-            </div>
+            <ContextMenu contextTitle={session?.user?.name || "no title"} contextIcon={UserImage}>
+                <button onPointerDown={() => signOut()}>
+                    <MdLogout />
+                    Sign Out
+                </button>
+                <button
+                    className="text-red-800"
+                    onPointerDown={() => {
+                        setShowConfirmModal(true);
+                    }}
+                >
+                    <MdOutlineDelete />
+                    Delete Account
+                </button>
+            </ContextMenu>
         </>
     );
 };

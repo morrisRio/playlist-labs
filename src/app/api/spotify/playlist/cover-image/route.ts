@@ -3,8 +3,6 @@ import { NextRequest } from "next/server";
 import { spotifyGet, spotifyPut } from "@/lib/serverUtils";
 import { getToken } from "next-auth/jwt";
 import { debugLog, setDebugMode } from "@/lib/utils";
-import { createCanvas } from "@napi-rs/canvas";
-import { createCanvasGradient } from "@/lib/spotifyUtils";
 
 export async function GET(req: NextRequest, res: NextResponse): Promise<NextResponse> {
     setDebugMode(false);

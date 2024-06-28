@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { auth, spotifyPost, spotifyPut, spotifyGet } from "@/lib/serverUtils";
-import { getRecommendations, createPlaylistDescription, createCanvasGradient } from "@/lib/spotifyUtils";
+import { getRecommendations, createPlaylistDescription } from "@/lib/spotifyUtils";
+import { createCanvasGradient } from "@/lib/utils";
 import { getToken } from "next-auth/jwt";
 import { PlaylistData } from "@/types/spotify";
 import { dbCreatePlaylist, dbGetUsersPlaylists, dbUpdatePlaylist } from "@/lib/db/dbActions";

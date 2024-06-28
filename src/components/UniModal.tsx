@@ -45,7 +45,7 @@ function UniModal({
             onPointerDown={(e) => triggerClose(e)}
         >
             <div
-                className={`w-full md:max-w-96 md:m-auto h-fit px-6 py-5 bg-ui-900 border border-ui-700 rounded-xl z-50`}
+                className={`w-full max-w-96 md:m-auto h-fit px-6 py-5 bg-ui-900 border border-ui-700 rounded-xl z-50`}
                 onPointerDown={(e) => e.stopPropagation()}
             >
                 <h4 className="text-themetext mb-5 w-full">{title}</h4>

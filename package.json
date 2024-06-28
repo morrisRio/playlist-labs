@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@napi-rs/canvas": "^0.1.53",
+    "color.js": "^1.2.0",
     "fastest-levenshtein": "^1.0.16",
     "fs": "^0.0.1-security",
     "mongodb": "^6.6.0",

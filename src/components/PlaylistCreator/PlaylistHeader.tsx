@@ -1,11 +1,17 @@
 "use client";
-import { MdChevronLeft, MdModeEdit, MdMoreVert, MdPalette, MdOpenInNew, MdShuffle } from "react-icons/md";
-import NameModal from "./NameModal";
-import GradientModal from "../GradientModal";
-import { FormEvent, PointerEventHandler, use, useCallback, useEffect, useRef, useState } from "react";
-import { getCssGradient } from "@/lib/spotifyUtils";
+import { MdChevronLeft, MdModeEdit, MdPalette, MdOpenInNew, MdShuffle, MdOutlineDelete } from "react-icons/md";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getCssHueGradient, getCssHexGradient } from "@/lib/utils";
+import { prominent } from "color.js";
+
 import Link from "next/link";
 import Image from "next/image";
+
+import NameModal from "@/components/PlaylistCreator/NameModal";
+import GradientModal from "@/components/GradientModal";
+import ContextMenu from "@/components/Context";
+import UniModal from "@/components/UniModal";
+import { useHeaderState } from "@/lib/hooks/useHeaderState";
 
 interface PlaylistHeaderProps {
     pageTitle: string;
@@ -26,72 +32,48 @@ function PlaylistHeader({
     name,
     hue,
     coverUrl,
-    action,
     actionTitle,
     submitting,
 }: PlaylistHeaderProps) {
     const [showNameModal, setShowNameModal] = useState(playlist_id === false);
     const [showGradient, setShowGradient] = useState(false);
 
-    let bgImage = "";
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-    let blackGradient = "linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 1) 100%)";
+    let blackGradient = "linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.8) 100%)";
 
-    if (!hue && coverUrl) {
-        bgImage = `url(${coverUrl})`;
-    } else if (hue) {
-        bgImage = `${getCssGradient(hue)}`;
-    }
+    const bgImage = hue
+        ? getCssHueGradient(hue)
+        : coverUrl
+        ? `url(${coverUrl})`
+        : getCssHueGradient(Math.floor(Math.random() * 360));
 
-    const darken = "linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.6) 100%)";
-    let headerBg = ` ${darken}, ${bgImage}`;
+    const headerBg = `linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.7) 100%), ${bgImage}`;
 
     const headerRef = useRef<HTMLDivElement>(null);
-    const [headerHeight, setHeaderHeight] = useState(60);
-
     const actionButtonRef = useRef<HTMLButtonElement>(null);
-    const [triggerPoint, setTriggerPoint] = useState(0);
+    const { headerHeight, collapsed, headerOpacity } = useHeaderState(headerRef, actionButtonRef);
 
-    const [collapsed, setCollapsed] = useState(false);
-    const [headerOpacity, setHeaderOpacity] = useState(0);
-
-    const handleScroll = useCallback(() => {
-        setHeaderOpacity(collapsed ? 1 : triggerPoint > 0 ? window.scrollY / triggerPoint : 0);
-
-        if (collapsed && window.scrollY < triggerPoint) {
-            setCollapsed(false);
-        } else if (!collapsed && window.scrollY > triggerPoint) {
-            setCollapsed(true);
-        }
-    }, [triggerPoint, collapsed]);
-
-    useEffect(() => {
-        if (actionButtonRef.current) {
-            setTriggerPoint(actionButtonRef.current.clientHeight + window.scrollY);
-            console.log("setting trigger point", actionButtonRef.current);
-        }
-    }, [actionButtonRef]);
-
-    useEffect(() => {
-        if (headerRef.current) {
-            setHeaderHeight(headerRef.current.clientHeight);
-        }
-    }, [headerRef]);
-
-    useEffect(() => {
-        window.addEventListener("scroll", handleScroll, { passive: true });
-        //determine the initial state of the header
-        handleScroll();
-        return () => {
-            window.removeEventListener("scroll", handleScroll);
-        };
-    }, [handleScroll]);
+    const deleteAccount = async () => {
+        console.log("Deleting Account");
+    };
 
     return (
         <>
             <header ref={headerRef} className="sticky top-0 z-40">
-                <div className="absolute inset-0" style={{ backgroundImage: headerBg, opacity: headerOpacity }}></div>
-                <div className="relative flex items-center w-full py-3 z-10">
+                <div
+                    className="absolute inset-0"
+                    style={{
+                        backgroundImage: headerBg,
+                        opacity: headerOpacity,
+                        backgroundSize: "cover",
+                    }}
+                ></div>
+                <div
+                    className="absolute inset-0"
+                    style={{ backdropFilter: `blur(64px) opacity(${headerOpacity ? 1 : 0})` }}
+                ></div>
+                <div className="relative flex items-center w-full py-3 px-4 z-10">
                     <Link href="/" replace={true}>
                         <MdChevronLeft size="2rem"></MdChevronLeft>
                     </Link>
@@ -106,24 +88,65 @@ function PlaylistHeader({
                         <MdShuffle size="1.2rem" />
                         {actionTitle}
                     </button>
-                    <MdMoreVert size="1.5em" onClick={() => console.log("more")} className="mr-5" />
+                    <ContextMenu contextTitle={"Playlist Options"}>
+                        <a
+                            href={`https://open.spotify.com/playlist/${playlist_id}`}
+                            target="_blank"
+                            className="text-ui-600"
+                        >
+                            <MdOpenInNew />
+                            Open in Spotify
+                        </a>
+                        <button onPointerDown={() => setShowConfirmModal(true)} className="text-red-800">
+                            <MdOutlineDelete />
+                            Delete Playlist
+                        </button>
+                    </ContextMenu>
+                    {showConfirmModal && (
+                        <UniModal
+                            title="Delete Account"
+                            action={deleteAccount}
+                            actionTitle="Delete"
+                            actionDanger={true}
+                            onClose={() => setShowConfirmModal(false)}
+                        >
+                            <p>
+                                This action will delete your account and all associated data irreversibly. This includes
+                                all playlists and preferences. In fact that&apos;s all we store for you
+                                <br />
+                                <br />
+                                For security reasons we won&apos;t delete generated playlists on Spotify.
+                            </p>
+                        </UniModal>
+                    )}
                 </div>
             </header>
             <div
-                className="relative top-0 w-full"
+                className="relative top-0 w-full bg-ui-850"
                 style={{
                     backgroundImage: `${blackGradient},` + bgImage,
+                    backgroundSize: "cover",
                     paddingTop: `${headerHeight}px`,
                     marginTop: `-${headerHeight}px`,
                 }}
             >
-                <div className="flex flex-col justify-between w-full pt-5 pb-2 px-4 bg-cover gap-6">
+                <div
+                    className="absolute size-full backdrop-blur-3xl"
+                    style={{
+                        paddingTop: `${headerHeight}px`,
+                        marginTop: `-${headerHeight}px`,
+                    }}
+                ></div>
+                <div className="flex flex-col justify-between w-full pt-2 pb-2 px-4 bg-cover gap-6">
                     <div className="flex items-center w-full gap-8">
                         {/* Image */}
-                        <div className="size-32 rounded-lg overflow-hidden relative">
+                        <div className=" size-36 rounded-lg overflow-hidden relative z-20">
                             {coverUrl && !hue && <Image src={coverUrl} alt="cover-image" fill></Image>}
                             {hue && (
-                                <div className="w-full h-full" style={{ backgroundImage: getCssGradient(hue) }}></div>
+                                <div
+                                    className="w-full h-full"
+                                    style={{ backgroundImage: getCssHueGradient(hue) }}
+                                ></div>
                             )}
                             <div
                                 className="absolute right-1 bottom-1 rounded-full flex items-center justify-center bg-ui-900 p-1"
@@ -133,7 +156,7 @@ function PlaylistHeader({
                             </div>
                         </div>
                         {/* Actions */}
-                        <div className="flex flex-col items-center justify-between gap-2">
+                        <div className="flex flex-col items-center justify-between gap-1 z-30 -mt-5">
                             <button
                                 type="submit"
                                 form="playlist-form"
@@ -154,7 +177,8 @@ function PlaylistHeader({
                             </a>
                         </div>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="-mx-4 absolute bg-ui-950 border-t border-ui-700 h-[88px] w-full bottom-0 rounded-t-2xl"></div>
+                    <div className="flex justify-between z-10">
                         <h2>{name}</h2>
                         <MdModeEdit size="1.5em" onClick={() => setShowNameModal(true)} />
                     </div>
