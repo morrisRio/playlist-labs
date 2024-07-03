@@ -1,7 +1,7 @@
 "use client";
 import { MdChevronLeft, MdModeEdit, MdPalette, MdOpenInNew, MdShuffle, MdOutlineDelete } from "react-icons/md";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { getCssHueGradient, getCssHexGradient } from "@/lib/utils";
+import { getCssHueGradient } from "@/lib/utils";
 import { prominent } from "color.js";
 
 import Link from "next/link";
@@ -40,15 +40,12 @@ function PlaylistHeader({
 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-    let blackGradient = "linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.8) 100%)";
-
+    //TODO: Memo the random color
     const bgImage = hue
         ? getCssHueGradient(hue)
         : coverUrl
         ? `url(${coverUrl})`
         : getCssHueGradient(Math.floor(Math.random() * 360));
-
-    const headerBg = `linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.7) 100%), ${bgImage}`;
 
     const headerRef = useRef<HTMLDivElement>(null);
     const actionButtonRef = useRef<HTMLButtonElement>(null);
@@ -64,15 +61,12 @@ function PlaylistHeader({
                 <div
                     className="absolute inset-0"
                     style={{
-                        backgroundImage: headerBg,
-                        opacity: headerOpacity,
+                        backgroundImage: bgImage,
                         backgroundSize: "cover",
+                        filter: `saturate(0.5) brightness(0.5)`,
                     }}
                 ></div>
-                <div
-                    className="absolute inset-0"
-                    style={{ backdropFilter: `blur(64px) opacity(${headerOpacity ? 1 : 0})` }}
-                ></div>
+                <div className="absolute inset-0" style={{ backdropFilter: `blur(64px)` }}></div>
                 <div className="relative flex items-center w-full py-3 px-4 z-10">
                     <Link href="/" replace={true}>
                         <MdChevronLeft size="2rem"></MdChevronLeft>
@@ -121,26 +115,20 @@ function PlaylistHeader({
                     )}
                 </div>
             </header>
-            <div
-                className="relative top-0 w-full bg-ui-850"
-                style={{
-                    backgroundImage: `${blackGradient},` + bgImage,
-                    backgroundSize: "cover",
-                    paddingTop: `${headerHeight}px`,
-                    marginTop: `-${headerHeight}px`,
-                }}
-            >
+            <div className="relative top-0 w-full bg-ui-850">
                 <div
-                    className="absolute size-full backdrop-blur-3xl"
+                    className="absolute size-full blur-3xl bg-cover"
                     style={{
+                        backgroundImage: bgImage,
                         paddingTop: `${headerHeight}px`,
                         marginTop: `-${headerHeight}px`,
+                        filter: `saturate(0.5) brightness(0.5)`,
                     }}
                 ></div>
-                <div className="flex flex-col justify-between w-full pt-2 pb-2 px-4 bg-cover gap-6">
-                    <div className="flex items-center w-full gap-8">
+                <div className="flex flex-col justify-between w-full pt-3 pb-2 px-4 bg-cover gap-5">
+                    <div className="flex items-center w-full gap-6">
                         {/* Image */}
-                        <div className=" size-36 rounded-lg overflow-hidden relative z-20">
+                        <div className="size-36 rounded-lg overflow-hidden relative z-20">
                             {coverUrl && !hue && <Image src={coverUrl} alt="cover-image" fill></Image>}
                             {hue && (
                                 <div
@@ -177,7 +165,7 @@ function PlaylistHeader({
                             </a>
                         </div>
                     </div>
-                    <div className="-mx-4 absolute bg-ui-950 border-t border-ui-700 h-[88px] w-full bottom-0 rounded-t-2xl"></div>
+                    <div className="-mx-4 absolute bg-ui-950 border-t border-ui-700 h-[90px] w-full bottom-0 rounded-t-2xl"></div>
                     <div className="flex justify-between z-10">
                         <h2>{name}</h2>
                         <MdModeEdit size="1.5em" onClick={() => setShowNameModal(true)} />

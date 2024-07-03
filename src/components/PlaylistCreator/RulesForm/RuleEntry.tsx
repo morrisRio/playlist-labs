@@ -64,7 +64,7 @@ export function RuleEntry({
                         <>
                             <input
                                 type="number"
-                                className="text-sm hide-arrows p-2 rounded-lg bg-ui-800 max-w-12 text-b6b6b6 focus:outline-none focus:ring focus:border-themetext"
+                                className="text-sm hide-arrows p-2 rounded-lg border border-ui-700 bg-ui-850 max-w-12  text-ui-500"
                                 name="amount"
                                 value={rule.value}
                                 min="40"
@@ -114,15 +114,15 @@ export function RuleEntry({
                             <div className="h-16 relative flex justify-between bg-ui-800 rounded-b-lg">
                                 <div
                                     className={`mx-4 -top-2 bottom-3 bg-ui-500 absolute rounded-b-lg transition-all duration-200 ${
-                                        rule.value ? "left-0 right-1/2" : "left-1/2 right-0"
+                                        rule.value ? "left-1/2 right-0" : "left-0 right-1/2"
                                     }`}
                                 ></div>
                                 <button
                                     className="relative -top-1 w-1/2 p-3 m-1 bg-transparent text-center rounded-lg z-10 text-invertme mix-blend-difference"
                                     name={rule.name}
-                                    value={"true"}
+                                    value={"false"}
                                     onClick={onChange}
-                                    disabled={rule.value}
+                                    disabled={!rule.value}
                                     type="button"
                                 >
                                     {rule.range[0]}
@@ -131,9 +131,9 @@ export function RuleEntry({
                                     className="relative -top-1 w-1/2 p-3 m-1  bg-transparent text-center rounded-lg z-10 text-invertme mix-blend-difference"
                                     type="button"
                                     name={rule.name}
-                                    value={"false"}
+                                    value={"true"}
                                     onClick={onChange}
-                                    disabled={!rule.value}
+                                    disabled={rule.value}
                                 >
                                     {rule.range[1]}
                                 </button>

@@ -31,7 +31,7 @@ export default function PreferencesForm({ preferences, onChange }: PreferencesPr
                     Number of Tracks
                     <input
                         type="number"
-                        className="text-sm hide-arrows p-2 rounded-lg border border-ui-700 bg-ui-850 max-w-12  text-ui-500 focus:outline-none focus:ring focus:border-themetext"
+                        className="text-sm hide-arrows p-2 rounded-lg border border-ui-700 bg-ui-850 max-w-12  text-ui-500"
                         name="amount"
                         value={preferences.amount}
                         min="5"

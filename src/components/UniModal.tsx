@@ -53,7 +53,7 @@ function UniModal({
                 <div className={`w-full flex items-center ${action ? "justify-between" : "justify-around"}`}>
                     <button
                         type="button"
-                        className={`p-2 px-8 min-w-32 text-ui-600 text-base rounded-md text-center ${
+                        className={`p-2 px-8 min-w-32 text-ui-600 text-base rounded-lg text-center ${
                             action && !actionDanger ? "" : "bg-ui-900 border border-ui-700"
                         }`}
                         onPointerDown={(e) => triggerClose(e)}
@@ -63,7 +63,7 @@ function UniModal({
                     {action && (
                         <button
                             type="button"
-                            className={`p-2 px-8 min-w-32 bg-ui-900 border border-ui-700 text-base rounded-md text-center ${
+                            className={`p-2 px-8 min-w-32 bg-ui-900 border border-ui-700 text-base rounded-lg text-center ${
                                 actionDanger ? "border-red-800 text-red-800" : "text-themetext"
                             }`}
                             onPointerDown={(e) => triggerAction(e)}

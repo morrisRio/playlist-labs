@@ -195,7 +195,10 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     const updatePlaylistDetails = await spotifyPut(
         `https://api.spotify.com/v1/playlists/${playlist_id}`,
         accessToken,
-        preferencesBody
+        preferencesBody,
+        undefined,
+        undefined,
+        true
     );
 
     if (updatePlaylistDetails.error) {
@@ -215,12 +218,17 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     }
 
     const recommandationUris = await getRecommendations(accessToken, preferences, seeds, rules);
+    debugLog(" - got recommendations", recommandationUris);
 
     if ("error" in recommandationUris) {
+        console.error("Failed to get Recommendations!!!!", recommandationUris.error);
         const { message, status } = recommandationUris.error;
-        return NextResponse.json({
-            message: "Failed to get Recommendations. Maybe your Settings are very limiting.\n" + message,
-        });
+        return NextResponse.json(
+            {
+                message: "Failed to get Recommendations. Maybe your Settings are very limiting.\n" + message,
+            },
+            { status }
+        );
     }
     //add the tracks to the playlist
 
@@ -231,7 +239,9 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     const addRes = await spotifyPost(
         `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
         accessToken,
-        addBody
+        addBody,
+        undefined,
+        true
     );
 
     if (addRes.error) {

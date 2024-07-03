@@ -18,7 +18,7 @@ interface PlaylistFormProps {
 function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
     const router = useRouter();
 
-    const [showSubmitErrors, setShowSubmittErrors] = useState(false);
+    const [showSubmitErrors, setShowSubmitErrors] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [submitErrors, setSubmitErrors] = useState<string[]>([]);
 
@@ -81,6 +81,8 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
             setRules((prevState) => {
                 const newRules = [...prevState];
                 const i = newRules.findIndex((r) => r.name === name);
+                console.log("rule change", name, value);
+
                 //parse the value to the correct type
                 //if the type is range, parse it to a float
                 //if the type is "axis" (manually set), keep it (value is an array)
@@ -98,7 +100,6 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
                 newRules[i].value = valueParsed;
                 return newRules;
             });
-            // }
         },
         []
     );
@@ -147,7 +148,7 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
         const errors = validateForm(preferences, seeds);
         if (errors.length > 0) {
             setSubmitErrors(errors);
-            setShowSubmittErrors(true);
+            setShowSubmitErrors(true);
             return;
         }
         setSubmitting(true);
@@ -166,20 +167,20 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
             }),
         })
             .then(async (res) => {
+                setSubmitting(false);
                 const data = await res.json();
                 if (!res.ok) {
                     const { message } = data;
                     throw new Error(message || "Network response was not ok");
                 }
                 setSubmitErrors([]);
-                setSubmitting(false);
-                router.replace("/pages/edit-playlist/" + data, { scroll: false });
+                router.replace("/pages/edit-playlist/" + data);
                 router.refresh();
             })
             .catch((err) => {
                 setSubmitting(false);
-                setSubmitErrors([...submitErrors, err.message]);
-                setShowSubmittErrors(true);
+                setSubmitErrors([err.message]);
+                setShowSubmitErrors(true);
                 console.error(err);
             });
         //TODO: show submitting state
@@ -208,16 +209,15 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
                 actionTitle={!changed ? "Regenerate" : playlist_id ? "Save Changes" : "Create Playlist"}
                 action={handleSubmit}
             ></PlaylistHeader>
-
             <form
                 id="playlist-form"
-                className="w-full flex flex-col gap-8 justify-center text-white mb-8"
+                className="w-full flex flex-col gap-6 justify-center text-white mb-14"
                 onSubmit={handleSubmit}
             >
                 {showSubmitErrors && (
                     <UniModal
                         title="We ran into some issues"
-                        onClose={() => setShowSubmittErrors(false)}
+                        onClose={() => setShowSubmitErrors(false)}
                         closeTitle="Got it"
                     >
                         {submitErrors.map((error, i) => (

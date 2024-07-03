@@ -40,21 +40,25 @@ function Rules({ rules, onAdd, onRemove, onChange }: RulesProps) {
     const interactColor = fullConfig.theme.colors.themetext["DEFAULT"] + "a8"; //a8 is 65% opacity
     return (
         <div className="px-4">
-            <div className="flex mb-8 gap-4 justify-between">
-                <h3>Rules</h3>
-                <button className="flex items-center justify-center gap-2 self-end" onClick={openModal} type="button">
-                    <MdAddCircleOutline size="1.5em" color={interactColor} />
-                    <h4 className="text-b6b6b6">Add Rule</h4>
+            <div className="flex mb-6 justify-between">
+                <h3>Tuning</h3>
+                <button
+                    className="p-1 px-2 rounded-lg flex items-center justify-center gap-2 text-themetext border border-ui-700 bg-ui-850 text-base"
+                    onClick={openModal}
+                    type="button"
+                >
+                    <MdAddCircleOutline />
+                    Add Rule
                 </button>
             </div>
             {rules.length == 0 ? (
-                <div onClick={openModal} className="flex rounded-md bg-ui-950 justify-between items-center p-6">
-                    <p className="mx-auto text-themetext/30 text-center self-center text-lg">
+                <div onClick={openModal} className="flex rounded-lg bg-ui-850 justify-between items-center p-6">
+                    <p className="mx-auto text-themetext/30 text-center self-center text-base">
                         Fine tune your Playlist by adding rules
                     </p>
                 </div>
             ) : (
-                <div className="flex flex-col gap-8">
+                <div className="flex flex-col gap-6">
                     {rules.map((rule, index) => (
                         <RuleEntry
                             rule={rule}

@@ -81,7 +81,7 @@ export const getRecommendations = async (
     seeds: Seed[],
     rules?: Rule[]
 ): Promise<string[] | ErrorRes> => {
-    setDebugMode(false);
+    setDebugMode(true);
     debugLog(" - getting recommendations");
     //create the query string for the api call from the seeds and rules
     const limitQuery = "limit=" + preferences.amount;
@@ -89,7 +89,7 @@ export const getRecommendations = async (
     const ruleQuery = rules ? "&" + getRuleQuery(rules) : "";
 
     const validateTrackRes = (data: any) => {
-        if (!data || !data.tracks || !Array.isArray(data.tracks)) {
+        if (!data || !data.tracks || !Array.isArray(data.tracks) || data.tracks.length === 0) {
             return { valid: false, message: "Could not get recommandations", status: 500 };
         }
         return { valid: true };
@@ -140,10 +140,10 @@ const getRuleQuery = (rules: Rule[]): string => {
                 //this might be flipped
                 return `target_valence=${1 - rule.value[1] / 100}&target_energy=${rule.value[0] / 100}`;
             } else if (rule.type === "range" && typeof rule.value === "number") {
-                if (rule.name === "Tempo") return `target_${rule.name}=${rule.value}`;
-                return `target_${rule.name}=${rule.value / 100}`;
+                if (rule.name === "Tempo") return `target_${rule.name.toLowerCase()}=${rule.value}`;
+                return `target_${rule.name.toLowerCase()}=${rule.value / 100}`;
             } else if (rule.type === "boolean" && typeof rule.value === "boolean") {
-                return `target_${rule.name}=${rule.value}`;
+                return `target_${rule.name.toLowerCase()}=${rule.value}`;
             }
         })
         .join("&");
@@ -158,16 +158,19 @@ const getRuleQuery = (rules: Rule[]): string => {
  * @returns The generated seed query string.
  */
 const getSeedQuery = (seeds: Seed[]) => {
+    setDebugMode(true);
     const seedArtists = seeds.filter((seed) => seed.type === "artist");
     const seedGenres = seeds.filter((seed) => seed.type === "genre");
     const seedTracks = seeds.filter((seed) => seed.type === "track");
 
     const seedArtistsQuery =
         seedArtists.length > 0 ? "seed_artists=" + seedArtists.map((seed) => seed.id).join(",") : "";
-    const seedGenresQuery = seedGenres.length > 0 ? "seed_genres=" + seedGenres.map((seed) => seed.id).join(",") : "";
+    const seedGenresQuery =
+        seedGenres.length > 0 ? "seed_genres=" + seedGenres.map((seed) => seed.id.toLowerCase()).join(",") : "";
     const seedTracksQuery = seedTracks.length > 0 ? "seed_tracks=" + seedTracks.map((seed) => seed.id).join(",") : "";
 
     const seedQuery = [seedArtistsQuery, seedGenresQuery, seedTracksQuery].filter((seed) => seed !== "").join("&");
+    debugLog("SEED_QUERY: ", seedQuery);
     return seedQuery;
 };
 
