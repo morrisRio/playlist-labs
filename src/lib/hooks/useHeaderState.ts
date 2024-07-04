@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback, RefObject } from "react";
 interface HeaderState {
     headerHeight: number;
     collapsed: boolean;
-    headerOpacity: number;
     handleScroll: () => void;
 }
 
@@ -14,7 +13,6 @@ export const useHeaderState = (
     const [headerHeight, setHeaderHeight] = useState(60);
     const [triggerPoint, setTriggerPoint] = useState(0);
     const [collapsed, setCollapsed] = useState(false);
-    const [headerOpacity, setHeaderOpacity] = useState(0);
 
     useEffect(() => {
         if (headerRef.current) {
@@ -30,8 +28,6 @@ export const useHeaderState = (
 
     const handleScroll = useCallback(() => {
         const currentScrollY = window.scrollY;
-
-        setHeaderOpacity(collapsed ? 1 : triggerPoint > 0 ? currentScrollY / triggerPoint : 0);
 
         if (collapsed && currentScrollY < triggerPoint) {
             setCollapsed(false);
@@ -51,7 +47,6 @@ export const useHeaderState = (
     return {
         headerHeight,
         collapsed,
-        headerOpacity,
         handleScroll,
     };
 };

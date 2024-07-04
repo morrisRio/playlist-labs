@@ -1,6 +1,14 @@
 "use client";
-import { MdChevronLeft, MdModeEdit, MdPalette, MdOpenInNew, MdShuffle, MdOutlineDelete } from "react-icons/md";
-import { FormEvent, useRef, useState } from "react";
+import {
+    MdChevronLeft,
+    MdModeEdit,
+    MdPalette,
+    MdOpenInNew,
+    MdShuffle,
+    MdOutlineDelete,
+    MdRefresh,
+} from "react-icons/md";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { getCssHueGradient } from "@/lib/utils";
 
 import Link from "next/link";
@@ -12,6 +20,9 @@ import ContextMenu from "@/components/Context";
 import UniModal from "@/components/UniModal";
 import { useHeaderState } from "@/lib/hooks/useHeaderState";
 
+import { dbDeletePlaylist } from "@/lib/db/dbActions";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+
 interface PlaylistHeaderProps {
     pageTitle: string;
     playlist_id: string | false;
@@ -22,6 +33,8 @@ interface PlaylistHeaderProps {
     action: (e: FormEvent<HTMLFormElement>) => void;
     actionTitle: string;
     submitting: boolean;
+    resetSettings: () => void;
+    router: AppRouterInstance;
 }
 
 function PlaylistHeader({
@@ -33,26 +46,29 @@ function PlaylistHeader({
     coverUrl,
     actionTitle,
     submitting,
+    resetSettings,
+    router,
 }: PlaylistHeaderProps) {
     const [showNameModal, setShowNameModal] = useState(playlist_id === false);
     const [showGradient, setShowGradient] = useState(false);
 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [showResetModal, setShowResetModal] = useState(false);
 
     //TODO: Memo the random color
-    const bgImage = hue
-        ? getCssHueGradient(hue)
-        : coverUrl
-        ? `url(${coverUrl})`
-        : getCssHueGradient(Math.floor(Math.random() * 360));
 
     const headerRef = useRef<HTMLDivElement>(null);
     const actionButtonRef = useRef<HTMLButtonElement>(null);
-    const { headerHeight, collapsed, headerOpacity } = useHeaderState(headerRef, actionButtonRef);
+    const { headerHeight, collapsed } = useHeaderState(headerRef, actionButtonRef);
 
-    const deleteAccount = async () => {
-        console.log("Deleting Account");
+    const deletePlaylist = async () => {
+        if (!playlist_id) return;
+        dbDeletePlaylist(playlist_id);
+        router.replace("/");
+        router.refresh();
     };
+
+    const bgImage = hue ? getCssHueGradient(hue) : coverUrl ? `url(${coverUrl})` : getCssHueGradient(150);
 
     return (
         <>
@@ -83,35 +99,65 @@ function PlaylistHeader({
                         <MdShuffle size="1.2rem" />
                         {actionTitle}
                     </button>
-                    <ContextMenu contextTitle={"Playlist Options"}>
-                        <a
-                            href={`https://open.spotify.com/playlist/${playlist_id}`}
-                            target="_blank"
-                            className="text-ui-600"
+                    {playlist_id ? (
+                        <ContextMenu contextTitle={"Playlist Options"}>
+                            <a
+                                href={`https://open.spotify.com/playlist/${playlist_id}`}
+                                target="_blank"
+                                className="text-ui-600"
+                            >
+                                <MdOpenInNew />
+                                Open in Spotify
+                            </a>
+                            <button onPointerDown={() => setShowResetModal(true)} className="text-ui-600">
+                                <MdRefresh />
+                                Reset Settings
+                            </button>
+                            <button onPointerDown={() => setShowConfirmModal(true)} className="text-red-800">
+                                <MdOutlineDelete />
+                                Delete Playlist
+                            </button>
+                        </ContextMenu>
+                    ) : (
+                        <ContextMenu contextTitle={"Playlist Options"}>
+                            <button onPointerDown={() => setShowResetModal(true)} className="text-ui-600">
+                                <MdRefresh />
+                                Reset Settings
+                            </button>
+                        </ContextMenu>
+                    )}
+
+                    {showResetModal && (
+                        <UniModal
+                            title="Reset Settings"
+                            action={() => {
+                                resetSettings();
+                                setShowResetModal(false);
+                            }}
+                            actionTitle="Reset"
+                            onClose={() => setShowResetModal(false)}
                         >
-                            <MdOpenInNew />
-                            Open in Spotify
-                        </a>
-                        <button onPointerDown={() => setShowConfirmModal(true)} className="text-red-800">
-                            <MdOutlineDelete />
-                            Delete Playlist
-                        </button>
-                    </ContextMenu>
+                            <p>Are you sure you want to reset all settings?</p>
+                        </UniModal>
+                    )}
+
                     {showConfirmModal && (
                         <UniModal
-                            title="Delete Account"
-                            action={deleteAccount}
+                            title="Delete Playlist"
+                            action={deletePlaylist}
                             actionTitle="Delete"
                             actionDanger={true}
                             onClose={() => setShowConfirmModal(false)}
                         >
-                            <p>
-                                This action will delete your account and all associated data irreversibly. This includes
-                                all playlists and preferences. In fact that&apos;s all we store for you
-                                <br />
-                                <br />
-                                For security reasons we won&apos;t delete generated playlists on Spotify.
-                            </p>
+                            <div className="w-full flex flex-col gap-4 ">
+                                <ul className="list-disc list-inside">
+                                    <li>The playlist will remain on Spotify but won't update here.</li>
+                                    <li>All associated data will be permanently removed.</li>
+                                    <li>This action is irreversible</li>
+                                </ul>
+
+                                <p>Are you sure you want to delete this playlist?</p>
+                            </div>
                         </UniModal>
                     )}
                 </div>

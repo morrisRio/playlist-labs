@@ -6,6 +6,8 @@ import User from "@/models/userModel";
 import UserModel from "@/models/userModel";
 import { Document } from "mongoose";
 import { debugLog, setDebugMode } from "@/lib/utils";
+import { auth } from "../serverUtils";
+import { revalidateTag } from "next/cache";
 
 interface MongoUserData extends Document {
     name: string;
@@ -161,6 +163,40 @@ export async function dbUpdatePlaylist(userId: string, playlistData: PlaylistDat
         return true;
     } catch (error) {
         console.error("Error updating playlist:", error);
+        return false;
+    }
+}
+
+export async function dbDeletePlaylist(playlistId: string): Promise<boolean> {
+    //redundant authentication
+    const session = await auth();
+    const userId = session.user.id;
+    await connectMongoDB();
+    try {
+        const result = await UserModel.updateOne(
+            { spotify_id: userId },
+            { $pull: { playlists: { playlist_id: playlistId } } }
+        );
+        if (!result.acknowledged) throw new Error("Change not acknowledged in DB");
+        revalidateTag("playlists");
+        return true;
+    } catch (error) {
+        console.error("Error deleting playlist:", error);
+        return false;
+    }
+}
+
+export async function dbDeleteUser(): Promise<boolean> {
+    //redundant authentication
+    const session = await auth();
+    const userId = session.user.id;
+    await connectMongoDB();
+    try {
+        const result = await UserModel.deleteOne({ spotify_id: userId });
+        if (!result.acknowledged) throw new Error("Change not acknowledged in DB");
+        return true;
+    } catch (error) {
+        console.error("Error deleting user:", error);
         return false;
     }
 }

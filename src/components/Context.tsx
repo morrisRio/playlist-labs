@@ -9,14 +9,21 @@ import {
     useCallback,
     useMemo,
     isValidElement,
+    Dispatch,
+    SetStateAction,
 } from "react";
 import { MdMoreVert } from "react-icons/md";
 
 // Utility function to add class to React node
-const addClassToNode = (node: ReactNode, className: string, key: number): ReactNode => {
+const addClassAndCloseToNode = (
+    node: ReactNode,
+    className: string,
+    key: number,
+    setShowContextMenu: Dispatch<SetStateAction<boolean>>
+): ReactNode => {
     if (node == null || typeof node !== "object") {
         return (
-            <span className={className} key={key}>
+            <span className={className} key={key} onPointerDown={() => setShowContextMenu(false)}>
                 {node}
             </span>
         );
@@ -24,9 +31,17 @@ const addClassToNode = (node: ReactNode, className: string, key: number): ReactN
 
     if (isValidElement(node)) {
         const existingClassName = node.props.className || "";
+        const existingOnPointerDown = node.props.onPointerDown || (() => {});
+
         return cloneElement(node as ReactElement, {
             className: `${className} ${existingClassName}`.trim(),
             key,
+            onPointerDown: (event: React.PointerEvent) => {
+                setShowContextMenu(false);
+                if (existingOnPointerDown) {
+                    existingOnPointerDown(event);
+                }
+            },
         });
     }
 
@@ -38,14 +53,13 @@ const addClassToNode = (node: ReactNode, className: string, key: number): ReactN
     );
 };
 // Memoized function to process children
-const useContextChildren = (children: ReactNode) => {
+const useContextChildren = (children: ReactNode, setShowContextMenu: Dispatch<SetStateAction<boolean>>) => {
     return useMemo(() => {
         if (children == null) return null;
 
-        const contextClassName = "text-lg text-nowrap flex flex-row items-center gap-2 px-3 py-2";
-
+        const contextClassName = "text-lg text-nowrap flex flex-row items-center gap-2 px-3 py-2 whitespace-nowrap";
         return Children.map(children, (child, index) =>
-            isValidElement(child) ? addClassToNode(child, contextClassName, index) : child
+            isValidElement(child) ? addClassAndCloseToNode(child, contextClassName, index, setShowContextMenu) : child
         );
     }, [children]);
 };
@@ -59,9 +73,8 @@ interface ContextProps {
 
 function ContextMenu({ contextTitle, contextIcon, children, className = "" }: ContextProps) {
     const [showContextMenu, setShowContextMenu] = useState(false);
-    const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
 
-    const processedChildren = useContextChildren(children);
+    const processedChildren = useContextChildren(children, setShowContextMenu);
 
     const handleScroll = useCallback(() => setShowContextMenu(false), []);
 

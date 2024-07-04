@@ -1,14 +1,18 @@
 "use client";
 import { useState, FormEvent, useCallback, PointerEventHandler } from "react";
+import { useRouter } from "next/navigation";
+
+import PlaylistHeader from "./PlaylistHeader";
 import PreferencesForm from "./PreferencesForm";
 import Rules from "./RulesForm/Rules";
 import Seeds from "./SeedsForm/Seeds";
-import PlaylistHeader from "./PlaylistHeader";
-import { Seed, Rule, Preferences, RuleInput } from "@/types/spotify";
 import UniModal from "../UniModal";
-import { PlaylistData } from "@/types/spotify";
+
+import { Seed, Rule, Preferences, RuleInput, PlaylistData } from "@/types/spotify";
 import { completeRules } from "@/lib/spotifyUtils";
-import { useRouter } from "next/navigation";
+
+import Lottie from "lottie-react";
+import Loading from "@/lib/lotties/loading.json";
 
 interface PlaylistFormProps {
     pageTitle: string;
@@ -81,7 +85,6 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
             setRules((prevState) => {
                 const newRules = [...prevState];
                 const i = newRules.findIndex((r) => r.name === name);
-                console.log("rule change", name, value);
 
                 //parse the value to the correct type
                 //if the type is range, parse it to a float
@@ -187,6 +190,12 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
         setSubmitting(false);
     };
 
+    const resetSettings = () => {
+        setPreferences(initialState.preferences);
+        setSeeds(initialState.seeds);
+        setRules(initialState.rules);
+    };
+
     //check if the playlist has changed
     const currentState = {
         preferences: preferences,
@@ -198,6 +207,13 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
 
     return (
         <>
+            {submitting && (
+                <div className="fixed inset-0 max-h-screen bg-ui-950/80 z-50 flex items-center">
+                    <div className="size-24 mx-auto">
+                        <Lottie animationData={Loading}> </Lottie>
+                    </div>
+                </div>
+            )}
             <PlaylistHeader
                 pageTitle={pageTitle}
                 name={preferences.name}
@@ -208,6 +224,8 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
                 submitting={submitting}
                 actionTitle={!changed ? "Regenerate" : playlist_id ? "Save Changes" : "Create Playlist"}
                 action={handleSubmit}
+                resetSettings={resetSettings}
+                router={router}
             ></PlaylistHeader>
             <form
                 id="playlist-form"

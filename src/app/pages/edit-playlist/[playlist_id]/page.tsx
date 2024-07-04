@@ -4,8 +4,6 @@ import PlaylistCreator from "@/components/PlaylistCreator/PlaylistCreator";
 import { dbGetOnePlaylist } from "@/lib/db/dbActions";
 import { headers } from "next/headers";
 import { getAppUrl } from "@/lib/utils";
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
 
 async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
     const { playlist_id } = params;

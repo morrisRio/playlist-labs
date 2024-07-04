@@ -52,15 +52,18 @@ function SmartMarquee({ children, divider = false }: SmartMarqueeProps) {
     return (
         <div ref={containerRef} className="relative">
             {childrenTooLong && (
-                <div className="size-full visible">
+                <div className="size-full visible flex flex-nowrap">
                     <div className="absolute size-full z-10" style={{ backgroundImage: bgGradient }}></div>
-                    <Marquee play={true} speed={30} delay={1}>
+                    <Marquee play={true} speed={30}>
                         {children}
                         {divider && <span>{"\xa0-\xa0"}</span>}
                     </Marquee>
                 </div>
             )}
-            <div ref={childRef} className={`${childrenTooLong ? "invisible absolute" : "visible"} size-full`}>
+            <div
+                ref={childRef}
+                className={`${childrenTooLong ? "invisible absolute" : "visible"} size-full whitespace-nowrap`}
+            >
                 {children}
             </div>
         </div>
