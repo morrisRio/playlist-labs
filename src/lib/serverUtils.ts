@@ -7,6 +7,7 @@ import { NextResponse } from "next/server";
 import { debugLog, setDebugMode } from "@/lib/utils";
 import { fetchFromSpotify, ValidationFunction } from "@/lib/spotifyApiUtils";
 import { IncomingHttpHeaders } from "http";
+import { redirect } from "next/navigation";
 
 /* helper function for getServerSession() to avoid passing authOptions around */
 export async function auth(
@@ -18,7 +19,12 @@ export async function auth(
 ) {
     setDebugMode(false);
     debugLog(" - auth() from: ", calledBy);
-    return getServerSession(...args, authOptions);
+    return getServerSession(...args, authOptions).then((session) => {
+        if (!session) {
+            redirect("/api/auth/signin");
+        }
+        return session;
+    });
 }
 
 /**

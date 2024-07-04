@@ -1,8 +1,7 @@
 "use client";
 import { MdChevronLeft, MdModeEdit, MdPalette, MdOpenInNew, MdShuffle, MdOutlineDelete } from "react-icons/md";
-import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { getCssHueGradient } from "@/lib/utils";
-import { prominent } from "color.js";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -58,14 +57,16 @@ function PlaylistHeader({
     return (
         <>
             <header ref={headerRef} className="sticky top-0 z-40">
-                <div
-                    className="absolute inset-0"
-                    style={{
-                        backgroundImage: bgImage,
-                        backgroundSize: "cover",
-                        filter: `saturate(0.5) brightness(0.5)`,
-                    }}
-                ></div>
+                <div className="absolute inset-0 overflow-hidden">
+                    <div
+                        className="w-full aspect-square"
+                        style={{
+                            backgroundImage: bgImage,
+                            backgroundSize: "cover",
+                            filter: `saturate(0.5) brightness(0.5)`,
+                        }}
+                    ></div>
+                </div>
                 <div className="absolute inset-0" style={{ backdropFilter: `blur(64px)` }}></div>
                 <div className="relative flex items-center w-full py-3 px-4 z-10">
                     <Link href="/" replace={true}>
@@ -116,15 +117,15 @@ function PlaylistHeader({
                 </div>
             </header>
             <div className="relative top-0 w-full bg-ui-850">
-                <div
-                    className="absolute size-full blur-3xl bg-cover"
-                    style={{
-                        backgroundImage: bgImage,
-                        paddingTop: `${headerHeight}px`,
-                        marginTop: `-${headerHeight}px`,
-                        filter: `saturate(0.5) brightness(0.5)`,
-                    }}
-                ></div>
+                <div className="absolute size-full overflow-hidden" style={{ marginTop: `-${headerHeight}px` }}>
+                    <div
+                        className="w-full aspect-square blur-3xl bg-cover"
+                        style={{
+                            backgroundImage: bgImage,
+                            filter: `saturate(0.5) brightness(0.5)`,
+                        }}
+                    ></div>
+                </div>
                 <div className="flex flex-col justify-between w-full pt-3 pb-2 px-4 bg-cover gap-5">
                     <div className="flex items-center w-full gap-6">
                         {/* Image */}

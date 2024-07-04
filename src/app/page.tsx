@@ -6,25 +6,22 @@ import { PlaylistData } from "@/types/spotify";
 
 import { headers } from "next/headers";
 
-import resolveConfig from "tailwindcss/resolveConfig";
-import tailwindConfig from "@/../tailwind.config";
-
 import Image from "next/image";
 import Logo from "../../public/logo-small.svg";
 
 import { getAppUrl } from "@/lib/utils";
+import { auth } from "@/lib/serverUtils";
 
 export default async function Home() {
     let playlists: PlaylistData[] | false = false;
-
-    const fullConfig = resolveConfig(tailwindConfig);
-    //@ts-expect-error
-    const interactColor = fullConfig.theme.colors.ui[600];
     /* 
         This is workaround to get the playlists from a database with a fetch to be able to use 
         tagged data cache
         //TODO: wait for unstable_cache to be stable to use for revalidation on demand (submit trigger)
     */
+
+    //get server session to trigger session rotation
+    await auth();
     const res = await fetch(getAppUrl() + "/api/spotify/playlist", {
         method: "GET",
         headers: new Headers(headers()),
@@ -46,8 +43,8 @@ export default async function Home() {
             </div>
             <Link href="/pages/create-playlist">
                 <div className="flex gap-4 items-center w-full mb-4 bg-ui-900 border border-ui-700 rounded-lg">
-                    <div className="size-24 rounded-l-lg flex items-center justify-center border-r border-ui-700">
-                        <MdAdd size="1rem" color={interactColor}></MdAdd>
+                    <div className="size-24 rounded-l-lg flex items-center justify-center border-r border-ui-700 text-ui-600">
+                        <MdAdd></MdAdd>
                     </div>
                     <h4 className="text-ui-600">Create New Playlist</h4>
                 </div>

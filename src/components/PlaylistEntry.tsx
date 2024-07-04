@@ -3,8 +3,6 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import SmartMarquee from "@/components/SmartMarquee";
 
-import resolveConfig from "tailwindcss/resolveConfig";
-import tailwindConfig from "@/../tailwind.config";
 import { MdChevronRight } from "react-icons/md";
 import Image from "next/image";
 import { getAppUrl } from "@/lib/utils";
@@ -16,10 +14,6 @@ interface PlaylistProps {
 async function PlaylistEntry({ playlist }: PlaylistProps) {
     const { playlist_id, seeds } = playlist;
     const { name, frequency, amount } = playlist.preferences;
-
-    const fullConfig = resolveConfig(tailwindConfig);
-    //@ts-expect-error
-    const interactColor = fullConfig.theme.colors.ui[600] || "#fff";
 
     const url = await fetch(getAppUrl() + `/api/spotify/playlist/cover-image?playlist_id=${playlist_id}`, {
         method: "GET",
@@ -44,7 +38,7 @@ async function PlaylistEntry({ playlist }: PlaylistProps) {
             <div className="flex gap-4 items-center w-full bg-ui-900 border border-ui-700 rounded-lg">
                 {url && (
                     <div className="size-24 bg-ui-800 rounded-l-lg relative overflow-hidden flex-none">
-                        <Image src={url} alt="playlist cover image" fill={true} />
+                        <Image src={url} alt="playlist cover image" fill={true} sizes="96px" />
                     </div>
                 )}
                 {!url && <div className="size-24 bg-ui-800 rounded-l-lg"></div>}
@@ -67,8 +61,8 @@ async function PlaylistEntry({ playlist }: PlaylistProps) {
                         ))}
                     </SmartMarquee>
                 </div>
-                <div>
-                    <MdChevronRight color={interactColor} size="2rem"></MdChevronRight>
+                <div className="text-themetext">
+                    <MdChevronRight size="2rem"></MdChevronRight>
                 </div>
             </div>
         </Link>

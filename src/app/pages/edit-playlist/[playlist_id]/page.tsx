@@ -2,15 +2,15 @@ import { auth } from "@/lib/serverUtils";
 import { PlaylistData } from "@/types/spotify";
 import PlaylistCreator from "@/components/PlaylistCreator/PlaylistCreator";
 import { dbGetOnePlaylist } from "@/lib/db/dbActions";
-import { MdChevronLeft } from "react-icons/md";
-import Link from "next/link";
 import { headers } from "next/headers";
 import { getAppUrl } from "@/lib/utils";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 
 async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
     const { playlist_id } = params;
 
-    const session = await auth("edit");
+    const session = await auth();
 
     let playlist: PlaylistData | null = null;
 
