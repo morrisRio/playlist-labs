@@ -151,7 +151,7 @@ function PlaylistHeader({
                         >
                             <div className="w-full flex flex-col gap-4 ">
                                 <ul className="list-disc list-inside">
-                                    <li>The playlist will remain on Spotify but won't update here.</li>
+                                    <li>The playlist will remain on Spotify but won&apos;t update here.</li>
                                     <li>All associated data will be permanently removed.</li>
                                     <li>This action is irreversible</li>
                                 </ul>

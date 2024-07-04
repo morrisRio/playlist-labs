@@ -61,7 +61,7 @@ const useContextChildren = (children: ReactNode, setShowContextMenu: Dispatch<Se
         return Children.map(children, (child, index) =>
             isValidElement(child) ? addClassAndCloseToNode(child, contextClassName, index, setShowContextMenu) : child
         );
-    }, [children]);
+    }, [children, setShowContextMenu]);
 };
 
 interface ContextProps {
