@@ -170,7 +170,7 @@ export async function dbUpdatePlaylist(userId: string, playlistData: PlaylistDat
 export async function dbDeletePlaylist(playlistId: string): Promise<boolean> {
     //redundant authentication
     const session = await auth();
-    const userId = session.user.id;
+    const userId = session?.user.id;
     await connectMongoDB();
     try {
         const result = await UserModel.updateOne(
@@ -189,7 +189,7 @@ export async function dbDeletePlaylist(playlistId: string): Promise<boolean> {
 export async function dbDeleteUser(): Promise<boolean> {
     //redundant authentication
     const session = await auth();
-    const userId = session.user.id;
+    const userId = session?.user.id;
     await connectMongoDB();
     try {
         const result = await UserModel.deleteOne({ spotify_id: userId });

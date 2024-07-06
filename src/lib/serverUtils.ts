@@ -14,14 +14,15 @@ export async function auth(
         | [NextApiRequest, NextApiResponse]
         | []
 ) {
-    setDebugMode(false);
-    debugLog(" - auth() from: ", calledBy);
-    return getServerSession(...args, authOptions).then((session) => {
-        if (!session) {
-            redirect("/api/auth/signin");
-        }
-        return session;
-    });
+    setDebugMode(true);
+    debugLog("auth() function called", calledBy);
+    return getServerSession(...args, authOptions);
+    // .then((session) => {
+    //     if (!session) {
+    //         redirect("/api/auth/signin");
+    //     }
+    //     return session;
+    // });
 }
 
 /**

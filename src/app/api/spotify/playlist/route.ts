@@ -287,8 +287,8 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 export async function GET(req: NextRequest, res: NextResponse): Promise<NextResponse> {
     setDebugMode(true);
     debugLog("API: PLAYLIST GET - fetching playlists for user");
-    const session = await auth();
-    debugLog("got session", session);
+    const session = await auth("PLAYLIST");
+    debugLog("API: got session", session);
 
     if (!session || !session.user || !session.user.id) {
         return NextResponse.json({ message: "Unauthorized." }, { status: 401 });

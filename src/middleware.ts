@@ -7,6 +7,8 @@ import { getAppUrl } from "@/lib/utils";
 // This function can be marked `async` if using `await` inside
 export async function middleware(req: NextRequest) {
     setDebugMode(true);
+
+    debugLog("MIDDLEWARE ACTIVE");
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     const { pathname } = req.nextUrl;
 

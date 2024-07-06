@@ -21,7 +21,7 @@ export default async function Home() {
     */
 
     //get server session to trigger session rotation
-    await auth();
+    await auth("HOME");
     const res = await fetch(getAppUrl() + "/api/spotify/playlist", {
         method: "GET",
         headers: new Headers(headers()),

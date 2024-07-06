@@ -179,6 +179,11 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
                 setSubmitErrors([]);
                 router.replace("/pages/edit-playlist/" + data);
                 router.refresh();
+                currentState = {
+                    preferences: preferences,
+                    seeds: seeds,
+                    rules: rules,
+                };
             })
             .catch((err) => {
                 setSubmitting(false);
@@ -197,7 +202,7 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
     };
 
     //check if the playlist has changed
-    const currentState = {
+    let currentState = {
         preferences: preferences,
         seeds: seeds,
         rules: rules,
