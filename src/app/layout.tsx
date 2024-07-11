@@ -28,10 +28,11 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+    //this should trigger token rotation but it doesnt.
     const session = await auth("layout");
     return (
         <html lang="en">
-            <body className={`${ibmPlexSans.variable} font-ibm antialiased relative`}>
+            <body className={`${ibmPlexSans.variable} font-ibm antialiased relative overflow-x-hidden`}>
                 <SessionProvider session={session}>
                     <main className="min-h-screen">{children}</main>
                 </SessionProvider>
