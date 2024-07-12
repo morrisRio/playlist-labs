@@ -60,6 +60,7 @@ export const authOptions: NextAuthOptions = {
             //on first sign in add the tokens from account to jwt
             if (account) {
                 debugLog("JWT: FIRST SIGN IN");
+                debugLog("JWT: ACCOUNT token", account.access_token);
                 return {
                     ...token,
                     accessToken: account.access_token!,
@@ -71,12 +72,13 @@ export const authOptions: NextAuthOptions = {
 
             //return previous token if it hasn't expired yet
             if (token.accessTokenExpires && Date.now() < token.accessTokenExpires) {
-                debugLog("JWT: TOKEN STILL VALID");
+                debugLog("JWT: still valid token", token.accessToken);
                 return token;
             }
 
             // //access token has expired, try to update it
             let refreshToken = (await refreshAccessToken(token)) as JWT;
+            debugLog("JWT: refreshed token", refreshToken.accessToken);
             return refreshToken;
         },
 

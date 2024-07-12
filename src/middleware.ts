@@ -13,7 +13,7 @@ export async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
 
     if (pathname.includes("/api/auth") || token) {
-        debugLog("TOKEN FOUND");
+        debugLog("TOKEN FOUND OR AUTH API, CONTINUE");
         return NextResponse.next();
     }
     //TODO: BUG this gets called on every page load even if the user is signed in and no redirect is performed

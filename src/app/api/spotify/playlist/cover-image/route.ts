@@ -5,11 +5,13 @@ import { getToken } from "next-auth/jwt";
 import { debugLog, setDebugMode } from "@/lib/utils";
 
 export async function GET(req: NextRequest, res: NextResponse): Promise<NextResponse> {
-    setDebugMode(false);
+    setDebugMode(true);
     const token = await getToken({ req });
-
+    debugLog("GETTING THE PLAYLIST COVER IMAGE ======================");
+    debugLog("GET - token", token);
     if (!token) {
         console.error("No token found");
+        debugLog("END OF GET ======================");
         return NextResponse.json({ error: "No token found" }, { status: 401 });
     }
 
@@ -35,11 +37,13 @@ export async function GET(req: NextRequest, res: NextResponse): Promise<NextResp
 
     if (imageResponseData.error) {
         debugLog("API - error", imageResponseData.error);
+        debugLog("END OF GET ======================");
         const { message, status } = imageResponseData.error;
         return NextResponse.json({ message }, { status });
     }
 
     const { url } = imageResponseData[0];
     debugLog("API - after fetch", url);
+    debugLog("END OF GET ======================");
     return NextResponse.json(url, { status: 200 });
 }

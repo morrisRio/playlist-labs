@@ -24,12 +24,12 @@ async function PlaylistEntry({ playlist }: PlaylistProps) {
             const data = await res.json();
             if (!res.ok) {
                 const { message } = data;
-                throw new Error("Network response was not ok " + res.status + " " + message);
+                throw new Error("response !ok: " + res.status + " " + message);
             }
             return data;
         })
         .catch((error) => {
-            console.log("Error on Server Component:", error);
+            console.log("Error  getiing urls on Server Component:", error);
             return false;
         });
 

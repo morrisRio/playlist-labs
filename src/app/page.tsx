@@ -19,9 +19,6 @@ export default async function Home() {
         tagged data cache
         //TODO: wait for unstable_cache to be stable to use for revalidation on demand (submit trigger)
     */
-
-    //get server session to trigger session rotation
-    await auth("HOME");
     const res = await fetch(getAppUrl() + "/api/spotify/playlist", {
         method: "GET",
         headers: new Headers(headers()),
