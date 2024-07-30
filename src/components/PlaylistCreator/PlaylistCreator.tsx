@@ -225,7 +225,7 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
                 playlist_id={playlist_id}
                 onChange={handlePrefChange}
                 coverUrl={playlist?.coverUrl ? playlist.coverUrl : false}
-                hue={preferences.hue ? preferences.hue : false}
+                hue={preferences.hue}
                 submitting={submitting}
                 actionTitle={!changed ? "Regenerate" : playlist_id ? "Save Changes" : "Create Playlist"}
                 action={handleSubmit}

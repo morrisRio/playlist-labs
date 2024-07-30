@@ -4,16 +4,21 @@ import PlaylistCreator from "@/components/PlaylistCreator/PlaylistCreator";
 import { dbGetOnePlaylist } from "@/lib/db/dbActions";
 import { headers } from "next/headers";
 import { getAppUrl } from "@/lib/utils";
+import { redirect } from "next/navigation";
 
 async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
     const { playlist_id } = params;
 
-    const session = await auth();
+    const session = await auth("playlist");
+    if (!session || !session.user || !session.user.id) {
+        console.error("No session found");
+        redirect("/api/auth/signin");
+    }
 
     let playlist: PlaylistData | null = null;
 
     const getCoverUrl = async (playlist_id: string): Promise<string | undefined> => {
-        const coverUrl = await fetch(getAppUrl() + `/api/spotify/playlist/cover-image?playlist_id=${playlist_id}`, {
+        const coverUrl = await fetch(getAppUrl() + `/api/spotify/playlist/cover/${playlist_id}`, {
             method: "GET",
             headers: new Headers(headers()),
             next: { tags: ["playlist"] },

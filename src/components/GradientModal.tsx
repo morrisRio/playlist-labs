@@ -42,6 +42,7 @@ const GradientModal = ({ onSave, onClose }: GradientModalProps) => {
                     max="360"
                     value={hue}
                     onChange={(e) => setHue(parseInt(e.target.value))}
+                    className="noprogress"
                     style={{ background: `linear-gradient(in hsl longer hue 45deg, hsl(0 70 40) 0 0)` }}
                 />
             </div>

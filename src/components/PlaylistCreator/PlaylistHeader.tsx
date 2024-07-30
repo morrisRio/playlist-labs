@@ -28,7 +28,7 @@ interface PlaylistHeaderProps {
     playlist_id: string | false;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     name: string;
-    hue: number | false;
+    hue: number | undefined;
     coverUrl: string | false;
     action: (e: FormEvent<HTMLFormElement>) => void;
     actionTitle: string;
@@ -68,7 +68,8 @@ function PlaylistHeader({
         router.refresh();
     };
 
-    const bgImage = hue ? getCssHueGradient(hue) : coverUrl ? `url(${coverUrl})` : getCssHueGradient(150);
+    console.log("PlaylistHeader hue:", hue);
+    const bgImage = hue !== undefined ? getCssHueGradient(hue) : coverUrl ? `url(${coverUrl})` : getCssHueGradient(150);
 
     return (
         <>
@@ -81,9 +82,10 @@ function PlaylistHeader({
                             backgroundSize: "cover",
                             filter: `saturate(0.5) brightness(0.5)`,
                         }}
-                    ></div>
+                    >
+                        <div className="absolute inset-0" style={{ backdropFilter: `blur(64px)` }}></div>
+                    </div>
                 </div>
-                <div className="absolute inset-0" style={{ backdropFilter: `blur(64px)` }}></div>
                 <div className="relative flex items-center w-full py-3 px-4 z-10">
                     <Link href="/" replace={true}>
                         <MdChevronLeft size="2rem"></MdChevronLeft>
@@ -165,24 +167,24 @@ function PlaylistHeader({
             <div className="relative top-0 w-full bg-ui-850">
                 <div className="absolute size-full overflow-hidden" style={{ marginTop: `-${headerHeight}px` }}>
                     <div
-                        className="w-full aspect-square blur-3xl bg-cover"
+                        className="w-full aspect-square bg-cover"
                         style={{
                             backgroundImage: bgImage,
                             filter: `saturate(0.5) brightness(0.5)`,
                         }}
-                    ></div>
+                    >
+                        <div className="absolute inset-0" style={{ backdropFilter: `blur(64px)` }}></div>
+                    </div>
                 </div>
                 <div className="flex flex-col justify-between w-full pt-3 pb-2 px-4 bg-cover gap-5">
                     <div className="flex items-center w-full gap-6">
                         {/* Image */}
                         <div className="size-36 rounded-lg overflow-hidden relative z-20">
-                            {coverUrl && !hue && <Image src={coverUrl} alt="cover-image" fill></Image>}
-                            {hue && (
-                                <div
-                                    className="w-full h-full"
-                                    style={{ backgroundImage: getCssHueGradient(hue) }}
-                                ></div>
-                            )}
+                            <div
+                                className="w-full h-full"
+                                style={{ backgroundImage: bgImage, backgroundSize: "cover" }}
+                            ></div>
+
                             <div
                                 className="absolute right-1 bottom-1 rounded-full flex items-center justify-center bg-ui-900 p-1"
                                 onPointerDown={() => setShowGradient(true)}

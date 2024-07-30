@@ -79,12 +79,12 @@ export const spotifyPost = async (
 
 /**
  * Makes a PUT request to the Spotify API.
- *
  * @param url - The URL to send the request to.
  * @param token - The access token for authentication.
  * @param body - The request body.
- * @param validationFunction - Optional. The function used to validate the fetched data.
- * @param debug - Optional. Set to true to enable debug mode.
+ * @param header - Additional headers to include in the request.
+ * @param validationFunction - A function to validate the response.
+ * @param debug - Whether to enable debug mode.
  * @returns A Promise that resolves to the response data.
  */
 export const spotifyPut = async (

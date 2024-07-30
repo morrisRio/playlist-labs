@@ -56,7 +56,7 @@ export const authOptions: NextAuthOptions = {
 
         async jwt({ token, account }: { token: JWT; account: Account | null; user: User }): Promise<JWT> {
             setDebugMode(true);
-            debugLog("JWT CALLBACK");
+            debugLog("JWT CALLBACK START =================================================== ");
             //on first sign in add the tokens from account to jwt
             if (account) {
                 debugLog("JWT: FIRST SIGN IN");
@@ -69,24 +69,30 @@ export const authOptions: NextAuthOptions = {
                     accessTokenExpires: account.expires_at!,
                 };
             }
+            let now = Date.now() / 1000;
+            let date = new Date(0);
+            date.setUTCSeconds(now);
 
-            //return previous token if it hasn't expired yet
-            if (token.accessTokenExpires && Date.now() < token.accessTokenExpires) {
+            let expires = new Date(0);
+            expires.setUTCSeconds(token.accessTokenExpires);
+
+            debugLog("JWT: now", date);
+            debugLog("JWT: exp", expires);
+            // //return previous token if it hasn't expired yet
+            if (token.accessTokenExpires && Date.now() / 1000 < token.accessTokenExpires - 3540) {
                 debugLog("JWT: still valid token", token.accessToken);
                 return token;
             }
 
             // //access token has expired, try to update it
+            debugLog("JWT: old token", token.accessToken);
             let refreshToken = (await refreshAccessToken(token)) as JWT;
-            debugLog("JWT: refreshed token", refreshToken.accessToken);
+            debugLog("JWT: new token", refreshToken.accessToken);
             return refreshToken;
         },
 
         async session({ session, token }) {
             session.user.id = token.userId;
-            session.expires_in = token.accessTokenExpires
-                ? ((token.accessTokenExpires - Date.now()) / 60000).toFixed(1) + "min"
-                : "0min";
             return session;
         },
     },
@@ -94,7 +100,7 @@ export const authOptions: NextAuthOptions = {
 
 async function refreshAccessToken(token: JWT) {
     try {
-        debugLog("REFRESHING TOKEN");
+        debugLog("-> refreshing token", token.accessToken);
         if (!token.refreshToken) throw new Error("NO_REFRESH_TOKEN_PROVIDED");
 
         //get new access token
@@ -112,6 +118,7 @@ async function refreshAccessToken(token: JWT) {
                 refresh_token: token.refreshToken,
             }),
         });
+        debugLog("-> refresh = ", response.ok);
         const refreshedToken = await response.json();
 
         if (!response.ok) throw new Error("NETWORK RESPONSE ERROR");
@@ -119,7 +126,7 @@ async function refreshAccessToken(token: JWT) {
         return {
             ...token,
             accessToken: refreshedToken.access_token,
-            accessTokenExpires: Date.now() + refreshedToken.expires_in * 1000,
+            accessTokenExpires: Date.now() / 1000 + refreshedToken.expires_in,
             //keep old refresh token if new one is not provided
             refreshToken: refreshedToken.refresh_token ?? token.refreshToken,
         };

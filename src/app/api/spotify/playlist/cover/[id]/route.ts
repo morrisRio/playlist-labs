@@ -1,25 +1,29 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
-import { spotifyGet, spotifyPut } from "@/lib/serverUtils";
-import { getToken } from "next-auth/jwt";
+import { spotifyGet } from "@/lib/serverUtils";
 import { debugLog, setDebugMode } from "@/lib/utils";
+import { getToken } from "next-auth/jwt";
 
-export async function GET(req: NextRequest, res: NextResponse): Promise<NextResponse> {
+export async function GET(
+    req: NextRequest,
+    {
+        params,
+    }: {
+        params: { id: string };
+    }
+): Promise<NextResponse> {
     setDebugMode(true);
+    debugLog("API: GETTING THE PLAYLIST COVER IMAGE ============================================");
     const token = await getToken({ req });
-    debugLog("GETTING THE PLAYLIST COVER IMAGE ======================");
-    debugLog("GET - token", token);
     if (!token) {
         console.error("No token found");
-        debugLog("END OF GET ======================");
+        debugLog("API: END OF GET ============================================");
         return NextResponse.json({ error: "No token found" }, { status: 401 });
     }
-
-    debugLog("got token", token.accessToken);
+    debugLog("API: GET - token from req:", token?.accessToken);
 
     const { accessToken } = token;
-    const playlistId = req.nextUrl.searchParams.get("playlist_id");
-    debugLog("getting image for playlist", playlistId);
+    const playlistId = params.id;
 
     const validatePlaylistImage = (data: any) => {
         if (!data || !data[0] || !data[0].url || typeof data[0].url !== "string") {
@@ -37,13 +41,13 @@ export async function GET(req: NextRequest, res: NextResponse): Promise<NextResp
 
     if (imageResponseData.error) {
         debugLog("API - error", imageResponseData.error);
-        debugLog("END OF GET ======================");
+        debugLog("API: END OF GET ============================================");
         const { message, status } = imageResponseData.error;
         return NextResponse.json({ message }, { status });
     }
 
     const { url } = imageResponseData[0];
-    debugLog("API - after fetch", url);
-    debugLog("END OF GET ======================");
+    debugLog("API: SUCCESS", url);
+    debugLog("API: END OF GET ============================================");
     return NextResponse.json(url, { status: 200 });
 }

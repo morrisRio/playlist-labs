@@ -10,33 +10,47 @@ import { debugLog, setDebugMode } from "@/lib/utils";
 import { revalidateTag } from "next/cache";
 import { createCanvas } from "@napi-rs/canvas";
 
-const updateCoverImage = async (
-    playlistId: string,
-    hue: number = Math.floor(Math.random() * 360),
-    accessToken: string,
-    debug: boolean = false
-) => {
+const generateCoverImage = async (hue: number): Promise<string> => {
+    console.log("Generating Cover Image. Hue:", hue);
+
     const canvas = createCanvas(640, 640);
+    console.log("Canvas created");
+
     createCanvasGradient(canvas, hue);
+    console.log("Gradient painted");
+
     const buffer = canvas.toDataURL("image/jpeg");
+    console.log("Canvas to data URL");
+
     const base64JpegData = buffer.replace(/^data:image\/\w+;base64,/, "");
+    console.log("Base64 data created");
 
-    const putData = await spotifyPut(
-        `https://api.spotify.com/v1/playlists/${playlistId}/images`,
-        accessToken,
-        base64JpegData,
-        { "Content-Type": "image/jpeg" },
-        undefined,
-        debug
-    );
+    return base64JpegData;
+};
 
-    if (putData.error) {
-        //not critical, just log the error
-        const { message, status } = putData.error;
-        console.error("Failed to add Cover Image to Playlist", message, status);
+const updatePlaylistCover = async (hue: number, idToWriteTo: string, accessToken: string): Promise<void> => {
+    const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("Playlist cover update timed out after 10s")), 10000);
+    });
+
+    try {
+        await Promise.race([
+            (async () => {
+                const coverImageData = await generateCoverImage(hue);
+                const res = await spotifyPut(
+                    `https://api.spotify.com/v1/playlists/${idToWriteTo}/images`,
+                    accessToken,
+                    coverImageData,
+                    { "Content-Type": "image/jpeg" }
+                );
+                console.log("API: Added Cover Image to Playlist:", res);
+            })(),
+            timeoutPromise,
+        ]);
+    } catch (error) {
+        console.error("Failed to update playlist cover:", error);
+        throw error;
     }
-
-    debugLog("API: Added Cover Image to Playlist:", putData);
 };
 
 export async function POST(req: NextRequest, res: NextResponse): Promise<NextResponse> {
@@ -116,13 +130,11 @@ export async function POST(req: NextRequest, res: NextResponse): Promise<NextRes
     debugLog("API: Added Tracks to Playlist:", addRes);
 
     //add the cover image to the playlist
-    try {
-        const hue = preferences.hue || Math.floor(Math.random() * 360);
-        delete preferences.hue;
-        updateCoverImage(idToWriteTo, hue, accessToken, true);
-    } catch (error) {
-        console.error("Failed to create Cover Image", error);
-    }
+    const hue = preferences.hue || Math.floor(Math.random() * 360);
+    delete preferences.hue;
+    await updatePlaylistCover(hue, idToWriteTo, accessToken).catch((error) => {
+        console.error("Failed to update Cover Image", error);
+    });
 
     //add playlist to user document DB
     const dbSuccess = await dbCreatePlaylist(userId, {
@@ -250,12 +262,9 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     }
 
     if (preferences.hue) {
-        try {
-            updateCoverImage(playlist_id, preferences.hue, accessToken);
-            delete preferences.hue;
-        } catch (error) {
+        await updatePlaylistCover(preferences.hue, playlist_id, accessToken).catch((error) => {
             console.error("Failed to update Cover Image", error);
-        }
+        });
     }
 
     const dbSuccess = await dbUpdatePlaylist(userId, {

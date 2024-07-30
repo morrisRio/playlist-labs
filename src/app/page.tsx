@@ -11,25 +11,27 @@ import Logo from "../../public/logo-small.svg";
 
 import { getAppUrl } from "@/lib/utils";
 import { auth } from "@/lib/serverUtils";
+import { redirect } from "next/navigation";
+import { dbGetUsersPlaylists } from "@/lib/db/dbActions";
 
 export default async function Home() {
-    let playlists: PlaylistData[] | false = false;
+    let playlistData: PlaylistData[] | null = null;
     /* 
         This is workaround to get the playlists from a database with a fetch to be able to use 
         tagged data cache
         //TODO: wait for unstable_cache to be stable to use for revalidation on demand (submit trigger)
     */
-    const res = await fetch(getAppUrl() + "/api/spotify/playlist", {
-        method: "GET",
-        headers: new Headers(headers()),
-        next: { tags: ["playlist"] },
-    })
-        .then((res) => res.json())
-        .catch((err) => {
-            console.log(err);
-            return { error: err.message };
-        });
-    playlists = res;
+
+    //this on every server side render instead of middleware
+    const session = await auth("page");
+    if (!session || !session.user || !session.user.id) {
+        console.error("No session found");
+        redirect("/api/auth/signin");
+    }
+
+    const { playlists, error } = await dbGetUsersPlaylists(session.user.id);
+    if (error) playlistData = null;
+    else playlistData = playlists;
 
     return (
         <div className="h-full w-full p-4 flex flex-col gap-5">

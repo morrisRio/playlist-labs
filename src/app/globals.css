@@ -59,6 +59,7 @@
 
 /* TODO: FIDELITY ADD TOGGLE FOR LIGHT MODE */
 
+/* TODO: make clickable area bigger */
 /* regular slider */
 input[type="range"] {
     -webkit-appearance: none;
@@ -99,6 +100,9 @@ input[type="range"]::-moz-range-progress {
     appearance: none;
     border-radius: 100px;
     background-color: var(--color-themetext);
+}
+input[type="range"].noprogress::-moz-range-progress {
+    background-color: transparent;
 }
 
 /* Rule slider */
