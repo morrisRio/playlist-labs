@@ -1,4 +1,6 @@
 import { Canvas } from "@napi-rs/canvas";
+import resolveConfig from "tailwindcss/resolveConfig";
+import tailwindConfig from "../../tailwind.config";
 
 let debugMode = false;
 
@@ -64,3 +66,11 @@ export const createCanvasGradient = (canvas: Canvas, hue: number) => {
     ctx.fillStyle = radialGradient;
     ctx.fillRect(0, 0, width, height);
 };
+
+const fullConfig = resolveConfig(tailwindConfig);
+//@ts-expect-error
+export const twUi900 = fullConfig.theme.colors.ui[900] || "transparent";
+//@ts-expect-error
+export const twUi700 = fullConfig.theme.colors.ui[700] || "grey";
+//@ts-expect-error
+export const twUi500 = fullConfig.theme.colors.ui[500] || "lightgrey";

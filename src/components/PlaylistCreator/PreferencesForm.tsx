@@ -1,5 +1,4 @@
-import resolveConfig from "tailwindcss/resolveConfig";
-import tailwindConfig from "../../../tailwind.config";
+import { twUi700, twUi500 } from "@/lib/utils";
 
 interface PreferencesProps {
     preferences: Preferences;
@@ -13,11 +12,6 @@ interface Preferences {
 }
 
 export default function PreferencesForm({ preferences, onChange }: PreferencesProps) {
-    const fullConfig = resolveConfig(tailwindConfig);
-    //@ts-expect-error
-    const bgColor = fullConfig.theme.colors.ui[700];
-    //@ts-expect-error
-    const progressColor = fullConfig.theme.colors.ui[500];
     return (
         <div className="flex flex-col gap-4 rounded-xl p-4">
             <label className="flex space-between items-center justify-between text-base text-ui-500">
@@ -58,10 +52,10 @@ export default function PreferencesForm({ preferences, onChange }: PreferencesPr
                     onChange={onChange}
                     required
                     style={{
-                        backgroundColor: bgColor,
-                        background: `linear-gradient(90deg, ${progressColor} ${
+                        backgroundColor: twUi700,
+                        background: `linear-gradient(90deg, ${twUi500} ${
                             ((preferences.amount - 5) / 45) * 100
-                        }%, ${bgColor} ${((preferences.amount - 5) / 45) * 100}%)`,
+                        }%, ${twUi700} ${((preferences.amount - 5) / 45) * 100}%)`,
                     }}
                 />
             </div>

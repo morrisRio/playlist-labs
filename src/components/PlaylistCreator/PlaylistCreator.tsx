@@ -56,25 +56,27 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
 
     //Seeds ______________________________________________________________________________________________
     const [seeds, setSeeds] = useState<Seed[]>(initialState.seeds);
-    const addSeed = (seed: Seed) => {
-        if (seeds.length < 5) {
-            setSeeds((prevState) => {
-                return [...prevState, seed];
-            });
-        } else {
-            //TODO: show a toast or something
-            alert("You can only add 5 seeds");
-        }
-    };
+    const addSeed = useCallback(
+        (seed: Seed) => {
+            if (seeds.length < 5) {
+                setSeeds((prevState) => {
+                    return [...prevState, seed];
+                });
+            } else {
+                alert("You can only add 5 seeds");
+            }
+        },
+        [seeds]
+    );
 
-    const removeSeed = (id: string) => {
+    const removeSeed = useCallback((id: string) => {
         setSeeds((prevState) => {
             const newSeeds = [...prevState];
             const i = newSeeds.findIndex((seed) => seed.id === id);
             newSeeds.splice(i, 1);
             return newSeeds;
         });
-    };
+    }, []);
 
     //Rules ______________________________________________________________________________________________
     const [rules, setRules] = useState<Rule[]>(initialState.rules);

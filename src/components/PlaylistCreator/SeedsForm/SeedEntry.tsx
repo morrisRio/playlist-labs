@@ -5,12 +5,10 @@ import { MdRemoveCircleOutline, MdAddCircleOutline } from "react-icons/md";
 import Marquee from "react-fast-marquee";
 import { Seed } from "@/types/spotify";
 
-import resolveConfig from "tailwindcss/resolveConfig";
-import tailwindConfig from "@/../tailwind.config";
-
 import { useState, useRef, useLayoutEffect } from "react";
 
 import Image from "next/image";
+import SmartMarquee from "@/components/SmartMarquee";
 
 //using marquee. Docs:
 //https://www.react-fast-marquee.com/documentation
@@ -21,14 +19,18 @@ type SeedEntryProps = {
     onAdd?: (seed: Seed) => void;
     card?: boolean;
     added?: boolean;
+    isAboveTheFold?: boolean;
 };
 
-export function SeedEntry({ seedObj, onRemove, onAdd, card = false, added = false }: SeedEntryProps): JSX.Element {
+export function SeedEntry({
+    seedObj,
+    onRemove,
+    onAdd,
+    card = false,
+    added = false,
+    isAboveTheFold,
+}: SeedEntryProps): JSX.Element {
     const { description, title, thumbnail, type } = seedObj;
-
-    const fullConfig = resolveConfig(tailwindConfig);
-    //@ts-expect-error
-    const interactColor = fullConfig.theme.colors.themetext["DEFAULT"] + "a8"; //a8 is 65% opacity
 
     let imgSize = "size-14";
     let imgRound = type === "artist" ? "rounded-full" : "rounded-lg";
@@ -95,40 +97,40 @@ export function SeedEntry({ seedObj, onRemove, onAdd, card = false, added = fals
                 </div>
             ) : thumbnail && typeof thumbnail === "string" ? (
                 <div className={`${imgClass} flex-none relative overflow-hidden`}>
-                    <Image src={thumbnail} alt={title} fill />
+                    <Image src={thumbnail} alt={title} fill loading={isAboveTheFold && card ? undefined : "lazy"} />
                 </div>
             ) : (
                 <div className={`${imgClass} flex-none bg-zinc-800`}></div>
             )}
             <div className="flex-auto overflow-hidden">
-                {titleTooLong && !card ? (
-                    <Marquee play={true} speed={30} delay={1}>
-                        <p className="text-base whitespace-nowrap">{title + "\xa0-\xa0"}</p>
-                    </Marquee>
+                {card ? (
+                    <>
+                        <p ref={titleRef} className="text-base whitespace-nowrap overflow-hidden truncate">
+                            {title}
+                        </p>
+                        <p ref={descRef} className={`text-ui-600 text-base whitespace-nowrap truncate`}>
+                            {description}
+                        </p>
+                    </>
                 ) : (
-                    <p ref={titleRef} className="text-base whitespace-nowrap overflow-hidden truncate">
-                        {title}
-                    </p>
-                )}
-
-                {descTooLong && !card ? (
-                    <Marquee speed={30}>
-                        <p className={`text-ui-600 text-base`}>{description + "\xa0-\xa0"}</p>
-                    </Marquee>
-                ) : (
-                    <p ref={descRef} className={`text-ui-600 text-base whitespace-nowrap truncate`}>
-                        {description}
-                    </p>
+                    <>
+                        <SmartMarquee divider>
+                            <p className="text-base whitespace-nowrap">{title}</p>
+                        </SmartMarquee>
+                        <SmartMarquee divider>
+                            <p className={`text-ui-600 text-base`}>{description}</p>
+                        </SmartMarquee>
+                    </>
                 )}
             </div>
             {added && (
                 <button className="justify-end mr-4" onClick={() => onRemove(seedObj.id)} type="button">
-                    <MdRemoveCircleOutline size="1.5rem" color={interactColor} />
+                    <MdRemoveCircleOutline size="1.5rem" className="text-themetext/65" />
                 </button>
             )}
             {!added && onAdd && (
                 <button className="justify-end mr-4" onClick={() => onAdd(seedObj)} type="button">
-                    <MdAddCircleOutline size="1.5rem" color={interactColor} />
+                    <MdAddCircleOutline size="1.5rem" className="text-themetext/65" />
                 </button>
             )}
         </div>

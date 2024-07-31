@@ -114,8 +114,15 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
         }
     );
     const memoizedSeeds = useMemo(() => {
-        return (searchResults || topItemSeeds).map((seed: Seed) => (
-            <SeedEntry seedObj={seed} onAdd={onAdd} onRemove={onRemove} key={seed.id} added={isAdded(seed.id)} />
+        return (searchResults || topItemSeeds).map((seed: Seed, index: number) => (
+            <SeedEntry
+                seedObj={seed}
+                onAdd={onAdd}
+                onRemove={onRemove}
+                key={seed.id}
+                added={isAdded(seed.id)}
+                isAboveTheFold={index < 12}
+            />
         ));
     }, [searchResults, topItemSeeds, onAdd, onRemove, isAdded]);
 

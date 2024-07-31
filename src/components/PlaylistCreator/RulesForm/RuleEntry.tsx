@@ -4,9 +4,6 @@ import { useState } from "react";
 import { TwoAxisSlider } from "./TwoAxis";
 import UniModal from "../../UniModal";
 
-import resolveConfig from "tailwindcss/resolveConfig";
-import tailwindConfig from "@/../tailwind.config";
-
 type RuleEntryProps = {
     rule: Rule;
     onRemove: (id: string) => void;
@@ -29,12 +26,6 @@ export function RuleEntry({
     const ruleCard = control ? "bg-ui-900" : "mb-4 bg-zinc-700/40";
     const fontSize = "text-base";
     const nameConatiner = control ? "border border-b-0 rounded-t-lg" : "border rounded-lg";
-
-    const fullConfig = resolveConfig(tailwindConfig);
-    //@ts-expect-error
-    const interactColor = fullConfig.theme.colors.themetext["DEFAULT"] + "a8"; //a8 is 65% opacity
-    //@ts-expect-error
-    const infoColor = fullConfig.theme.colors.ui[600]; //a8 is 65% opacity
 
     const openModal = () => {
         setShowInfo(true);
@@ -59,7 +50,7 @@ export function RuleEntry({
                 {/* Info _____________________________________________________________________ */}
                 <div className="flex-grow flex items-center gap-4">
                     <h4 className={fontSize}>{rule.name}</h4>
-                    <MdInfoOutline size="1.2rem" color={infoColor} onClick={openModal}></MdInfoOutline>
+                    <MdInfoOutline size="1.2rem" onClick={openModal} className="text-ui-600"></MdInfoOutline>
                     {rule.type === "range" && rule.name === "Tempo" && control && onChange && (
                         <>
                             <input
@@ -77,13 +68,13 @@ export function RuleEntry({
                 </div>
                 {/* Toggles ___________________________________________________________________ */}
                 {added && (
-                    <button onClick={() => onRemove(rule.name)} type="button">
-                        <MdRemoveCircleOutline size="1.5em" color={interactColor} />
+                    <button onClick={() => onRemove(rule.name)} type="button" className="text-themetext/65">
+                        <MdRemoveCircleOutline size="1.5em" />
                     </button>
                 )}
                 {!added && onAdd && (
-                    <button onClick={() => onAdd(rule)} type="button">
-                        <MdAddCircleOutline size="1.5em" color={interactColor} />
+                    <button onClick={() => onAdd(rule)} type="button" className="text-themetext/65">
+                        <MdAddCircleOutline size="1.5em" />
                     </button>
                 )}
             </div>

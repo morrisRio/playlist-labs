@@ -10,6 +10,13 @@ export async function middleware(req: NextRequest) {
 
     debugLog("MIDDLEWARE ACTIVE =================================================== ");
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    if (token && token.accessTokenExpires && token.accessToken) {
+        const expires = new Date(0);
+        expires.setUTCSeconds(token?.accessTokenExpires! + 12000);
+        console.info("MW: token expires: ", expires);
+        console.info("MW: token in MW: ", token.accessToken);
+    }
+
     const { pathname } = req.nextUrl;
 
     //TODO: allow access for cron jobs

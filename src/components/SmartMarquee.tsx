@@ -2,8 +2,7 @@
 import { useState, useLayoutEffect, useRef } from "react";
 import Marquee from "react-fast-marquee";
 
-import resolveConfig from "tailwindcss/resolveConfig";
-import tailwindConfig from "@/../tailwind.config";
+import { twUi900 } from "@/lib/utils";
 
 interface SmartMarqueeProps {
     children: React.ReactNode;
@@ -11,12 +10,7 @@ interface SmartMarqueeProps {
 }
 
 function SmartMarquee({ children, divider = false }: SmartMarqueeProps) {
-    const fullConfig = resolveConfig(tailwindConfig);
-    //@ts-expect-error
-    const bgColor = fullConfig.theme.colors.ui[900] || "transparent";
-
-    const bgGradient = `linear-gradient(to right, ${bgColor} 0%, transparent 10%, transparent 90%, ${bgColor} 100%)`;
-    // const bgGradient = `linear-gradient(to right, red 0%, blue 100%)`;
+    const bgGradient = `linear-gradient(to right, ${twUi900} 0%, transparent 10%, transparent 90%, ${twUi900} 100%)`;
 
     const [childrenTooLong, setChildrenTooLong] = useState(false);
 
