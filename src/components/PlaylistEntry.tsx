@@ -15,7 +15,8 @@
 //     const { playlist_id, seeds } = playlist;
 //     const { name, frequency, amount } = playlist.preferences;
 
-//     const url = await fetch(getAppUrl() + `/api/spotify/playlist/cover-image/${playlist_id}`, {
+//     //TODO: checck waht happens when token is expired
+//     const url = await fetch(getAppUrl() + `/api/spotify/playlist/cover/${playlist_id}`, {
 //         method: "GET",
 //         headers: new Headers(headers()),
 //         next: { tags: ["playlist"] },
@@ -73,7 +74,7 @@
 
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import useSWR, { Fetcher } from "swr";
 
 import { PlaylistData } from "@/types/spotify";
 import Link from "next/link";
@@ -95,34 +96,12 @@ function PlaylistEntry({ playlist }: PlaylistProps) {
     const { playlist_id, seeds } = playlist;
     const { name, frequency, amount } = playlist.preferences;
 
-    let [coverUrl, setCoverUrl] = useState<string | null>(null);
+    const fetcher: Fetcher<string> = (url: string) => fetch(url).then((res) => res.json());
+    const options = {
+        revalidateOnFocus: false,
+    };
 
-    const getCoverUrl = useCallback(async () => {
-        const response = await fetch(`/api/spotify/playlist/cover/${playlist_id}`, {
-            method: "GET",
-        })
-            .then(async (res) => {
-                const data = await res.json();
-                if (!res.ok) {
-                    const { message } = data;
-                    throw new Error("response !ok: " + res.status + " " + message);
-                }
-                return data as string;
-            })
-            .catch((error) => {
-                console.log("Error fetching cover URL:", error);
-                return null;
-            });
-        return response;
-    }, [playlist_id]);
-
-    useEffect(() => {
-        const setUrl = async () => {
-            const url = await getCoverUrl();
-            setCoverUrl(url);
-        };
-        setUrl();
-    }, [getCoverUrl]);
+    const { data: coverUrl, error, isLoading } = useSWR(`/api/spotify/playlist/cover/${playlist_id}`, fetcher, options);
 
     return (
         <Link href={`/pages/edit-playlist/${playlist_id}`}>
@@ -132,9 +111,14 @@ function PlaylistEntry({ playlist }: PlaylistProps) {
                         <Image src={coverUrl} alt="playlist cover image" fill={true} sizes="96px" />
                     </div>
                 )}
-                {!coverUrl && (
+                {isLoading && (
                     <div className="size-24 bg-ui-850 rounded-l-lg flex-none p-5">
                         <Lottie animationData={Loading}> </Lottie>
+                    </div>
+                )}
+                {error && (
+                    <div className="size-24 bg-ui-850 rounded-l-lg flex-none p-5">
+                        <p className="text-ui-600">:&&#40;</p>
                     </div>
                 )}
                 <div className="flex flex-col overflow-hidden flex-grow">

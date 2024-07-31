@@ -13,11 +13,11 @@ export async function GET(
     }
 ): Promise<NextResponse> {
     setDebugMode(true);
-    debugLog("API: GETTING THE PLAYLIST COVER IMAGE ============================================");
+    debugLog("API: GETTING THE PLAYLIST COVER IMAGE -----------------------");
     const token = await getToken({ req });
     if (!token) {
         console.error("No token found");
-        debugLog("API: END OF GET ============================================");
+        debugLog("API: END OF GET-----------------------");
         return NextResponse.json({ error: "No token found" }, { status: 401 });
     }
     debugLog("API: GET - token from req:", token?.accessToken);
@@ -41,13 +41,13 @@ export async function GET(
 
     if (imageResponseData.error) {
         debugLog("API - error", imageResponseData.error);
-        debugLog("API: END OF GET ============================================");
+        debugLog("API: END OF GET -----------------------");
         const { message, status } = imageResponseData.error;
         return NextResponse.json({ message }, { status });
     }
 
     const { url } = imageResponseData[0];
     debugLog("API: SUCCESS", url);
-    debugLog("API: END OF GET ============================================");
+    debugLog("API: END OF GET -----------------------");
     return NextResponse.json(url, { status: 200 });
 }

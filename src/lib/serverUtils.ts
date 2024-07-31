@@ -4,7 +4,6 @@ import { authOptions } from "@/lib/auth";
 import type { GetServerSidePropsContext, NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 import { debugLog, setDebugMode } from "@/lib/utils";
-import { redirect } from "next/navigation";
 
 /* helper function for getServerSession() to avoid passing authOptions around */
 export async function auth(
@@ -14,15 +13,9 @@ export async function auth(
         | [NextApiRequest, NextApiResponse]
         | []
 ) {
-    setDebugMode(true);
+    setDebugMode(false);
     debugLog("auth() function called", calledBy);
     return getServerSession(...args, authOptions);
-    // .then((session) => {
-    //     if (!session) {
-    //         redirect("/api/auth/signin");
-    //     }
-    //     return session;
-    // });
 }
 
 /**

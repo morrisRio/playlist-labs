@@ -143,7 +143,7 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
         return errors;
     };
 
-    //TODO: feauture: differentiate saving the settings and regenerating the playlist
+    //TODO: feature: differentiate saving the settings and regenerating the playlist
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         e.stopPropagation();
@@ -224,7 +224,7 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
                 name={preferences.name}
                 playlist_id={playlist_id}
                 onChange={handlePrefChange}
-                coverUrl={playlist?.coverUrl ? playlist.coverUrl : false}
+                // coverUrl={playlist?.coverUrl ? playlist.coverUrl : false}
                 hue={preferences.hue}
                 submitting={submitting}
                 actionTitle={!changed ? "Regenerate" : playlist_id ? "Save Changes" : "Create Playlist"}

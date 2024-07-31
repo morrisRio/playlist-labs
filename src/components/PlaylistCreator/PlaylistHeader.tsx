@@ -8,11 +8,11 @@ import {
     MdOutlineDelete,
     MdRefresh,
 } from "react-icons/md";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
+import useSWR, { Fetcher } from "swr";
 import { getCssHueGradient } from "@/lib/utils";
 
 import Link from "next/link";
-import Image from "next/image";
 
 import NameModal from "@/components/PlaylistCreator/NameModal";
 import GradientModal from "@/components/GradientModal";
@@ -23,13 +23,17 @@ import { useHeaderState } from "@/lib/hooks/useHeaderState";
 import { dbDeletePlaylist } from "@/lib/db/dbActions";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
+import Lottie from "lottie-react";
+import Loading from "@/lib/lotties/loading.json";
+import { DiCelluloid } from "react-icons/di";
+
 interface PlaylistHeaderProps {
     pageTitle: string;
     playlist_id: string | false;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     name: string;
     hue: number | undefined;
-    coverUrl: string | false;
+    // coverUrl: string | false;
     action: (e: FormEvent<HTMLFormElement>) => void;
     actionTitle: string;
     submitting: boolean;
@@ -43,7 +47,7 @@ function PlaylistHeader({
     onChange,
     name,
     hue,
-    coverUrl,
+    // coverUrl,
     actionTitle,
     submitting,
     resetSettings,
@@ -68,8 +72,18 @@ function PlaylistHeader({
         router.refresh();
     };
 
-    console.log("PlaylistHeader hue:", hue);
-    const bgImage = hue !== undefined ? getCssHueGradient(hue) : coverUrl ? `url(${coverUrl})` : getCssHueGradient(150);
+    const fetcher: Fetcher<string> = (url: string) => fetch(url).then((res) => res.json());
+    const options = {
+        revalidateOnFocus: false,
+    };
+    const { data: coverUrl, error, isLoading } = useSWR(`/api/spotify/playlist/cover/${playlist_id}`, fetcher, options);
+    const bgImage =
+        hue !== undefined ? getCssHueGradient(hue) : isLoading || error ? "" : coverUrl ? `url(${coverUrl})` : "";
+
+    //TODO: fix loading state
+    //TODO: check for refresh token bug on homepage at 20:15
+
+    console.log("BG Image:", bgImage);
 
     return (
         <>
@@ -180,9 +194,15 @@ function PlaylistHeader({
                     <div className="flex items-center w-full gap-6">
                         {/* Image */}
                         <div className="size-36 rounded-lg overflow-hidden relative z-20">
+                            {isLoading && (
+                                <div className="size-full bg-ui-700 flex-none p-8">
+                                    <Lottie animationData={Loading}> </Lottie>
+                                </div>
+                            )}
                             <div
-                                className="w-full h-full"
+                                className="w-full h-full bg-ui-700"
                                 style={{ backgroundImage: bgImage, backgroundSize: "cover" }}
+                                role="presentation"
                             ></div>
 
                             <div

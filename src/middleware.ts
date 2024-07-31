@@ -8,9 +8,11 @@ import { getAppUrl } from "@/lib/utils";
 export async function middleware(req: NextRequest) {
     setDebugMode(true);
 
-    debugLog("MIDDLEWARE ACTIVE");
+    debugLog("MIDDLEWARE ACTIVE =================================================== ");
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     const { pathname } = req.nextUrl;
+
+    //TODO: allow access for cron jobs
 
     if (pathname.includes("/api/auth") || token) {
         debugLog("TOKEN FOUND OR AUTH API, CONTINUE");

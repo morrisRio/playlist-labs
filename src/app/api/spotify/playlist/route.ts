@@ -11,20 +11,11 @@ import { revalidateTag } from "next/cache";
 import { createCanvas } from "@napi-rs/canvas";
 
 const generateCoverImage = async (hue: number): Promise<string> => {
-    console.log("Generating Cover Image. Hue:", hue);
-
+    debugLog("API: Generating Cover Image with Hue:", hue);
     const canvas = createCanvas(640, 640);
-    console.log("Canvas created");
-
     createCanvasGradient(canvas, hue);
-    console.log("Gradient painted");
-
     const buffer = canvas.toDataURL("image/jpeg");
-    console.log("Canvas to data URL");
-
     const base64JpegData = buffer.replace(/^data:image\/\w+;base64,/, "");
-    console.log("Base64 data created");
-
     return base64JpegData;
 };
 
@@ -37,13 +28,14 @@ const updatePlaylistCover = async (hue: number, idToWriteTo: string, accessToken
         await Promise.race([
             (async () => {
                 const coverImageData = await generateCoverImage(hue);
+                debugLog("API: Generated Cover Image. Sending to Spotify");
                 const res = await spotifyPut(
                     `https://api.spotify.com/v1/playlists/${idToWriteTo}/images`,
                     accessToken,
                     coverImageData,
                     { "Content-Type": "image/jpeg" }
                 );
-                console.log("API: Added Cover Image to Playlist:", res);
+                debugLog("API: Added Cover Image to Playlist:", res);
             })(),
             timeoutPromise,
         ]);
@@ -233,7 +225,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     debugLog(" - got recommendations", recommandationUris);
 
     if ("error" in recommandationUris) {
-        console.error("Failed to get Recommendations!!!!", recommandationUris.error);
+        console.error("API: END: Failed to get Recommendations", recommandationUris.error);
         const { message, status } = recommandationUris.error;
         return NextResponse.json(
             {
@@ -263,8 +255,9 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
     if (preferences.hue) {
         await updatePlaylistCover(preferences.hue, playlist_id, accessToken).catch((error) => {
-            console.error("Failed to update Cover Image", error);
+            console.error("Failed to update Cover Image: ", error);
         });
+        delete preferences.hue;
     }
 
     const dbSuccess = await dbUpdatePlaylist(userId, {
@@ -285,37 +278,4 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
     revalidateTag("playlists");
     return NextResponse.json(playlist_id, { status: 201 });
-}
-
-/**
- * Get all playlists for the user
- * @param req
- * @returns {Promise<NextResponse>} all the playlists for the user
- */
-
-export async function GET(req: NextRequest, res: NextResponse): Promise<NextResponse> {
-    setDebugMode(true);
-    debugLog("API: PLAYLIST GET - fetching playlists for user");
-    const session = await auth("PLAYLIST ENDPOINT");
-    debugLog("API: got session", session);
-
-    if (!session || !session.user || !session.user.id) {
-        return NextResponse.json({ message: "Unauthorized." }, { status: 401 });
-    }
-
-    const userId = session.user.id;
-
-    const { playlists, error } = await dbGetUsersPlaylists(userId);
-    debugLog("API: PLAYLIST GET - fetching playlists for user", userId, playlists, error);
-    if (error) {
-        return NextResponse.json(
-            {
-                message: "An error occurred while fetching the playlists.",
-                error: error,
-            },
-            { status: 500 }
-        );
-    }
-
-    return NextResponse.json(playlists, { status: 200 });
 }

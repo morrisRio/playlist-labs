@@ -55,7 +55,7 @@ export const authOptions: NextAuthOptions = {
         },
 
         async jwt({ token, account }: { token: JWT; account: Account | null; user: User }): Promise<JWT> {
-            setDebugMode(true);
+            setDebugMode(false);
             debugLog("JWT CALLBACK START =================================================== ");
             //on first sign in add the tokens from account to jwt
             if (account) {
@@ -69,6 +69,7 @@ export const authOptions: NextAuthOptions = {
                     accessTokenExpires: account.expires_at!,
                 };
             }
+
             let now = Date.now() / 1000;
             let date = new Date(0);
             date.setUTCSeconds(now);
@@ -78,14 +79,15 @@ export const authOptions: NextAuthOptions = {
 
             debugLog("JWT: now", date);
             debugLog("JWT: exp", expires);
+
             // //return previous token if it hasn't expired yet
-            if (token.accessTokenExpires && Date.now() / 1000 < token.accessTokenExpires - 3540) {
+            if (token.accessTokenExpires && Date.now() / 1000 < token.accessTokenExpires) {
                 debugLog("JWT: still valid token", token.accessToken);
                 return token;
             }
 
             // //access token has expired, try to update it
-            debugLog("JWT: old token", token.accessToken);
+            debugLog("JWT: old token EXPIRED ", token.accessToken);
             let refreshToken = (await refreshAccessToken(token)) as JWT;
             debugLog("JWT: new token", refreshToken.accessToken);
             return refreshToken;
