@@ -8,6 +8,8 @@ import {
     MdOutlineDelete,
     MdRefresh,
 } from "react-icons/md";
+import { BsStars } from "react-icons/bs";
+import { AiOutlineSave } from "react-icons/ai";
 import { FormEvent, useRef, useState } from "react";
 import useSWR, { Fetcher } from "swr";
 import { getCssHueGradient } from "@/lib/utils";
@@ -25,7 +27,6 @@ import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.share
 
 import Lottie from "lottie-react";
 import Loading from "@/lib/lotties/loading.json";
-import { DiCelluloid } from "react-icons/di";
 
 interface PlaylistHeaderProps {
     pageTitle: string;
@@ -33,9 +34,8 @@ interface PlaylistHeaderProps {
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     name: string;
     hue: number | undefined;
-    // coverUrl: string | false;
     action: (e: FormEvent<HTMLFormElement>) => void;
-    actionTitle: string;
+    changed: boolean;
     submitting: boolean;
     resetSettings: () => void;
     router: AppRouterInstance;
@@ -47,8 +47,7 @@ function PlaylistHeader({
     onChange,
     name,
     hue,
-    // coverUrl,
-    actionTitle,
+    changed,
     submitting,
     resetSettings,
     router,
@@ -59,7 +58,15 @@ function PlaylistHeader({
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [showResetModal, setShowResetModal] = useState(false);
 
-    //TODO: Memo the random color
+    const actionTitle = !changed ? "Regenerate" : playlist_id ? "Save Changes" : "Generate";
+
+    const actionIcon = !changed ? (
+        <MdShuffle size="1.2rem" />
+    ) : playlist_id ? (
+        <AiOutlineSave size="1.2rem" />
+    ) : (
+        <BsStars size="1.2rem" />
+    );
 
     const headerRef = useRef<HTMLDivElement>(null);
     const actionButtonRef = useRef<HTMLButtonElement>(null);
@@ -80,23 +87,16 @@ function PlaylistHeader({
     const bgImage =
         hue !== undefined ? getCssHueGradient(hue) : isLoading || error ? "" : coverUrl ? `url(${coverUrl})` : "";
 
-    //TODO: fix loading state
-    //TODO: check for refresh token bug on homepage at 20:15
-
-    console.log("BG Image:", bgImage);
-
+    const bgStyle = {
+        backgroundImage: bgImage,
+        backgroundSize: "cover",
+        filter: `saturate(0.7) brightness(0.45)`,
+    };
     return (
         <>
             <header ref={headerRef} className="sticky top-0 z-40">
-                <div className="absolute inset-0 overflow-hidden">
-                    <div
-                        className="w-full aspect-square"
-                        style={{
-                            backgroundImage: bgImage,
-                            backgroundSize: "cover",
-                            filter: `saturate(0.5) brightness(0.5)`,
-                        }}
-                    >
+                <div className="absolute inset-0 overflow-hidden rounded-b-lg">
+                    <div className="w-full aspect-square" style={bgStyle}>
                         <div className="absolute inset-0" style={{ backdropFilter: `blur(64px)` }}></div>
                     </div>
                 </div>
@@ -112,7 +112,7 @@ function PlaylistHeader({
                             collapsed ? "opacity-100" : "invisible opacity-0"
                         }`}
                     >
-                        <MdShuffle size="1.2rem" />
+                        {actionIcon}
                         {actionTitle}
                     </button>
                     {playlist_id ? (
@@ -120,12 +120,12 @@ function PlaylistHeader({
                             <a
                                 href={`https://open.spotify.com/playlist/${playlist_id}`}
                                 target="_blank"
-                                className="text-ui-600"
+                                className="text-ui-500"
                             >
                                 <MdOpenInNew />
                                 Open in Spotify
                             </a>
-                            <button onPointerDown={() => setShowResetModal(true)} className="text-ui-600">
+                            <button onPointerDown={() => setShowResetModal(true)} className="text-ui-500">
                                 <MdRefresh />
                                 Reset Settings
                             </button>
@@ -180,13 +180,7 @@ function PlaylistHeader({
             </header>
             <div className="relative top-0 w-full bg-ui-850">
                 <div className="absolute size-full overflow-hidden" style={{ marginTop: `-${headerHeight}px` }}>
-                    <div
-                        className="w-full aspect-square bg-cover"
-                        style={{
-                            backgroundImage: bgImage,
-                            filter: `saturate(0.5) brightness(0.5)`,
-                        }}
-                    >
+                    <div className="w-full aspect-square bg-cover" style={bgStyle}>
                         <div className="absolute inset-0" style={{ backdropFilter: `blur(64px)` }}></div>
                     </div>
                 </div>
@@ -221,7 +215,7 @@ function PlaylistHeader({
                                 disabled={submitting}
                                 ref={actionButtonRef}
                             >
-                                <MdShuffle size="1.2rem" />
+                                {actionIcon}
                                 {actionTitle}
                             </button>
                             <a

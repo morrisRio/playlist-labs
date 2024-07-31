@@ -33,7 +33,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <html lang="en">
             <body className={`${ibmPlexSans.variable} font-ibm antialiased relative overflow-x-hidden`}>
                 <SessionProvider session={session}>
-                    <main className="min-h-screen">{children}</main>
+                    <main className="min-h-screen h-screen">{children}</main>
                 </SessionProvider>
             </body>
         </html>

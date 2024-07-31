@@ -4,15 +4,18 @@ import { dbRegisterUser } from "@/lib/db/dbActions";
 import { JWT } from "next-auth/jwt";
 import { debugLog, setDebugMode } from "./utils";
 
+//scopes for future use
+// "user-read-playback-position",
+//     "user-read-playback-state",
+//     "user-modify-playback-state",
+//     "user-read-currently-playing",
+//     "app-remote-control",
+
 const scopes = [
     "playlist-read-private",
     "playlist-read-collaborative",
+    "playlist-modify-public",
     "playlist-modify-private",
-    "user-read-playback-position",
-    "user-read-playback-state",
-    "user-modify-playback-state",
-    "user-read-currently-playing",
-    "app-remote-control",
     "user-top-read",
     "user-read-recently-played",
     "user-library-read",

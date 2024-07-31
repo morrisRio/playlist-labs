@@ -52,10 +52,11 @@ function Rules({ rules, onAdd, onRemove, onChange }: RulesProps) {
                 </button>
             </div>
             {rules.length == 0 ? (
-                <div onClick={openModal} className="flex rounded-lg bg-ui-850 justify-between items-center p-6">
-                    <p className="mx-auto text-themetext/30 text-center self-center text-base">
-                        Fine tune your Playlist by adding rules
-                    </p>
+                <div
+                    onClick={openModal}
+                    className="flex rounded-lg bg-ui-850 text-ui-600 border border-ui-800 justify-between items-center p-6"
+                >
+                    <p className="mx-auto text-center self-center text-base">Fine tune your Playlist by adding rules</p>
                 </div>
             ) : (
                 <div className="flex flex-col gap-6">

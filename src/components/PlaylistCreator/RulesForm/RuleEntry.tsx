@@ -28,7 +28,7 @@ export function RuleEntry({
 
     const ruleCard = control ? "bg-ui-900" : "mb-4 bg-zinc-700/40";
     const fontSize = "text-base";
-    const nameConatiner = control ? "border border-b-0 rounded-t-md" : "border rounded-md";
+    const nameConatiner = control ? "border border-b-0 rounded-t-lg" : "border rounded-lg";
 
     const fullConfig = resolveConfig(tailwindConfig);
     //@ts-expect-error

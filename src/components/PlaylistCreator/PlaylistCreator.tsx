@@ -191,7 +191,6 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
                 setShowSubmitErrors(true);
                 console.error(err);
             });
-        //TODO: show submitting state
         setSubmitting(false);
     };
 
@@ -224,10 +223,9 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
                 name={preferences.name}
                 playlist_id={playlist_id}
                 onChange={handlePrefChange}
-                // coverUrl={playlist?.coverUrl ? playlist.coverUrl : false}
                 hue={preferences.hue}
                 submitting={submitting}
-                actionTitle={!changed ? "Regenerate" : playlist_id ? "Save Changes" : "Create Playlist"}
+                changed={changed}
                 action={handleSubmit}
                 resetSettings={resetSettings}
                 router={router}

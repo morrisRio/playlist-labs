@@ -44,9 +44,9 @@ export default function Seeds({ seeds, onRemove, onAdd }: SeedsProps) {
             {seeds.length == 0 ? (
                 <div
                     onClick={openModal}
-                    className="flex flex-col rounded-lg bg-ui-850 justify-between items-center p-6 "
+                    className="flex flex-col rounded-lg bg-ui-850 text-ui-600 border border-ui-800 justify-between items-center p-6 "
                 >
-                    <p className="mx-auto text-themetext/30 text-center self-center text-base">
+                    <p className="mx-autotext-center self-center text-base">
                         Add up to 5 Tracks, Artists or Genres as a foundation for your Playlist
                     </p>
                 </div>

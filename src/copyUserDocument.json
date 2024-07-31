@@ -1,0 +1,98 @@
+{
+    "_id": { "$oid": "66957419ca537c8ceb349065" },
+    "name": "karate_morris",
+    "spotify_id": "karate_morris",
+    "playlists": [
+        {
+            "playlist_id": "33TzNktW1xsNmRQSmGXpd3",
+            "preferences": { "name": "Coding Fuel", "frequency": "weekly", "amount": { "$numberInt": "46" } },
+            "seeds": [
+                {
+                    "id": "69sefX182J1a3DtaPiBnPd",
+                    "type": "track",
+                    "title": "Diversion",
+                    "description": "Setaoc Mass",
+                    "thumbnail": "https://i.scdn.co/image/ab67616d00001e028c7df728b7688ff747916ab3"
+                }
+            ],
+            "rules": [
+                { "name": "Instrumentalness", "value": { "$numberInt": "100" } },
+                { "name": "Mood", "value": [{ "$numberDouble": "24.8" }, { "$numberDouble": "50.641025641025635" }] }
+            ],
+            "_id": { "$oid": "66a937e19977075edfb94565" }
+        },
+        {
+            "playlist_id": "5BepTH1BsGj4wxkMMp0ZpB",
+            "preferences": { "name": "cleanser", "frequency": "weekly", "amount": { "$numberInt": "47" } },
+            "seeds": [
+                {
+                    "id": "4iqtDvbICWuBERMTz9cz41",
+                    "type": "track",
+                    "title": "Call Me",
+                    "description": "Marlon Hoffstadt, DJ Daddy Trance",
+                    "thumbnail": "https://i.scdn.co/image/ab67616d00001e0274699ccf53c5f0f8cb38711d"
+                },
+                {
+                    "id": "0LW3K407L0PVVtzqgp6p4w",
+                    "type": "track",
+                    "title": "Nothing Left",
+                    "description": "Non Cyclic",
+                    "thumbnail": "https://i.scdn.co/image/ab67616d00001e02aef1bd311241d1f9fc8f4f27"
+                },
+                {
+                    "id": "62lP69o3SgCbeQSJxY3XBC",
+                    "type": "track",
+                    "title": "Fenz",
+                    "description": "Rill",
+                    "thumbnail": "https://i.scdn.co/image/ab67616d00001e0218e0f1a4c740a7b146ca1e35"
+                },
+                {
+                    "id": "0IGS1AXhotoaTHzEHy79zS",
+                    "type": "track",
+                    "title": "Maxidub",
+                    "description": "LDS",
+                    "thumbnail": "https://i.scdn.co/image/ab67616d00001e02aef1bd311241d1f9fc8f4f27"
+                },
+                {
+                    "id": "7qp2NFrzqmarNPDK6YvMMI",
+                    "type": "track",
+                    "title": "Warehouse Jazz",
+                    "description": "Nicolas Vogler",
+                    "thumbnail": "https://i.scdn.co/image/ab67616d00001e02b344ba6bf94db5a6db7d3897"
+                }
+            ],
+            "rules": [
+                { "name": "Mood", "value": [{ "$numberInt": "100" }, { "$numberInt": "0" }] },
+                { "name": "Danceability", "value": { "$numberInt": "100" } },
+                { "name": "Tempo", "value": { "$numberInt": "160" } }
+            ],
+            "_id": { "$oid": "66a93dc29977075edfb94590" }
+        },
+        {
+            "playlist_id": "1CHemqhtJ8E3LhO3yNuzVN",
+            "preferences": { "name": "nightly reading", "frequency": "weekly", "amount": { "$numberInt": "34" } },
+            "seeds": [
+                {
+                    "id": "7B0ofCHeQu2FoX7P28ZaPp",
+                    "type": "track",
+                    "title": "My Friend the Forest",
+                    "description": "Nils Frahm",
+                    "thumbnail": "https://i.scdn.co/image/ab67616d00001e02d1474ac08537f5d9655552f2"
+                },
+                {
+                    "id": "5gqhueRUZEa7VDnQt4HODp",
+                    "type": "artist",
+                    "title": "Nils Frahm",
+                    "description": "658.2 k followers",
+                    "thumbnail": "https://i.scdn.co/image/ab67616100005174d07e87d9e0ef9006ff999f80"
+                }
+            ],
+            "rules": [
+                { "name": "Mood", "value": [{ "$numberInt": "0" }, { "$numberDouble": "48.717948717948715" }] },
+                { "name": "Instrumentalness", "value": { "$numberInt": "100" } }
+            ],
+            "_id": { "$oid": "66aa1aad9977075edfb945ac" }
+        }
+    ],
+    "__v": { "$numberInt": "0" }
+}

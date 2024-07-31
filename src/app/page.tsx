@@ -4,8 +4,6 @@ import Link from "next/link";
 import { MdAdd } from "react-icons/md";
 import { PlaylistData } from "@/types/spotify";
 
-import { headers } from "next/headers";
-
 import Image from "next/image";
 import Logo from "../../public/logo-small.svg";
 
@@ -34,26 +32,38 @@ export default async function Home() {
     else playlistData = playlists;
 
     return (
-        <div className="h-full w-full p-4 flex flex-col gap-5">
+        <div className="min-h-full w-full p-4 flex flex-col gap-5">
             <div className="flex justify-between gap-2 mt-8">
                 <Image src={Logo} alt="playlistLabs Logo" width={14} height={14}></Image>
                 <h3 className="font-normal text-themetext-nerfed flex-grow">playlistLabs</h3>
                 <Profile></Profile>
             </div>
             <Link href="/pages/create-playlist">
-                <div className="flex gap-4 items-center w-full mb-4 bg-ui-900 border border-ui-700 rounded-lg">
-                    <div className="size-24 rounded-l-lg flex items-center justify-center border-r border-ui-700 text-ui-600">
+                <div
+                    className={`flex gap-4 items-center w-full mb-4 bg-ui-900 border border-ui-700 rounded-lg ${
+                        playlists.length === 0 ? "animate-pulse" : ""
+                    }`}
+                >
+                    <div className="size-24 rounded-l-lg flex items-center justify-center border-r border-ui-700 text-ui-500">
                         <MdAdd></MdAdd>
                     </div>
-                    <h4 className="text-ui-600">Create New Playlist</h4>
+                    <h4 className="text-ui-500">Create New Playlist</h4>
                 </div>
             </Link>
             {/* render all playlists found in database for user */}
-            <h4>Your Playlists</h4>
+            <h4 className="text-themetext-nerfed">Your Playlists</h4>
             {playlists &&
                 playlists.length > 0 &&
                 playlists.map((playlist) => (
                     <PlaylistEntry playlist={playlist} key={playlist.playlist_id?.toString()} />
+                ))}
+            {!playlists ||
+                (playlists.length === 0 && (
+                    <div className="size-full flex-grow flex items-center justify-evenly bg-ui-850 text-ui-600 rounded-lg border border-ui-800">
+                        <p className="text-center mb-16">
+                            You don&apos;t have any playlists yet. <br></br> Create one now!
+                        </p>
+                    </div>
                 ))}
         </div>
     );

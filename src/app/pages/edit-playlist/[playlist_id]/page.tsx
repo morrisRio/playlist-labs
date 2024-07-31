@@ -17,31 +17,9 @@ async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
 
     let playlist: PlaylistData | null = null;
 
-    const getCoverUrl = async (playlist_id: string): Promise<string | undefined> => {
-        const coverUrl = await fetch(getAppUrl() + `/api/spotify/playlist/cover/${playlist_id}`, {
-            method: "GET",
-            headers: new Headers(headers()),
-            next: { tags: ["playlist"] },
-        })
-            .then(async (res) => {
-                const url = await res.json();
-                if (!res.ok) {
-                    const { message } = url;
-                    throw new Error("Network response was not ok " + res.status + " " + message);
-                }
-                return url as string;
-            })
-            .catch((error) => {
-                console.log("Error on Server Component:", error);
-                return undefined;
-            });
-        return coverUrl;
-    };
-
     if (session && session.user && session.user.id) {
         playlist = await dbGetOnePlaylist(session.user.id, playlist_id)
             .then(async (playlist) => {
-                if (playlist && playlist.playlist_id) playlist.coverUrl = await getCoverUrl(playlist.playlist_id);
                 return playlist;
             })
             .catch((err) => {
@@ -50,7 +28,7 @@ async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
             });
     } else {
         console.error("Session Error: ", session);
-        //TODO: error handling
+        redirect("/api/auth/signin");
     }
 
     return (
