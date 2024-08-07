@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
-import { auth, spotifyPost, spotifyPut, spotifyGet } from "@/lib/serverUtils";
+import { spotifyPost, spotifyPut, spotifyGet } from "@/lib/serverUtils";
 import { getRecommendations, createPlaylistDescription } from "@/lib/spotifyUtils";
-import { createCanvasGradient } from "@/lib/utils";
 import { getToken } from "next-auth/jwt";
 import { PlaylistData } from "@/types/spotify";
-import { dbCreatePlaylist, dbGetUsersPlaylists, dbUpdatePlaylist } from "@/lib/db/dbActions";
+import { dbCreatePlaylist, dbUpdatePlaylist } from "@/lib/db/dbActions";
 import { debugLog, setDebugMode } from "@/lib/utils";
 import { revalidateTag } from "next/cache";
 import { createCanvas } from "@napi-rs/canvas";
+import { createCanvasGradient } from "@/lib/utils";
 
 const generateCoverImage = async (hue: number): Promise<string> => {
     debugLog("API: Generating Cover Image with Hue:", hue);
@@ -21,7 +21,7 @@ const generateCoverImage = async (hue: number): Promise<string> => {
 
 const updatePlaylistCover = async (hue: number, idToWriteTo: string, accessToken: string): Promise<void> => {
     const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error("Playlist cover update timed out after 10s")), 10000);
+        setTimeout(() => reject(new Error("Playlist cover update timed out after 10s")), 10 * 60 * 1000); //10 minutes
     });
 
     try {
@@ -45,8 +45,8 @@ const updatePlaylistCover = async (hue: number, idToWriteTo: string, accessToken
     }
 };
 
-export async function POST(req: NextRequest, res: NextResponse): Promise<NextResponse> {
-    setDebugMode(true);
+export async function POST(req: NextRequest): Promise<NextResponse> {
+    setDebugMode(false);
 
     const data = await req.json();
     const { preferences, seeds, rules }: PlaylistData = data;
@@ -150,7 +150,7 @@ export async function POST(req: NextRequest, res: NextResponse): Promise<NextRes
 
 //TODO: check if playlist exists in spotify (could be deleted by user) -> if there is no playlist id mathing the one in db call post
 export async function PUT(req: NextRequest): Promise<NextResponse> {
-    setDebugMode(true);
+    setDebugMode(false);
 
     const data = await req.json();
     if (!data.playlist_id) {

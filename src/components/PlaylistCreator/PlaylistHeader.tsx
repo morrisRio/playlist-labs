@@ -10,7 +10,7 @@ import {
 } from "react-icons/md";
 import { BsStars } from "react-icons/bs";
 import { AiOutlineSave } from "react-icons/ai";
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import useSWR, { Fetcher } from "swr";
 import { getCssHueGradient } from "@/lib/utils";
 
@@ -84,8 +84,15 @@ function PlaylistHeader({
         revalidateOnFocus: false,
     };
     const { data: coverUrl, error, isLoading } = useSWR(`/api/spotify/playlist/cover/${playlist_id}`, fetcher, options);
-    const bgImage =
-        hue !== undefined ? getCssHueGradient(hue) : isLoading || error ? "" : coverUrl ? `url(${coverUrl})` : "";
+    const [bgImage, setBgImage] = useState<string>(
+        hue !== undefined ? getCssHueGradient(hue) : isLoading || error ? "" : coverUrl ? `url(${coverUrl})` : ""
+    );
+
+    useEffect(() => {
+        setBgImage(
+            hue !== undefined ? getCssHueGradient(hue) : isLoading || error ? "" : coverUrl ? `url(${coverUrl})` : ""
+        );
+    }, [coverUrl, hue, isLoading, error]);
 
     const bgStyle = {
         backgroundImage: bgImage,

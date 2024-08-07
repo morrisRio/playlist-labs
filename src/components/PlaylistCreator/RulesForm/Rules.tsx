@@ -5,9 +5,6 @@ import { Rule } from "@/types/spotify";
 import RuleModal from "./RuleModal";
 import { RuleEntry } from "./RuleEntry";
 
-import resolveConfig from "tailwindcss/resolveConfig";
-import tailwindConfig from "@/../tailwind.config";
-
 interface RulesProps {
     rules: Rule[];
     onAdd: (rule: Rule) => void;
@@ -35,11 +32,8 @@ function Rules({ rules, onAdd, onRemove, onChange }: RulesProps) {
         closeModal();
     };
 
-    const fullConfig = resolveConfig(tailwindConfig);
-    //@ts-expect-error
-    const interactColor = fullConfig.theme.colors.themetext["DEFAULT"] + "a8"; //a8 is 65% opacity
     return (
-        <div className="px-4">
+        <div className="px-4 mb-16">
             <div className="flex mb-6 justify-between">
                 <h3>Tuning</h3>
                 <button
@@ -54,7 +48,7 @@ function Rules({ rules, onAdd, onRemove, onChange }: RulesProps) {
             {rules.length == 0 ? (
                 <div
                     onClick={openModal}
-                    className="flex rounded-lg bg-ui-850 text-ui-600 border border-ui-800 justify-between items-center p-6"
+                    className="flex rounded-lg bg-ui-900 text-ui-600 border border-ui-800 justify-between items-center p-6"
                 >
                     <p className="mx-auto text-center self-center text-base">Fine tune your Playlist by adding rules</p>
                 </div>

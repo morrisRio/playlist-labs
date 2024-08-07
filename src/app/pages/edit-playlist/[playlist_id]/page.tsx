@@ -2,9 +2,9 @@ import { auth } from "@/lib/serverUtils";
 import { PlaylistData } from "@/types/spotify";
 import PlaylistCreator from "@/components/PlaylistCreator/PlaylistCreator";
 import { dbGetOnePlaylist } from "@/lib/db/dbActions";
-import { headers } from "next/headers";
-import { getAppUrl } from "@/lib/utils";
 import { redirect } from "next/navigation";
+import UniModal from "@/components/UniModal";
+import router from "next/router";
 
 async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
     const { playlist_id } = params;
@@ -16,7 +16,7 @@ async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
     }
 
     let playlist: PlaylistData | null = null;
-
+    let error = false;
     if (session && session.user && session.user.id) {
         playlist = await dbGetOnePlaylist(session.user.id, playlist_id)
             .then(async (playlist) => {
@@ -24,6 +24,7 @@ async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
             })
             .catch((err) => {
                 console.error(err);
+                error = true;
                 return null;
             });
     } else {
@@ -32,7 +33,8 @@ async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
     }
 
     return (
-        <div className="h-full w-full">
+        <div className="min-h-full min-w-full">
+            {error && <p>Something went wrong. We&apos;re Sorry.</p>}
             {playlist && <PlaylistCreator pageTitle="Edit Playlist" playlist={playlist}></PlaylistCreator>}
         </div>
     );

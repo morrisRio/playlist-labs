@@ -82,42 +82,48 @@ export const getRecommendations = async (
     rules?: Rule[]
 ): Promise<string[] | ErrorRes> => {
     setDebugMode(true);
-    debugLog(" - getting recommendations");
-    //create the query string for the api call from the seeds and rules
-    const limitQuery = "limit=" + preferences.amount;
-    const seedQuery = "&" + getSeedQuery(seeds);
-    const ruleQuery = rules ? "&" + getRuleQuery(rules) : "";
+    try {
+        debugLog(" - getting recommendations");
+        //create the query string for the api call from the seeds and rules
+        const limitQuery = "limit=" + preferences.amount;
+        const seedQuery = "&" + getSeedQuery(seeds);
+        const ruleQuery = rules ? "&" + getRuleQuery(rules) : "";
 
-    const validateTrackRes = (data: any) => {
-        if (!data || !data.tracks || !Array.isArray(data.tracks) || data.tracks.length === 0) {
-            return { valid: false, message: "Could not get recommandations", status: 500 };
+        const validateTrackRes = (data: any) => {
+            if (!data || !data.tracks || !Array.isArray(data.tracks) || data.tracks.length === 0) {
+                return { valid: false, message: "Could not get recommandations", status: 500 };
+            }
+            return { valid: true };
+        };
+
+        interface TracksResponse {
+            tracks: Track[];
+            seeds: Seed[];
         }
-        return { valid: true };
-    };
 
-    interface TracksResponse {
-        tracks: Track[];
-        seeds: Seed[];
+        type TrackRes = TracksResponse | ErrorRes;
+
+        const trackRes: TrackRes = await spotifyGet(
+            `https://api.spotify.com/v1/recommendations?${limitQuery}${seedQuery}${ruleQuery}`,
+            accessToken,
+            validateTrackRes
+        );
+
+        if ("error" in trackRes) {
+            const { message, status } = trackRes.error;
+            debugLog("API - error", message);
+            return { error: { message, status } };
+        }
+
+        //create the tracksquery
+        const tracksToAdd = trackRes.tracks.map((track) => `spotify:track:${track.id}`);
+
+        return tracksToAdd;
+    } catch (e) {
+        console.error("API: Failed to get recommendations", e);
+        if (typeof e === "string") return { error: { message: e, status: 500 } };
+        return { error: { message: "Failed to get recommendations", status: 500 } };
     }
-
-    type TrackRes = TracksResponse | ErrorRes;
-
-    const trackRes: TrackRes = await spotifyGet(
-        `https://api.spotify.com/v1/recommendations?${limitQuery}${seedQuery}${ruleQuery}`,
-        accessToken,
-        validateTrackRes
-    );
-
-    if ("error" in trackRes) {
-        const { message, status } = trackRes.error;
-        debugLog("API - error", message);
-        return { error: { message, status } };
-    }
-
-    //create the tracksquery
-    const tracksToAdd = trackRes.tracks.map((track) => `spotify:track:${track.id}`);
-
-    return tracksToAdd;
 };
 
 /**
@@ -209,92 +215,99 @@ export const completeRules = (rules: MongoRule[]): Rule[] => {
  * @returns The playlist description.
  */
 export const createPlaylistDescription = (preferences: Preferences, seeds: Seed[], rules: Rule[] | undefined) => {
-    const preferencesDescription = `${preferences.frequency[0].toUpperCase() + preferences.frequency.slice(1)} updates`;
+    try {
+        const preferencesDescription = `${
+            preferences.frequency[0].toUpperCase() + preferences.frequency.slice(1)
+        } updates`;
 
-    /**
-     * Gets the description for the seed section of the playlist.
-     * @param seeds - The seeds for the playlist.
-     * @returns The seed description.
-     */
-    const getSeedDescription = (seeds: Seed[]) => {
-        let trackSeeds = seeds.filter((seed) => seed.type === "track").map((seed) => seed.title);
-        let artistSeeds = seeds.filter((seed) => seed.type === "artist").map((seed) => seed.title);
-        let genreSeeds = seeds.filter((seed) => seed.type === "genre").map((seed) => seed.title);
+        /**
+         * Gets the description for the seed section of the playlist.
+         * @param seeds - The seeds for the playlist.
+         * @returns The seed description.
+         */
+        const getSeedDescription = (seeds: Seed[]) => {
+            let trackSeeds = seeds.filter((seed) => seed.type === "track").map((seed) => seed.title);
+            let artistSeeds = seeds.filter((seed) => seed.type === "artist").map((seed) => seed.title);
+            let genreSeeds = seeds.filter((seed) => seed.type === "genre").map((seed) => seed.title);
 
-        const seedStrings = [...trackSeeds, ...artistSeeds, ...genreSeeds];
+            const seedStrings = [...trackSeeds, ...artistSeeds, ...genreSeeds];
 
-        if (seedStrings.length === 1) {
-            return ` based on ${seedStrings.join(" and ")}`;
-        }
-        const lastSeed = seedStrings.pop();
-        const seedDescription = ` based on ${seedStrings.join(", ")} and ${lastSeed}`;
-
-        return seedDescription;
-    };
-
-    /**
-     * Gets the description for the rule section of the playlist.
-     * @param rules - The rules for the playlist.
-     * @returns The rule description.
-     */
-    const getRuleDescription = (rules: Rule[] | undefined) => {
-        setDebugMode(false);
-
-        if (!rules || rules.length === 0 || !Array.isArray(rules)) {
-            return "";
-        }
-
-        const getRangeDescription = (value: number): string => {
-            if (value < 16) return "very low";
-            if (value < 32) return "low";
-            if (value < 66) return "medium";
-            if (value < 82) return "high";
-            return "very high";
-        };
-
-        const getMoodDescription = (value: number): string => {
-            if (value < 16) return "very negative";
-            if (value < 32) return "negative";
-            if (value < 66) return "neutral";
-            if (value < 82) return "positive";
-            return "euphoric";
-        };
-
-        const ruleStrings = rules.map((rule) => {
-            switch (rule.type) {
-                case "range":
-                    return `${getRangeDescription(rule.value as number)} ${rule.name.toLowerCase()}`;
-                case "boolean":
-                    if (typeof rule.range[+rule.value as number] !== "string") return "";
-                    //turning boolean into a number with "+" and then using it as an index for the range array
-                    const string = `${rule.range![+rule.value as number]} ${rule.name}`;
-                    return string.toLowerCase();
-                case "axis":
-                    const [rangeValue, moodValue] = rule.value as [number, number];
-                    return `${getMoodDescription(100 - moodValue)} feelings in ${getRangeDescription(
-                        rangeValue
-                    )} intensity`;
-                default:
-                    return "";
+            if (seedStrings.length === 1) {
+                return ` based on ${seedStrings.join(" and ")}`;
             }
-        });
+            const lastSeed = seedStrings.pop();
+            const seedDescription = ` based on ${seedStrings.join(", ")} and ${lastSeed}`;
 
-        if (ruleStrings.length === 1) {
-            debugLog("ruleStrings", ruleStrings);
-            return `. Aiming for ${ruleStrings[0]}`;
-        }
+            return seedDescription;
+        };
 
-        //if there are multiple rules, join them with commas and add "and" before the last rule
-        const lastRule = ruleStrings.pop();
-        const ruleDescription = `. Aiming for ${ruleStrings.join(", ")} and ${lastRule}`;
+        /**
+         * Gets the description for the rule section of the playlist.
+         * @param rules - The rules for the playlist.
+         * @returns The rule description.
+         */
+        const getRuleDescription = (rules: Rule[] | undefined) => {
+            setDebugMode(false);
 
-        debugLog("ruleDescription", ruleDescription);
-        return ruleDescription;
-    };
+            if (!rules || rules.length === 0 || !Array.isArray(rules)) {
+                return "";
+            }
 
-    const description = `Playlist created by playlistLabs. ${
-        preferencesDescription + getSeedDescription(seeds) + getRuleDescription(rules)
-    }`;
-    debugLog("Finished Description: ", description);
-    return description;
+            const getRangeDescription = (value: number): string => {
+                if (value < 16) return "very low";
+                if (value < 32) return "low";
+                if (value < 66) return "medium";
+                if (value < 82) return "high";
+                return "very high";
+            };
+
+            const getMoodDescription = (value: number): string => {
+                if (value < 16) return "very negative";
+                if (value < 32) return "negative";
+                if (value < 66) return "neutral";
+                if (value < 82) return "positive";
+                return "euphoric";
+            };
+
+            const ruleStrings = rules.map((rule) => {
+                switch (rule.type) {
+                    case "range":
+                        return `${getRangeDescription(rule.value as number)} ${rule.name.toLowerCase()}`;
+                    case "boolean":
+                        if (typeof rule.range[+rule.value as number] !== "string") return "";
+                        //turning boolean into a number with "+" and then using it as an index for the range array
+                        const string = `${rule.range![+rule.value as number]} ${rule.name}`;
+                        return string.toLowerCase();
+                    case "axis":
+                        const [rangeValue, moodValue] = rule.value as [number, number];
+                        return `${getMoodDescription(100 - moodValue)} feelings in ${getRangeDescription(
+                            rangeValue
+                        )} intensity`;
+                    default:
+                        return "";
+                }
+            });
+
+            if (ruleStrings.length === 1) {
+                debugLog("ruleStrings", ruleStrings);
+                return `. Aiming for ${ruleStrings[0]}`;
+            }
+
+            //if there are multiple rules, join them with commas and add "and" before the last rule
+            const lastRule = ruleStrings.pop();
+            const ruleDescription = `. Aiming for ${ruleStrings.join(", ")} and ${lastRule}`;
+
+            debugLog("ruleDescription", ruleDescription);
+            return ruleDescription;
+        };
+
+        const description = `Playlist created by playlistLabs. ${
+            preferencesDescription + getSeedDescription(seeds) + getRuleDescription(rules)
+        }`;
+        debugLog("Finished Description: ", description);
+        return description;
+    } catch (e) {
+        console.error("Failed to create Playlist Description", e);
+        return "Playlist created by playlistLabs";
+    }
 };

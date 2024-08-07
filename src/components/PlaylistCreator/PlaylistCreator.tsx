@@ -109,23 +109,23 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
         []
     );
 
-    const addRule = (rule: any) => {
+    const addRule = useCallback((rule: any) => {
         setRules((prevState) => {
             return [...prevState, rule];
         });
-    };
+    }, []);
 
-    const removeRule = (name: string) => {
+    const removeRule = useCallback((name: string) => {
         setRules((prevState) => {
             const newRules = [...prevState];
             const i = newRules.findIndex((rule) => rule.name === name);
             newRules.splice(i, 1);
             return newRules;
         });
-    };
+    }, []);
 
     //Form Validation ______________________________________________________________________________________________
-    const validateForm = (preferences: Preferences, seeds: Seed[]) => {
+    const validateForm = useCallback((preferences: Preferences, seeds: Seed[]) => {
         let errors: string[] = [];
         //check if the form is valid
         //check if the preferences are valid
@@ -143,59 +143,65 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
         if (seeds.length < 1) errors.push("We'll need atleast one Seed for creating the Playlist.\n");
         if (seeds.length > 5) errors.push("We can only handle 5 seeds at a time.\n");
         return errors;
-    };
+    }, []);
 
     //TODO: feature: differentiate saving the settings and regenerating the playlist
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
 
-        const errors = validateForm(preferences, seeds);
-        if (errors.length > 0) {
-            setSubmitErrors(errors);
-            setShowSubmitErrors(true);
-            return;
-        }
-        setSubmitting(true);
-        finishSubmit();
-    };
-
-    const finishSubmit = async () => {
-        //create a new playlist and populate it with the tracks
-        await fetch("/api/spotify/playlist", {
-            method: playlist_id ? "PUT" : "POST",
-            body: JSON.stringify({
-                playlist_id: playlist_id,
-                preferences,
-                seeds,
-                rules,
-            }),
-        })
-            .then(async (res) => {
-                setSubmitting(false);
-                const data = await res.json();
-                if (!res.ok) {
-                    const { message } = data;
-                    throw new Error(message || "Network response was not ok");
-                }
-                setSubmitErrors([]);
-                router.replace("/pages/edit-playlist/" + data);
-                router.refresh();
-                currentState = {
-                    preferences: preferences,
-                    seeds: seeds,
-                    rules: rules,
-                };
+    const finishSubmit = useCallback(async () => {
+        const finishSubmit = async () => {
+            //create a new playlist and populate it with the tracks
+            await fetch("/api/spotify/playlist", {
+                method: playlist_id ? "PUT" : "POST",
+                body: JSON.stringify({
+                    playlist_id: playlist_id,
+                    preferences,
+                    seeds,
+                    rules,
+                }),
             })
-            .catch((err) => {
-                setSubmitting(false);
-                setSubmitErrors([err.message]);
-                setShowSubmitErrors(true);
-                console.error(err);
-            });
-        setSubmitting(false);
-    };
+                .then(async (res) => {
+                    setSubmitting(false);
+                    const data = await res.json();
+                    if (!res.ok) {
+                        const { message } = data;
+                        throw new Error(message || "Network response was not ok");
+                    }
+                    setSubmitErrors([]);
+                    router.replace("/pages/edit-playlist/" + data);
+                    router.refresh();
+                    setCurrentState({
+                        preferences: preferences,
+                        seeds: seeds,
+                        rules: rules,
+                    });
+                    setSubmitting(false);
+                })
+                .catch((err) => {
+                    setSubmitting(false);
+                    setSubmitErrors([err.message]);
+                    setShowSubmitErrors(true);
+                    console.error(err);
+                });
+        };
+    }, [preferences, seeds, rules, playlist_id, router]);
 
+    const handleSubmit = useCallback(
+        (e: FormEvent<HTMLFormElement>) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const errors = validateForm(preferences, seeds);
+            if (errors.length > 0) {
+                setSubmitErrors(errors);
+                setShowSubmitErrors(true);
+                return;
+            }
+            setSubmitting(true);
+
+            finishSubmit();
+        },
+        [finishSubmit, preferences, seeds, validateForm]
+    );
     const resetSettings = () => {
         setPreferences(initialState.preferences);
         setSeeds(initialState.seeds);
@@ -203,11 +209,11 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
     };
 
     //check if the playlist has changed
-    let currentState = {
+    const [currentState, setCurrentState] = useState({
         preferences: preferences,
         seeds: seeds,
         rules: rules,
-    };
+    });
 
     const changed = JSON.stringify(initialState) !== JSON.stringify(currentState);
 
@@ -234,7 +240,7 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
             ></PlaylistHeader>
             <form
                 id="playlist-form"
-                className="w-full flex flex-col gap-6 justify-center text-white mb-14"
+                className="w-full min-h-full flex flex-col gap-6 justify-center text-white mb-16 sm:mb-24"
                 onSubmit={handleSubmit}
             >
                 {showSubmitErrors && (

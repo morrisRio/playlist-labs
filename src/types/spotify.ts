@@ -152,7 +152,7 @@ export interface PlaylistData {
 }
 
 export interface MongoPlaylistData extends Document {
-    playlist_id?: string | boolean;
+    playlist_id?: string;
     preferences: Preferences;
     seeds: Seed[];
     rules?: Rule[];

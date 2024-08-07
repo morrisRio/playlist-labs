@@ -1,3 +1,5 @@
+"use client";
+
 interface UniModalProps {
     title: string;
     onClose: () => void;

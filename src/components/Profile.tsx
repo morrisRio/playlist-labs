@@ -1,17 +1,24 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
+import { MdMailOutline } from "react-icons/md";
 import { MdLogout, MdOutlineDelete } from "react-icons/md";
 import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
 import UniModal from "@/components/UniModal";
 import ContextMenu from "./Context";
+import { dbDeleteUser } from "@/lib/db/dbActions";
 
 const Profile = () => {
     const { data: session } = useSession();
     const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [showInfoModal, setShowInfoModal] = useState(false);
 
     const deleteAccount = async () => {
-        console.log("Deleting Account");
+        if (await dbDeleteUser()) signOut();
+        else {
+            setShowInfoModal(true);
+            console.error("Error deleting user");
+        }
     };
 
     const UserImage = (
@@ -26,6 +33,23 @@ const Profile = () => {
 
     return (
         <>
+            {showInfoModal && (
+                <UniModal
+                    title="Problem Deleting Account"
+                    action={deleteAccount}
+                    actionTitle="Try Again"
+                    onClose={() => setShowInfoModal(false)}
+                >
+                    <p>
+                        There was a problem deleting your account. Please try again. <br />
+                        <br />
+                        If the problem persists please contact me at{" "}
+                        <a className="text-themetext/90" href="mailto:contact@maurice-rio.de">
+                            contact&#64;maurice-rio.de
+                        </a>
+                    </p>
+                </UniModal>
+            )}
             {showConfirmModal && (
                 <UniModal
                     title="Delete Account"

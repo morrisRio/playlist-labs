@@ -33,7 +33,7 @@ export default function Seeds({ seeds, onRemove, onAdd }: SeedsProps) {
                     <p className="text-ui-600 text-base flex-grow">{seeds?.length} /5 used</p>
                 </div>
                 <button
-                    className="p-1 px-2 rounded-lg flex items-center justify-center gap-2 text-themetext border border-ui-700 bg-ui-850 text-base"
+                    className="p-1 px-2 rounded-lg flex items-center justify-center gap-2 text-themetext border border-ui-700 bg-ui-900 text-base"
                     onClick={openModal}
                     type="button"
                 >

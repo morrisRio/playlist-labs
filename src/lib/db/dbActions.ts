@@ -59,12 +59,12 @@ export async function dbRegisterUser(userId: string, name: string): Promise<bool
  * @throws {Error} Will throw an error if the user is not found or if the user has no playlists.
  */
 
-interface PlaylistResponseDB {
-    playlists: PlaylistData[];
+interface DbRes<T> {
+    data: T;
     error: string | null;
 }
 
-export async function dbGetUsersPlaylists(userId: string): Promise<PlaylistResponseDB> {
+export async function dbGetUsersPlaylists(userId: string): Promise<DbRes<PlaylistData[]>> {
     setDebugMode(false);
     await connectMongoDB();
     try {
@@ -85,10 +85,10 @@ export async function dbGetUsersPlaylists(userId: string): Promise<PlaylistRespo
             delete playlist._id;
         });
 
-        return { playlists: playlists, error: null } as PlaylistResponseDB;
+        return { data: playlists, error: null };
     } catch (error: any) {
         console.error("Error getting playlists: ", error);
-        return { playlists: [], error: error.message } as PlaylistResponseDB;
+        return { data: [], error: error.message };
     }
 }
 
