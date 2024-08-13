@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo, use } from "react";
-import { MdOutlineArrowBackIos, MdOutlineSearch, MdClose } from "react-icons/md";
+import { MdOutlineArrowBackIos, MdOutlineSearch, MdClose, MdCheck } from "react-icons/md";
 import { SeedEntry } from "./SeedEntry";
 import { Seed } from "@/types/spotify";
 import useSWR, { mutate } from "swr";
@@ -224,14 +224,14 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
     return (
         <div className="bg-ui-950 fixed h-screen w-full top-0 left-0 z-50 flex flex-col">
             <header className="border-b border-ui-700 flex flex-col gap-4 p-4 bg-ui-900">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-4">
                     <button onClick={onClose} type="button">
                         <MdOutlineArrowBackIos />
                     </button>
                     <h3>Add Seed</h3>
                     <h3 className="text-ui-600 font-normal text-right flex-grow self-end">{seeds?.length} /5 used</h3>
                     <button onClick={onClose} type="button">
-                        Done
+                        <MdCheck size="1.7rem" />
                     </button>
                 </div>
                 <SearchBar
@@ -277,6 +277,7 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
             </header>
             <div className="relative flex flex-col gap-4 overflow-y-auto overflow-x-hidden p-4 size-full">
                 {memoizedSeeds}
+                {/* {searchResults && searchResults.length > 0 && <p>searchResults[0].</p>} */}
                 {loading && (
                     <div className="absolute inset-0 flex justify-center pt-16 size-full bg-ui-900/20">
                         <Lottie animationData={Loading} className="size-20"></Lottie>

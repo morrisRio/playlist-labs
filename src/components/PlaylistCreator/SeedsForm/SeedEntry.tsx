@@ -49,41 +49,6 @@ export function SeedEntry({
 
     const imgClass = `${imgSize} ${imgRound}`;
 
-    const [titleTooLong, setTitleTooLong] = useState(false);
-    const [descTooLong, setDescTooLong] = useState(false);
-
-    const titleRef = useRef<HTMLParagraphElement>(null);
-    const descRef = useRef<HTMLParagraphElement>(null);
-
-    useLayoutEffect(() => {
-        const titleElem = titleRef.current;
-        const descElem = descRef.current;
-
-        const checkOverflow = () => {
-            if (titleElem) {
-                setTitleTooLong(titleElem.scrollWidth > titleElem.clientWidth);
-            }
-            if (descElem) {
-                setDescTooLong(descElem.scrollWidth > descElem.clientWidth);
-            }
-        };
-
-        const resizeObserver = new ResizeObserver(checkOverflow);
-        if (titleElem) {
-            resizeObserver.observe(titleElem);
-        }
-
-        // Initial check in case the element is already overflowing
-        checkOverflow();
-
-        // Cleanup observer on component unmount
-        return () => {
-            if (titleElem) {
-                resizeObserver.unobserve(titleElem);
-            }
-        };
-    }, [title, description]);
-
     return (
         <div className={`flex gap-4 items-center justify-between ${seedCard}`}>
             {seedObj.type === "genre" ? (
@@ -105,12 +70,8 @@ export function SeedEntry({
             <div className="flex-auto overflow-hidden">
                 {card ? (
                     <>
-                        <p ref={titleRef} className="text-base whitespace-nowrap overflow-hidden truncate">
-                            {title}
-                        </p>
-                        <p ref={descRef} className={`text-ui-600 text-base whitespace-nowrap truncate`}>
-                            {description}
-                        </p>
+                        <p className="text-base whitespace-nowrap overflow-hidden truncate">{title}</p>
+                        <p className={`text-ui-600 text-base whitespace-nowrap truncate`}>{description}</p>
                     </>
                 ) : (
                     <>
