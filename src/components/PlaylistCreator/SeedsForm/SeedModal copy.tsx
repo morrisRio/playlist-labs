@@ -7,8 +7,7 @@ import type { Key, SWRConfiguration, SWRResponse } from "swr";
 
 import Lottie from "lottie-react";
 import Loading from "@/lib/lotties/loading.json";
-import debounce from "lodash/debounce";
-import { set } from "lodash";
+import { set } from "mongoose";
 
 interface SeedModalProps {
     onAdd: (seed: Seed) => void;
@@ -22,30 +21,13 @@ interface SelectionTops {
     selectedRange: "short_term" | "medium_term" | "long_term";
 }
 
-const useDebounce = (callback: () => void) => {
-    const ref = useRef<() => void>();
-
-    useEffect(() => {
-        ref.current = callback;
-    }, [callback]);
-
-    const debouncedCallback = useMemo(() => {
-        const func = () => {
-            ref.current?.();
-        };
-
-        return debounce(func, 500);
-    }, []);
-
-    return debouncedCallback;
-};
-
 function SearchBar({
+    setNewSearch,
     setSearch,
     showSearch,
     setShowSearch,
 }: {
-    // setNewSearch: (value: string) => void;
+    setNewSearch: (value: string) => void;
     setSearch: (value: string) => void;
     showSearch: boolean;
     setShowSearch: (state: boolean) => void;
@@ -54,19 +36,34 @@ function SearchBar({
 
     const [query, setQuery] = useState("");
 
-    const debouncedSearch = useDebounce(() => {
-        if (query.length > 0) {
-            setSearch(query);
-            setShowSearch(true);
-        } else {
-            setShowSearch(false);
-        }
-    });
+    // const handleQueryChange = useCallback(
+    //     (e: React.ChangeEvent<HTMLInputElement>) => {
+    //         setQuery(e.target.value);
+    //     },
+    //     [setQuery]
+    // );
+    //v1 optimization
+    // const useDebounce = (value: any, delay: number) => {
+    //     const [debouncedValue, setDebouncedValue] = useState(value);
 
-    const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setQuery(e.target.value);
-        debouncedSearch();
-    };
+    //     useEffect(() => {
+    //         const handler = setTimeout(() => {
+    //             setDebouncedValue(value);
+    //         }, delay);
+
+    //         return () => {
+    //             clearTimeout(handler);
+    //         };
+    //     }, [value, delay]);
+
+    //     return debouncedValue;
+    // };
+
+    // const debouncedSearch = useDebounce(query, 300);
+
+    // useEffect(() => {
+    //     setNewSearch(debouncedSearch);
+    // }, [debouncedSearch, setNewSearch]);
 
     return (
         <div className="relative -mx-4">
@@ -74,7 +71,10 @@ function SearchBar({
                 ref={inputRef}
                 type="text"
                 value={query}
-                onChange={onChange}
+                onChange={(e) => {
+                    setNewSearch(e.target.value);
+                    setQuery(e.target.value);
+                }}
                 placeholder="Search"
                 className="w-full px-5 py-3 bg-ui-850 focus:outline-none placeholder-ui-600 text-lg  border-y border-ui-700"
             />
@@ -121,6 +121,7 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
     }, [seeds]);
 
     const fetcher = (url: string, controller: AbortController) => {
+        // if (abortControllerRef.current) abortControllerRef.current.abort();
         const promise = fetch(url, { signal: controller.signal }).then(async (r) => {
             if (!r.ok) {
                 const error = new Error("An error occurred while fetching the data.");
@@ -141,10 +142,12 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
     function useCancellableSWR(key: Key, opts: SWRConfiguration): SWRResponse {
         useEffect(() => {
             if (key) {
+                console.log("setting new controller");
                 setController(new AbortController());
                 abortControllerRef.current?.abort();
                 abortControllerRef.current = controller;
                 return () => {
+                    console.log("aborting");
                     abortControllerRef.current?.abort();
                 };
             }
@@ -166,6 +169,40 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
         }
     );
 
+    const setNewSearchRef = useRef<NodeJS.Timeout | null>(null);
+    const setNewSearch = useCallback((value: string) => {
+        if (setNewSearchRef.current) {
+            console.log("clearing timeout");
+            clearTimeout(setNewSearchRef.current);
+        }
+        if (abortControllerRef.current) {
+            console.log("aborting search");
+            abortControllerRef.current.abort();
+        }
+        setNewSearchRef.current = setTimeout(() => {
+            if (value.length > 0) {
+                console.log("searching", value);
+                setShowSearch(true);
+                setSearch(value);
+            } else {
+                console.log("empty search");
+                setShowSearch(false);
+            }
+        }, 500);
+    }, []);
+
+    //dont memo the function as controller is be updated for every new search
+    //v1 optimization
+    // const setNewSearch = (value: string) => {
+    //     controllerSearch.abort();
+    //     if (value.length > 0) {
+    //         setShowSearch(true);
+    //         setSearch(value);
+    //     } else {
+    //         setShowSearch(false);
+    //     }
+    // };
+
     //TOP_ITEMS ______________________________________________________________________________________________________________
     const [selectedTops, setSelectedTops] = useState<SelectionTops>({
         selectedType: "track",
@@ -179,6 +216,17 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
             ["long_term", "6 months"],
         ],
     };
+    //optimization v1
+    // const [{ data: topItems, error: topItemsError }, controllerTop] = useCancellableSWR(
+    //     !showSearch
+    //         ? `/api/spotify/top-items/${selectedTops.selectedType}s?time_range=${selectedTops.selectedRange}`
+    //         : null,
+    //     {
+    //         revalidateOnFocus: false,
+    //         dedupingInterval: 290,
+    //         suspense: true,
+    //     }
+    // );
     const { data: topItems, error: topItemsError } = useCancellableSWR(
         !showSearch
             ? `/api/spotify/top-items/${selectedTops.selectedType}s?time_range=${selectedTops.selectedRange}`
@@ -235,7 +283,7 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
                     </button>
                 </div>
                 <SearchBar
-                    // setNewSearch={setNewSearch}
+                    setNewSearch={setNewSearch}
                     showSearch={showSearch}
                     setShowSearch={setShowSearch}
                     setSearch={setSearch}
