@@ -183,6 +183,7 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
                     console.error(err);
                 });
         };
+        finishSubmit();
     }, [preferences, seeds, rules, playlist_id, router]);
 
     const handleSubmit = useCallback(

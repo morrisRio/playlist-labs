@@ -7,6 +7,7 @@ import type { Key, SWRConfiguration, SWRResponse } from "swr";
 
 import Lottie from "lottie-react";
 import Loading from "@/lib/lotties/loading.json";
+import { set } from "mongoose";
 
 interface SeedModalProps {
     onAdd: (seed: Seed) => void;
@@ -22,10 +23,12 @@ interface SelectionTops {
 
 function SearchBar({
     setNewSearch,
+    setSearch,
     showSearch,
     setShowSearch,
 }: {
     setNewSearch: (value: string) => void;
+    setSearch: (value: string) => void;
     showSearch: boolean;
     setShowSearch: (state: boolean) => void;
 }) {
@@ -33,34 +36,34 @@ function SearchBar({
 
     const [query, setQuery] = useState("");
 
-    const handleQueryChange = useCallback(
-        (e: React.ChangeEvent<HTMLInputElement>) => {
-            setQuery(e.target.value);
-        },
-        [setQuery]
-    );
+    // const handleQueryChange = useCallback(
+    //     (e: React.ChangeEvent<HTMLInputElement>) => {
+    //         setQuery(e.target.value);
+    //     },
+    //     [setQuery]
+    // );
+    //v1 optimization
+    // const useDebounce = (value: any, delay: number) => {
+    //     const [debouncedValue, setDebouncedValue] = useState(value);
 
-    const useDebounce = (value: any, delay: number) => {
-        const [debouncedValue, setDebouncedValue] = useState(value);
+    //     useEffect(() => {
+    //         const handler = setTimeout(() => {
+    //             setDebouncedValue(value);
+    //         }, delay);
 
-        useEffect(() => {
-            const handler = setTimeout(() => {
-                setDebouncedValue(value);
-            }, delay);
+    //         return () => {
+    //             clearTimeout(handler);
+    //         };
+    //     }, [value, delay]);
 
-            return () => {
-                clearTimeout(handler);
-            };
-        }, [value, delay]);
+    //     return debouncedValue;
+    // };
 
-        return debouncedValue;
-    };
+    // const debouncedSearch = useDebounce(query, 300);
 
-    const debouncedSearch = useDebounce(query, 300);
-
-    useEffect(() => {
-        setNewSearch(debouncedSearch);
-    }, [debouncedSearch, setNewSearch]);
+    // useEffect(() => {
+    //     setNewSearch(debouncedSearch);
+    // }, [debouncedSearch, setNewSearch]);
 
     return (
         <div className="relative -mx-4">
@@ -68,7 +71,10 @@ function SearchBar({
                 ref={inputRef}
                 type="text"
                 value={query}
-                onChange={handleQueryChange}
+                onChange={(e) => {
+                    setNewSearch(e.target.value);
+                    setQuery(e.target.value);
+                }}
                 placeholder="Search"
                 className="w-full px-5 py-3 bg-ui-850 focus:outline-none placeholder-ui-600 text-lg  border-y border-ui-700"
             />
@@ -115,6 +121,7 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
     }, [seeds]);
 
     const fetcher = (url: string, controller: AbortController) => {
+        // if (abortControllerRef.current) abortControllerRef.current.abort();
         const promise = fetch(url, { signal: controller.signal }).then(async (r) => {
             if (!r.ok) {
                 const error = new Error("An error occurred while fetching the data.");
@@ -128,16 +135,32 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
         return promise;
     };
 
-    function useCancellableSWR(key: Key, opts: SWRConfiguration): [SWRResponse, AbortController] {
-        const controller = new AbortController();
-        return [useSWR(key, (url: string) => fetcher(url, controller), opts), controller];
+    const abortControllerRef = useRef<AbortController | null>(null);
+
+    const [controller, setController] = useState<AbortController | null>(new AbortController());
+
+    function useCancellableSWR(key: Key, opts: SWRConfiguration): SWRResponse {
+        useEffect(() => {
+            if (key) {
+                console.log("setting new controller");
+                setController(new AbortController());
+                abortControllerRef.current?.abort();
+                abortControllerRef.current = controller;
+                return () => {
+                    console.log("aborting");
+                    abortControllerRef.current?.abort();
+                };
+            }
+        }, [key]);
+
+        return useSWR(key, (url: string) => (controller ? fetcher(url, controller) : null), opts);
     }
 
     //SEARCH ______________________________________________________________________________________________________________
     const [search, setSearch] = useState("");
     const [showSearch, setShowSearch] = useState(false);
 
-    const [{ data: searchResults, error: searchError }, controllerSearch] = useCancellableSWR(
+    const { data: searchResults, error: searchError } = useCancellableSWR(
         showSearch && search ? `/api/spotify/search?q=${search}` : null,
         {
             revalidateOnFocus: false,
@@ -146,16 +169,38 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
         }
     );
 
-    //dont memo the function as controller is be updated for every new search
-    const setNewSearch = (value: string) => {
-        controllerSearch.abort();
-        if (value.length > 0) {
-            setShowSearch(true);
-            setSearch(value);
-        } else {
-            setShowSearch(false);
+    const setNewSearchRef = useRef<NodeJS.Timeout | null>(null);
+    const setNewSearch = useCallback((value: string) => {
+        if (setNewSearchRef.current) {
+            console.log("clearing timeout");
+            clearTimeout(setNewSearchRef.current);
         }
-    };
+        if (abortControllerRef.current) {
+            console.log("aborting search");
+            abortControllerRef.current.abort();
+        }
+        setNewSearchRef.current = setTimeout(() => {
+            if (value.length > 0) {
+                console.log("searching", value);
+                setShowSearch(true);
+                setSearch(value);
+            } else {
+                console.log("empty search");
+                setShowSearch(false);
+            }
+        }, 300);
+    }, []);
+    //dont memo the function as controller is be updated for every new search
+    //v1 optimization
+    // const setNewSearch = (value: string) => {
+    //     controllerSearch.abort();
+    //     if (value.length > 0) {
+    //         setShowSearch(true);
+    //         setSearch(value);
+    //     } else {
+    //         setShowSearch(false);
+    //     }
+    // };
 
     //TOP_ITEMS ______________________________________________________________________________________________________________
     const [selectedTops, setSelectedTops] = useState<SelectionTops>({
@@ -170,8 +215,18 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
             ["long_term", "6 months"],
         ],
     };
-
-    const [{ data: topItems, error: topItemsError }, controllerTop] = useCancellableSWR(
+    //optimization v1
+    // const [{ data: topItems, error: topItemsError }, controllerTop] = useCancellableSWR(
+    //     !showSearch
+    //         ? `/api/spotify/top-items/${selectedTops.selectedType}s?time_range=${selectedTops.selectedRange}`
+    //         : null,
+    //     {
+    //         revalidateOnFocus: false,
+    //         dedupingInterval: 290,
+    //         suspense: true,
+    //     }
+    // );
+    const { data: topItems, error: topItemsError } = useCancellableSWR(
         !showSearch
             ? `/api/spotify/top-items/${selectedTops.selectedType}s?time_range=${selectedTops.selectedRange}`
             : null,
@@ -183,7 +238,7 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
     );
 
     const changeFilter = (e: React.MouseEvent<HTMLButtonElement> | React.ChangeEvent<HTMLSelectElement>) => {
-        controllerTop.abort();
+        // controllerTop.abort();
         const { name, value } = e.currentTarget;
         setSelectedTops((prevState) => ({
             ...prevState,
@@ -230,6 +285,7 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
                     setNewSearch={setNewSearch}
                     showSearch={showSearch}
                     setShowSearch={setShowSearch}
+                    setSearch={setSearch}
                 ></SearchBar>
                 {!showSearch && (
                     <div className="gap-4">

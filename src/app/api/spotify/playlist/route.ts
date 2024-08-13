@@ -11,6 +11,7 @@ import { createCanvas } from "@napi-rs/canvas";
 import { createCanvasGradient } from "@/lib/utils";
 
 const generateCoverImage = async (hue: number): Promise<string> => {
+    setDebugMode(true);
     debugLog("API: Generating Cover Image with Hue:", hue);
     const canvas = createCanvas(640, 640);
     createCanvasGradient(canvas, hue);
@@ -20,6 +21,7 @@ const generateCoverImage = async (hue: number): Promise<string> => {
 };
 
 const updatePlaylistCover = async (hue: number, idToWriteTo: string, accessToken: string): Promise<void> => {
+    setDebugMode(true);
     const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error("Playlist cover update timed out after 10s")), 10 * 60 * 1000); //10 minutes
     });
@@ -46,7 +48,7 @@ const updatePlaylistCover = async (hue: number, idToWriteTo: string, accessToken
 };
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
-    setDebugMode(false);
+    setDebugMode(true);
 
     const data = await req.json();
     const { preferences, seeds, rules }: PlaylistData = data;
@@ -150,7 +152,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
 //TODO: check if playlist exists in spotify (could be deleted by user) -> if there is no playlist id mathing the one in db call post
 export async function PUT(req: NextRequest): Promise<NextResponse> {
-    setDebugMode(false);
+    setDebugMode(true);
 
     const data = await req.json();
     if (!data.playlist_id) {
@@ -253,7 +255,8 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
         return NextResponse.json({ message: "Failed adding new Tracks.\n" + message }, { status });
     }
 
-    if (preferences.hue) {
+    console.log("Updating Cover Image", preferences.hue);
+    if (preferences.hue !== undefined) {
         await updatePlaylistCover(preferences.hue, playlist_id, accessToken).catch((error) => {
             console.error("Failed to update Cover Image: ", error);
         });
