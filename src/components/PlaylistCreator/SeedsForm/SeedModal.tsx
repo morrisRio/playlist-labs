@@ -159,7 +159,7 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
         } catch {
             return false;
         }
-    }, [searchResults, topItems, onAdd, onRemove, isAdded, error, showSearch]);
+    }, [searchResults, topItems, onAdd, onRemove, isAdded, error, showSearch, searchLoading, topLoading]);
 
     return (
         <div className="bg-ui-950 fixed h-screen w-full top-0 left-0 z-50 flex flex-col">
