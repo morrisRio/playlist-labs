@@ -1,14 +1,13 @@
-import { useState, useEffect, useRef, useCallback, useMemo, use } from "react";
-import { MdOutlineArrowBackIos, MdOutlineSearch, MdClose, MdCheck } from "react-icons/md";
+import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
+import { MdOutlineArrowBackIos, MdCheck } from "react-icons/md";
 import { SeedEntry } from "./SeedEntry";
 import { Seed } from "@/types/spotify";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 import type { Key, SWRConfiguration, SWRResponse } from "swr";
+import MemoizedSearchBar from "./SearchBar";
 
 import Lottie from "lottie-react";
 import Loading from "@/lib/lotties/loading.json";
-import debounce from "lodash/debounce";
-import { set } from "lodash";
 
 interface SeedModalProps {
     onAdd: (seed: Seed) => void;
@@ -20,88 +19,6 @@ interface SeedModalProps {
 interface SelectionTops {
     selectedType: "artist" | "track";
     selectedRange: "short_term" | "medium_term" | "long_term";
-}
-
-const useDebounce = (callback: () => void) => {
-    const ref = useRef<() => void>();
-
-    useEffect(() => {
-        ref.current = callback;
-    }, [callback]);
-
-    const debouncedCallback = useMemo(() => {
-        const func = () => {
-            ref.current?.();
-        };
-
-        return debounce(func, 500);
-    }, []);
-
-    return debouncedCallback;
-};
-
-function SearchBar({
-    setSearch,
-    showSearch,
-    setShowSearch,
-}: {
-    // setNewSearch: (value: string) => void;
-    setSearch: (value: string) => void;
-    showSearch: boolean;
-    setShowSearch: (state: boolean) => void;
-}) {
-    const inputRef = useRef(null);
-
-    const [query, setQuery] = useState("");
-
-    const debouncedSearch = useDebounce(() => {
-        if (query.length > 0) {
-            setSearch(query);
-            setShowSearch(true);
-        } else {
-            setShowSearch(false);
-        }
-    });
-
-    const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setQuery(e.target.value);
-        debouncedSearch();
-    };
-
-    return (
-        <div className="relative -mx-4">
-            <input
-                ref={inputRef}
-                type="text"
-                value={query}
-                onChange={onChange}
-                placeholder="Search"
-                className="w-full px-5 py-3 bg-ui-850 focus:outline-none placeholder-ui-600 text-lg  border-y border-ui-700"
-            />
-            <div className="absolute inset-y-0 right-0 flex items-center p-2 text-themetext/65">
-                {showSearch ? (
-                    <MdClose
-                        onClick={() => {
-                            setQuery("");
-                            setShowSearch(false);
-                        }}
-                        size="2em"
-                        className="cursor-pointer"
-                    ></MdClose>
-                ) : (
-                    <MdOutlineSearch
-                        size="2em"
-                        onClick={() => {
-                            if (inputRef.current !== null)
-                                //@ts-ignore
-                                inputRef.current.focus();
-                        }}
-                        className="cursor-pointer"
-                    ></MdOutlineSearch>
-                )}
-            </div>
-        </div>
-    );
 }
 
 function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
@@ -135,14 +52,16 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
     };
 
     const abortControllerRef = useRef<AbortController | null>(null);
-
     const [controller, setController] = useState<AbortController | null>(new AbortController());
 
     function useCancellableSWR(key: Key, opts: SWRConfiguration): SWRResponse {
         useEffect(() => {
             if (key) {
                 setController(new AbortController());
-                abortControllerRef.current?.abort();
+                if (abortControllerRef.current !== null) {
+                    console.log("aboooorting", abortControllerRef.current);
+                    abortControllerRef.current?.abort();
+                }
                 abortControllerRef.current = controller;
                 return () => {
                     abortControllerRef.current?.abort();
@@ -155,16 +74,27 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
 
     //SEARCH ______________________________________________________________________________________________________________
     const [search, setSearch] = useState("");
-    const [showSearch, setShowSearch] = useState(false);
 
-    const { data: searchResults, error: searchError } = useCancellableSWR(
-        showSearch && search ? `/api/spotify/search?q=${search}` : null,
-        {
-            revalidateOnFocus: false,
-            dedupingInterval: 290,
-            suspense: true,
+    const [showSearch, setShowSearch] = useState(false);
+    const handleSetSearch = useCallback((value: string) => {
+        if (value.length > 0) {
+            setSearch(value);
+            setShowSearch(true);
+        } else {
+            setSearch("");
+            setShowSearch(false);
         }
-    );
+    }, []);
+
+    const {
+        data: searchResults,
+        error: searchError,
+        isLoading: searchLoading,
+    } = useCancellableSWR(showSearch && search ? `/api/spotify/search?q=${search}` : null, {
+        revalidateOnFocus: false,
+        dedupingInterval: 290,
+        keepPreviousData: true,
+    });
 
     //TOP_ITEMS ______________________________________________________________________________________________________________
     const [selectedTops, setSelectedTops] = useState<SelectionTops>({
@@ -179,14 +109,18 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
             ["long_term", "6 months"],
         ],
     };
-    const { data: topItems, error: topItemsError } = useCancellableSWR(
+    const {
+        data: topItems,
+        error: topItemsError,
+        isLoading: topLoading,
+    } = useCancellableSWR(
         !showSearch
             ? `/api/spotify/top-items/${selectedTops.selectedType}s?time_range=${selectedTops.selectedRange}`
             : null,
         {
             revalidateOnFocus: false,
             dedupingInterval: 290,
-            suspense: true,
+            keepPreviousData: true,
         }
     );
 
@@ -200,12 +134,18 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
     };
 
     const error = searchError || topItemsError;
-    const loading = error ? !error : searchResults ? searchResults.length <= 0 : topItems ? topItems.length <= 0 : true;
+    const loading = searchLoading || topLoading;
 
     const memoizedSeeds = useMemo(() => {
-        if (loading || error) return;
+        if (
+            error ||
+            (showSearch && (!searchResults || searchResults.length === 0) && !searchLoading) ||
+            (!showSearch && (!topItems || topItems.length === 0) && !topLoading)
+        ) {
+            return <div className="text-ui-600 text-center">An error occurred. Please try again later.</div>;
+        }
+
         try {
-            console.log(topItems);
             return (searchResults || topItems).map((seed: Seed, index: number) => (
                 <SeedEntry
                     seedObj={seed}
@@ -219,7 +159,7 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
         } catch {
             return false;
         }
-    }, [searchResults, topItems, onAdd, onRemove, isAdded, error, loading]);
+    }, [searchResults, topItems, onAdd, onRemove, isAdded, error, showSearch]);
 
     return (
         <div className="bg-ui-950 fixed h-screen w-full top-0 left-0 z-50 flex flex-col">
@@ -234,12 +174,7 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
                         <MdCheck size="1.7rem" />
                     </button>
                 </div>
-                <SearchBar
-                    // setNewSearch={setNewSearch}
-                    showSearch={showSearch}
-                    setShowSearch={setShowSearch}
-                    setSearch={setSearch}
-                ></SearchBar>
+                <MemoizedSearchBar setSearch={handleSetSearch} />
                 {!showSearch && (
                     <div className="gap-4">
                         <div className="flex justify-between">
@@ -277,31 +212,9 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
             </header>
             <div className="relative flex flex-col gap-4 overflow-y-auto overflow-x-hidden p-4 size-full">
                 {memoizedSeeds}
-                {/* {searchResults && searchResults.length > 0 && <p>searchResults[0].</p>} */}
                 {loading && (
-                    <div className="absolute inset-0 flex justify-center pt-16 size-full bg-ui-900/20">
+                    <div className="absolute z-50 inset-0 flex justify-center pt-16 size-full bg-ui-900/40">
                         <Lottie animationData={Loading} className="size-20"></Lottie>
-                    </div>
-                )}
-                {error && (
-                    <div className="absolute inset-0 flex justify-center pt-16 size-full bg-ui-900/20">
-                        <p>
-                            Error loading data
-                            <br />
-                        </p>
-                        {searchError && (
-                            <p>
-                                searchError: {searchError.toString()}
-                                <br />
-                            </p>
-                        )}
-
-                        {topItemsError && (
-                            <p>
-                                topItemsError: {topItemsError.toString()}
-                                <br />
-                            </p>
-                        )}
                     </div>
                 )}
             </div>

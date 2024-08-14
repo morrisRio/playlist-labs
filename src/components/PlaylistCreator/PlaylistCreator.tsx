@@ -1,5 +1,5 @@
 "use client";
-import { useState, FormEvent, useCallback, PointerEventHandler } from "react";
+import { useState, FormEvent, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 import PlaylistHeader from "./PlaylistHeader";
@@ -14,6 +14,8 @@ import { completeRules } from "@/lib/spotifyUtils";
 import Lottie from "lottie-react";
 import Loading from "@/lib/lotties/loading.json";
 
+import { preload } from "swr";
+
 interface PlaylistFormProps {
     pageTitle: string;
     playlist?: PlaylistData;
@@ -21,6 +23,9 @@ interface PlaylistFormProps {
 
 function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
     const router = useRouter();
+
+    const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    preload(`/api/spotify/top-items/tracks?time_range=short_term`, fetcher);
 
     const [showSubmitErrors, setShowSubmitErrors] = useState(false);
     const [submitting, setSubmitting] = useState(false);
