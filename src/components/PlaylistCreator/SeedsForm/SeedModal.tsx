@@ -58,10 +58,8 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
         useEffect(() => {
             if (key) {
                 setController(new AbortController());
-                if (abortControllerRef.current !== null) {
-                    console.log("aboooorting", abortControllerRef.current);
-                    abortControllerRef.current?.abort();
-                }
+                abortControllerRef.current?.abort();
+
                 abortControllerRef.current = controller;
                 return () => {
                     abortControllerRef.current?.abort();
@@ -146,7 +144,7 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
         }
 
         try {
-            return (searchResults || topItems).map((seed: Seed, index: number) => (
+            return (showSearch ? searchResults : topItems).map((seed: Seed, index: number) => (
                 <SeedEntry
                     seedObj={seed}
                     onAdd={onAdd}

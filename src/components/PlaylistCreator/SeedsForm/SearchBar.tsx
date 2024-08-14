@@ -15,7 +15,7 @@ function SearchBar({ setSearch }: { setSearch: (value: string) => void }) {
     const [query, setQuery] = useState("");
 
     const debouncedSetSearch = useMemo(() => debounce((value) => setSearch(value), 500), [setSearch]);
-
+    
     const onChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
             setQuery(e.target.value);
