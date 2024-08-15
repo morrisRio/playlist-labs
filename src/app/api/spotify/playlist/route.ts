@@ -48,7 +48,7 @@ const updatePlaylistCover = async (hue: number, idToWriteTo: string, accessToken
 };
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
-    setDebugMode(true);
+    setDebugMode(false);
 
     const data = await req.json();
     const { preferences, seeds, rules }: PlaylistData = data;
@@ -136,6 +136,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         preferences,
         seeds,
         rules,
+        trackHistory: addBody.uris,
     });
 
     if (!dbSuccess) {
@@ -152,7 +153,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
 //TODO: check if playlist exists in spotify (could be deleted by user) -> if there is no playlist id mathing the one in db call post
 export async function PUT(req: NextRequest): Promise<NextResponse> {
-    setDebugMode(true);
+    setDebugMode(false);
 
     const data = await req.json();
     if (!data.playlist_id) {
@@ -191,6 +192,8 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     }
 
     debugLog(" - checking if playlist exists", exists);
+
+    //TODO: fidelity check if the settings still the same, compare with db
     //complete the request body with the description and public fields
     const preferencesBody = {
         name: preferences.name,
@@ -263,11 +266,15 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
         delete preferences.hue;
     }
 
+    //TODO: add new tracks to history
+
+    const newTracks = ["placeholder"];
     const dbSuccess = await dbUpdatePlaylist(userId, {
         playlist_id,
         preferences,
         seeds,
         rules,
+        trackHistory: newTracks,
     });
 
     if (!dbSuccess) {

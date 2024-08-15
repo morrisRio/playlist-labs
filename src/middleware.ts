@@ -6,16 +6,16 @@ import { getAppUrl } from "@/lib/utils";
 
 // This function can be marked `async` if using `await` inside
 export async function middleware(req: NextRequest) {
-    setDebugMode(true);
+    setDebugMode(false);
 
     debugLog("MIDDLEWARE ACTIVE =================================================== ");
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-    if (token && token.accessTokenExpires && token.accessToken) {
-        const expires = new Date(0);
-        expires.setUTCSeconds(token?.accessTokenExpires! + 12000);
-        console.info("MW: token expires: ", expires);
-        console.info("MW: token in MW: ", token.accessToken);
-    }
+    // if (token && token.accessTokenExpires && token.accessToken) {
+    //     const expires = new Date(0);
+    //     expires.setUTCSeconds(token?.accessTokenExpires! + 12000);
+    //     console.info("MW: token expires: ", expires);
+    //     console.info("MW: token in MW: ", token.accessToken);
+    // }
 
     const { pathname } = req.nextUrl;
 

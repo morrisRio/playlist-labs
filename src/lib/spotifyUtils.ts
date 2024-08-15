@@ -4,6 +4,8 @@ import { allRules } from "@/lib/spotifyConstants";
 import { spotifyGet } from "@/lib/serverUtils";
 import { ErrorRes } from "@/types/spotify";
 import { debugLog, setDebugMode } from "@/lib/utils";
+import { connectMongoDB } from "./db/dbConnect";
+import { dbGetPlaylistHistory } from "./db/dbActions";
 
 /**
  * Generates a description for a given item (Track or Artist).
@@ -310,4 +312,21 @@ export const createPlaylistDescription = (preferences: Preferences, seeds: Seed[
         console.error("Failed to create Playlist Description", e);
         return "Playlist created by playlistLabs";
     }
+};
+
+export const ensureNewTracks = async (
+    playlist_id: string,
+    user_id: string,
+    newRecommendations: string[]
+): Promise<boolean> => {
+    setDebugMode(true);
+    debugLog("Ensuring new tracks");
+
+    const trackHistory = await dbGetPlaylistHistory(user_id, playlist_id);
+    if (trackHistory.error) {
+        debugLog("Failed to get track history");
+        return false;
+    }
+    debugLog("Track History:", trackHistory.data);
+    return true;
 };

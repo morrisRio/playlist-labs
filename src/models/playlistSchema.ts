@@ -24,6 +24,7 @@ interface Playlist extends Document {
         seed_image: string;
     }[];
     rules?: Rule[];
+    trackHistory: string[];
 }
 
 export const playlistSchema = new Schema<Playlist>({
@@ -114,6 +115,12 @@ export const playlistSchema = new Schema<Playlist>({
                 },
             },
             _id: false,
+        },
+    ],
+    trackHistory: [
+        {
+            type: String,
+            required: true,
         },
     ],
 });

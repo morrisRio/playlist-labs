@@ -148,6 +148,7 @@ export interface PlaylistData {
     preferences: Preferences;
     seeds: Seed[];
     rules?: Rule[];
+    trackHistory: string[];
     coverUrl?: string;
 }
 
@@ -156,4 +157,5 @@ export interface MongoPlaylistData extends Document {
     preferences: Preferences;
     seeds: Seed[];
     rules?: Rule[];
+    trackHistory: string[];
 }

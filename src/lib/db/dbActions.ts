@@ -8,6 +8,7 @@ import { Document } from "mongoose";
 import { debugLog, setDebugMode } from "@/lib/utils";
 import { auth } from "../serverUtils";
 import { revalidateTag } from "next/cache";
+import { set } from "lodash";
 
 interface MongoUserData extends Document {
     name: string;
@@ -117,7 +118,11 @@ export async function dbGetOnePlaylist(userId: string, playlistId: string): Prom
     ).lean()) as MongoUserData;
 
     const playlist = playlists[0];
+
     delete playlist._id;
+
+    setDebugMode(true);
+    debugLog("Playlist found:", playlist);
 
     return playlist as PlaylistData;
 }
@@ -198,5 +203,23 @@ export async function dbDeleteUser(): Promise<boolean> {
     } catch (error) {
         console.error("Error deleting user:", error);
         return false;
+    }
+}
+
+export async function dbGetPlaylistHistory(userId: string, playlistId: string): Promise<DbRes<string[]>> {
+    await connectMongoDB();
+    try {
+        // projection to only get the playlist with the id
+        const result = ((await User.findOne(
+            { spotify_id: userId, "playlists.playlist_id": playlistId },
+            {
+                "playlists.$": { trackHistory: 1 },
+                _id: 0,
+            }
+        ).lean()) as string[]) || ["No history found"];
+        return { data: result, error: null };
+    } catch (error: any) {
+        console.error("Error getting playlist history: ", error);
+        return { data: [], error: error.message };
     }
 }

@@ -20,6 +20,7 @@ async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
     if (session && session.user && session.user.id) {
         playlist = await dbGetOnePlaylist(session.user.id, playlist_id)
             .then(async (playlist) => {
+                // console.log("Playlist: ", playlist);
                 return playlist;
             })
             .catch((err) => {
