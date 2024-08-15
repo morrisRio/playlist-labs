@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { spotifyPost, spotifyPut, spotifyGet } from "@/lib/serverUtils";
-import { getRecommendations, createPlaylistDescription } from "@/lib/spotifyUtils";
+import { getRecommendations, createPlaylistDescription, ensureNewTracks, trackIdsToQuery } from "@/lib/spotifyUtils";
 import { getToken } from "next-auth/jwt";
 import { PlaylistData } from "@/types/spotify";
 import { dbCreatePlaylist, dbUpdatePlaylist } from "@/lib/db/dbActions";
@@ -95,19 +95,19 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     debugLog(" - created playlist with id: " + idToWriteTo);
 
     //get the recommendations and add them to the body for the api call that adds the tracks to the playlist
-    const recommandationUris = await getRecommendations(accessToken, preferences, seeds, rules);
+    const recommandationIds = await getRecommendations(accessToken, preferences, seeds, rules);
 
-    if ("error" in recommandationUris) {
-        const { message, status } = recommandationUris.error;
+    if ("error" in recommandationIds) {
+        const { message, status } = recommandationIds.error;
         return NextResponse.json(
             { message: "Failed to get Recommendations.\n Maybe your Settings are very limiting.\n" + message },
             { status }
         );
     }
     //add the tracks to the playlist
-
+    const recommandationQuery = trackIdsToQuery(recommandationIds);
     const addBody = {
-        uris: recommandationUris,
+        uris: recommandationQuery,
     };
 
     const addRes = await spotifyPost(
@@ -136,7 +136,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         preferences,
         seeds,
         rules,
-        trackHistory: addBody.uris,
+        trackHistory: recommandationIds,
     });
 
     if (!dbSuccess) {
@@ -226,12 +226,12 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
         return NextResponse.json({ message: "Failed deleting old Tracks.\n" + message }, { status });
     }
 
-    const recommandationUris = await getRecommendations(accessToken, preferences, seeds, rules);
-    debugLog(" - got recommendations", recommandationUris);
+    const recommandationIds = await getRecommendations(accessToken, preferences, seeds, rules);
+    debugLog(" - got recommendations", recommandationIds);
 
-    if ("error" in recommandationUris) {
-        console.error("API: END: Failed to get Recommendations", recommandationUris.error);
-        const { message, status } = recommandationUris.error;
+    if ("error" in recommandationIds) {
+        console.error("API: END: Failed to get Recommendations", recommandationIds.error);
+        const { message, status } = recommandationIds.error;
         return NextResponse.json(
             {
                 message: "Failed to get Recommendations. Maybe your Settings are very limiting.\n" + message,
@@ -240,9 +240,10 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
         );
     }
     //add the tracks to the playlist
-
+    const recommandationQuery = trackIdsToQuery(recommandationIds);
+    console.log("recQuery: ", recommandationQuery);
     const addBody = {
-        uris: recommandationUris,
+        uris: recommandationQuery,
     };
 
     const addRes = await spotifyPost(
@@ -267,6 +268,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     }
 
     //TODO: add new tracks to history
+    ensureNewTracks(userId, playlist_id, recommandationIds);
 
     const newTracks = ["placeholder"];
     const dbSuccess = await dbUpdatePlaylist(userId, {

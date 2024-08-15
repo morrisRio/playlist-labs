@@ -72,7 +72,7 @@ export const getThumbnail = (item: Artist | Track): string => {
  * @param {Preferences} preferences - The user's preferences, including the number of recommendations to fetch.
  * @param {Seed[]} seeds - An array of Seed objects used to generate recommendations.
  * @param {Rule[]} [rules] - Optional rules to refine the recommendations.
- * @returns {Promise<string[]>} - A promise that resolves to an array of Spotify track URIs.
+ * @returns {Promise<string[]>} - A promise that resolves to an array of Spotify track ids.
  *
  * This function constructs the query string for the API call from the seeds and rules, makes the API request,
  * and processes the response to extract and return an array of Spotify track URIs.
@@ -117,8 +117,8 @@ export const getRecommendations = async (
             return { error: { message, status } };
         }
 
-        //create the tracksquery
-        const tracksToAdd = trackRes.tracks.map((track) => `spotify:track:${track.id}`);
+        // //create the tracksquery
+        const tracksToAdd = trackRes.tracks.map((track) => track.id);
 
         return tracksToAdd;
     } catch (e) {
@@ -126,6 +126,11 @@ export const getRecommendations = async (
         if (typeof e === "string") return { error: { message: e, status: 500 } };
         return { error: { message: "Failed to get recommendations", status: 500 } };
     }
+};
+
+export const trackIdsToQuery = (tracks: string[]): string[] => {
+    const query = tracks.map((track) => `spotify:track:${track}`);
+    return query;
 };
 
 /**
@@ -145,7 +150,6 @@ const getRuleQuery = (rules: Rule[]): string => {
     const ruleQuery = rules
         .map((rule) => {
             if (Array.isArray(rule.value)) {
-                //this might be flipped
                 return `target_valence=${1 - rule.value[1] / 100}&target_energy=${rule.value[0] / 100}`;
             } else if (rule.type === "range" && typeof rule.value === "number") {
                 if (rule.name === "Tempo") return `target_${rule.name.toLowerCase()}=${rule.value}`;
