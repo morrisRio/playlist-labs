@@ -1,11 +1,15 @@
 "use client";
 
-function FetchButton() {
+interface FetchButtonProps {
+    playlistId: string;
+}
+
+function FetchButton({ playlistId }: FetchButtonProps) {
     const testFunction = async () => {
         console.log("Test started");
-        const res = await fetch("/api/spotify/playlist/cover-image", {
+        const res = await fetch(`/api/spotify/test`, {
             method: "POST",
-            body: JSON.stringify({ hue: 360 }),
+            body: JSON.stringify({ playlistId: playlistId }),
             headers: {
                 "Content-Type": "application/json",
             },

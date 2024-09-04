@@ -58,6 +58,7 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
         useEffect(() => {
             if (key) {
                 setController(new AbortController());
+
                 abortControllerRef.current?.abort();
 
                 abortControllerRef.current = controller;

@@ -8,7 +8,6 @@ import { Document } from "mongoose";
 import { debugLog, setDebugMode } from "@/lib/utils";
 import { auth } from "../serverUtils";
 import { revalidateTag } from "next/cache";
-import { set } from "lodash";
 
 interface MongoUserData extends Document {
     name: string;
@@ -60,11 +59,16 @@ export async function dbRegisterUser(userId: string, name: string): Promise<bool
  * @throws {Error} Will throw an error if the user is not found or if the user has no playlists.
  */
 
-interface DbRes<T> {
-    data: T;
-    error: string | null;
+type DbRes<T> =
+    | {
+          data: T;
+          error: string | null;
+      }
+    | DbError;
+interface DbError {
+    data: null;
+    error: string;
 }
-
 export async function dbGetUsersPlaylists(userId: string): Promise<DbRes<PlaylistData[]>> {
     setDebugMode(false);
     await connectMongoDB();
@@ -97,17 +101,46 @@ export async function dbGetUsersPlaylists(userId: string): Promise<DbRes<Playlis
  * Fetches a single playlist for a user based on the user's Spotify ID and the playlist ID.
  *
  * @async
- * @function dbGetOnePlaylist
+ * @function dbGetOnePlaylistData
  * @param {string} userId - The Spotify ID of the user.
  * @param {string} playlistId - The ID of the playlist to fetch.
- * @returns {Promise<PlaylistData | null>} A promise that resolves to the playlist data if found, or null if not found.
+ * @returns {Promise<DbRes<PlaylistData>>} A promise that resolves to the playlist data if found, or null if not found.
  */
-export async function dbGetOnePlaylist(userId: string, playlistId: string): Promise<PlaylistData | null> {
+export async function dbGetOnePlaylistData(userId: string, playlistId: string): Promise<DbRes<PlaylistData>> {
+    //for fetching only one playlist: https://www.mongodb.com/docs/manual/tutorial/optimize-query-performance-with-indexes-and-projections/
+    try {
+        await connectMongoDB();
+        setDebugMode(false);
+        // projection to only get the playlist with the id
+        const { playlists } = (await User.findOne(
+            { spotify_id: userId },
+            {
+                playlists: {
+                    $elemMatch: { playlist_id: playlistId },
+                },
+                _id: 0,
+            }
+        ).lean()) as MongoUserData;
+
+        const playlist = playlists[0];
+
+        delete playlist._id;
+
+        debugLog("Playlist found:", playlist);
+
+        return { data: playlist as PlaylistData, error: null };
+    } catch (error: any) {
+        console.error("Error getting playlist:", error);
+        return { data: null, error: error.message };
+    }
+}
+
+export async function dbGetOnePlaylist(userId: string, playlistId: string): Promise<DbRes<MongoPlaylistData | null>> {
     //for fetching only one playlist: https://www.mongodb.com/docs/manual/tutorial/optimize-query-performance-with-indexes-and-projections/
     await connectMongoDB();
 
     // projection to only get the playlist with the id
-    const { playlists } = (await User.findOne(
+    const { playlists } = await User.findOne(
         { spotify_id: userId },
         {
             playlists: {
@@ -115,16 +148,11 @@ export async function dbGetOnePlaylist(userId: string, playlistId: string): Prom
             },
             _id: 0,
         }
-    ).lean()) as MongoUserData;
+    );
 
     const playlist = playlists[0];
 
-    delete playlist._id;
-
-    setDebugMode(true);
-    debugLog("Playlist found:", playlist);
-
-    return playlist as PlaylistData;
+    return { data: playlist as MongoPlaylistData, error: null };
 }
 
 /**
@@ -152,18 +180,37 @@ export async function dbCreatePlaylist(userId: string, playlistData: PlaylistDat
  *
  * @param {string} userId - The Spotify ID of the user.
  * @param {PlaylistData} playlistData - The updated data of the playlist.
+ * @param {string[]} newTracks - Optional: An array of new track IDs to add to the trackHistory.
  * @returns {Promise<boolean>} - Returns true if the playlist was successfully updated, false otherwise.
  */
-export async function dbUpdatePlaylist(userId: string, playlistData: PlaylistData): Promise<boolean> {
+export async function dbUpdatePlaylist(
+    userId: string,
+    playlistData: PlaylistData,
+    newTracks?: string[]
+): Promise<boolean> {
     await connectMongoDB();
     try {
+        let updateOperation: any = {
+            $set: { "playlists.$": playlistData },
+        };
+
+        // If newTracks are provided, add them to the trackHistory
+        if (newTracks && newTracks.length > 0) {
+            updateOperation.$push = {
+                "playlists.$.trackHistory": {
+                    $each: newTracks,
+                },
+            };
+        }
+
         const result = await UserModel.updateOne(
             {
                 spotify_id: userId,
                 "playlists.playlist_id": playlistData.playlist_id,
             },
-            { $set: { "playlists.$": playlistData } }
+            updateOperation
         );
+
         if (!result.acknowledged) throw new Error("Change not acknowledged in DB");
         return true;
     } catch (error) {
@@ -209,15 +256,21 @@ export async function dbDeleteUser(): Promise<boolean> {
 export async function dbGetPlaylistHistory(userId: string, playlistId: string): Promise<DbRes<string[]>> {
     await connectMongoDB();
     try {
-        // projection to only get the playlist with the id
-        const result = ((await User.findOne(
+        // Query to find the specific track history of the playlist
+        const result = await User.findOne(
             { spotify_id: userId, "playlists.playlist_id": playlistId },
             {
-                "playlists.$": { trackHistory: 1 },
+                playlists: { $elemMatch: { playlist_id: playlistId } },
+                "playlists.trackhistory": 1,
                 _id: 0,
             }
-        ).lean()) as string[]) || ["No history found"];
-        return { data: result, error: null };
+        ).lean();
+
+        console.log("Result: ", result);
+        // Extract the trackhistory if it exists
+        // const trackHistory = result?.playlistst?.[0]?.trackhistory || ["No history found"];
+        const trackHistory = ["No history found"];
+        return { data: trackHistory, error: null };
     } catch (error: any) {
         console.error("Error getting playlist history: ", error);
         return { data: [], error: error.message };

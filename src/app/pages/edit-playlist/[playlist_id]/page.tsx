@@ -1,13 +1,13 @@
 import { auth } from "@/lib/serverUtils";
 import { PlaylistData } from "@/types/spotify";
 import PlaylistCreator from "@/components/PlaylistCreator/PlaylistCreator";
-import { dbGetOnePlaylist } from "@/lib/db/dbActions";
+import { dbGetOnePlaylistData } from "@/lib/db/dbActions";
 import { redirect } from "next/navigation";
-import UniModal from "@/components/UniModal";
-import router from "next/router";
+import FetchButton from "@/components/FetchButton";
 
 async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
     const { playlist_id } = params;
+    let playlistData: PlaylistData | null = null;
 
     const session = await auth("playlist");
     if (!session || !session.user || !session.user.id) {
@@ -15,28 +15,30 @@ async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
         redirect("/api/auth/signin");
     }
 
-    let playlist: PlaylistData | null = null;
-    let error = false;
-    if (session && session.user && session.user.id) {
-        playlist = await dbGetOnePlaylist(session.user.id, playlist_id)
-            .then(async (playlist) => {
-                // console.log("Playlist: ", playlist);
-                return playlist;
-            })
-            .catch((err) => {
-                console.error(err);
-                error = true;
-                return null;
-            });
-    } else {
-        console.error("Session Error: ", session);
-        redirect("/api/auth/signin");
-    }
+    console.log(session.user.id);
+
+    const { data, error } = await dbGetOnePlaylistData(session.user.id, playlist_id);
+    if (error) playlistData = null;
+    else playlistData = data;
 
     return (
         <div className="min-h-full min-w-full">
-            {error && <p>Something went wrong. We&apos;re Sorry.</p>}
-            {playlist && <PlaylistCreator pageTitle="Edit Playlist" playlist={playlist}></PlaylistCreator>}
+            {error && (
+                <div className="h-screen flex flex-col justify-center items-center gap-5">
+                    <p>Something went wrong. We&apos;re Sorry.</p>
+                    <a href="/">
+                        <button role="navigation" className="px-4 py-2 bg-themetext font-normal text-ui-900 rounded-lg">
+                            Back to the Main Page
+                        </button>
+                    </a>
+                </div>
+            )}
+            {playlistData && (
+                <>
+                    {/* <FetchButton playlistId={playlist_id}></FetchButton> */}
+                    <PlaylistCreator pageTitle="Edit Playlist" playlist={playlistData}></PlaylistCreator>)
+                </>
+            )}
         </div>
     );
 }

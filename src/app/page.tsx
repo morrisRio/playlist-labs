@@ -55,7 +55,7 @@ export default async function Home() {
                 (playlistData.length === 0 && (
                     <div className="size-full flex-grow flex items-center justify-evenly bg-ui-850 text-ui-600 rounded-lg border border-ui-800 mb-16">
                         <p className="text-center mb-16">
-                            You don&apos;t have any playlists yet. <br></br> Create one now!
+                            You don&apos;t have any playlists yet. <br /> Create one now!
                         </p>
                     </div>
                 ))}

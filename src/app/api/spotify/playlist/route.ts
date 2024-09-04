@@ -4,14 +4,14 @@ import { spotifyPost, spotifyPut, spotifyGet } from "@/lib/serverUtils";
 import { getRecommendations, createPlaylistDescription, ensureNewTracks, trackIdsToQuery } from "@/lib/spotifyUtils";
 import { getToken } from "next-auth/jwt";
 import { PlaylistData } from "@/types/spotify";
-import { dbCreatePlaylist, dbUpdatePlaylist } from "@/lib/db/dbActions";
+import { dbCreatePlaylist, dbGetOnePlaylist, dbUpdatePlaylist } from "@/lib/db/dbActions";
 import { debugLog, setDebugMode } from "@/lib/utils";
 import { revalidateTag } from "next/cache";
 import { createCanvas } from "@napi-rs/canvas";
 import { createCanvasGradient } from "@/lib/utils";
 
 const generateCoverImage = async (hue: number): Promise<string> => {
-    setDebugMode(true);
+    setDebugMode(false);
     debugLog("API: Generating Cover Image with Hue:", hue);
     const canvas = createCanvas(640, 640);
     createCanvasGradient(canvas, hue);
@@ -21,7 +21,7 @@ const generateCoverImage = async (hue: number): Promise<string> => {
 };
 
 const updatePlaylistCover = async (hue: number, idToWriteTo: string, accessToken: string): Promise<void> => {
-    setDebugMode(true);
+    setDebugMode(false);
     const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error("Playlist cover update timed out after 10s")), 10 * 60 * 1000); //10 minutes
     });
@@ -241,7 +241,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     }
     //add the tracks to the playlist
     const recommandationQuery = trackIdsToQuery(recommandationIds);
-    console.log("recQuery: ", recommandationQuery);
+
     const addBody = {
         uris: recommandationQuery,
     };
@@ -259,7 +259,6 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
         return NextResponse.json({ message: "Failed adding new Tracks.\n" + message }, { status });
     }
 
-    console.log("Updating Cover Image", preferences.hue);
     if (preferences.hue !== undefined) {
         await updatePlaylistCover(preferences.hue, playlist_id, accessToken).catch((error) => {
             console.error("Failed to update Cover Image: ", error);
@@ -268,15 +267,21 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     }
 
     //TODO: add new tracks to history
-    ensureNewTracks(userId, playlist_id, recommandationIds);
+    const dbPlaylistData = await dbGetOnePlaylist(userId, playlist_id);
 
-    const newTracks = ["placeholder"];
+    if (dbPlaylistData.error || !dbPlaylistData.data) {
+        return NextResponse.json({ message: "Failed to get playlist data from database." }, { status: 500 });
+    }
+
+    const tracksToAdd = await ensureNewTracks(accessToken, userId, recommandationIds, dbPlaylistData.data);
+
+    //TODO: save instead of update
     const dbSuccess = await dbUpdatePlaylist(userId, {
         playlist_id,
         preferences,
         seeds,
         rules,
-        trackHistory: newTracks,
+        trackHistory: [...dbPlaylistData.data.trackHistory, ...tracksToAdd],
     });
 
     if (!dbSuccess) {
@@ -291,3 +296,5 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     revalidateTag("playlists");
     return NextResponse.json(playlist_id, { status: 201 });
 }
+
+//TODO: PATCH to only regenerate with previous settings

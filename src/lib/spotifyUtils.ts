@@ -1,11 +1,13 @@
 import formatter from "numbuffix";
-import { Seed, Rule, Preferences, Track, Artist } from "@/types/spotify";
+import { Seed, Rule, Preferences, Track, Artist, MongoPlaylistData } from "@/types/spotify";
 import { allRules } from "@/lib/spotifyConstants";
 import { spotifyGet } from "@/lib/serverUtils";
 import { ErrorRes } from "@/types/spotify";
 import { debugLog, setDebugMode } from "@/lib/utils";
 import { connectMongoDB } from "./db/dbConnect";
 import { dbGetPlaylistHistory } from "./db/dbActions";
+import { access } from "fs";
+import { debug } from "console";
 
 /**
  * Generates a description for a given item (Track or Artist).
@@ -83,7 +85,7 @@ export const getRecommendations = async (
     seeds: Seed[],
     rules?: Rule[]
 ): Promise<string[] | ErrorRes> => {
-    setDebugMode(true);
+    setDebugMode(false);
     try {
         debugLog(" - getting recommendations");
         //create the query string for the api call from the seeds and rules
@@ -170,7 +172,6 @@ const getRuleQuery = (rules: Rule[]): string => {
  * @returns The generated seed query string.
  */
 const getSeedQuery = (seeds: Seed[]) => {
-    setDebugMode(true);
     const seedArtists = seeds.filter((seed) => seed.type === "artist");
     const seedGenres = seeds.filter((seed) => seed.type === "genre");
     const seedTracks = seeds.filter((seed) => seed.type === "track");
@@ -182,7 +183,6 @@ const getSeedQuery = (seeds: Seed[]) => {
     const seedTracksQuery = seedTracks.length > 0 ? "seed_tracks=" + seedTracks.map((seed) => seed.id).join(",") : "";
 
     const seedQuery = [seedArtistsQuery, seedGenresQuery, seedTracksQuery].filter((seed) => seed !== "").join("&");
-    debugLog("SEED_QUERY: ", seedQuery);
     return seedQuery;
 };
 
@@ -318,19 +318,141 @@ export const createPlaylistDescription = (preferences: Preferences, seeds: Seed[
     }
 };
 
+// export const ensureNewTracks = async (
+//     accessToken: string,
+//     userId: string,
+//     newRecommendations: string[],
+//     playlistData: MongoPlaylistData
+// ): Promise<string[]> => {
+//     setDebugMode(true);
+//     debugLog("Ensuring new tracks");
+
+//     const { trackHistory, seeds, rules, playlist_id, preferences } = playlistData;
+
+//     let newTracks = newRecommendations.filter((track) => !trackHistory.includes(track));
+
+//     const newRecommandationIds = await getRecommendations(accessToken, preferences, seeds, rules);
+
+//     debugLog("trackHistory", trackHistory);
+//     debugLog("new recommendations", newRecommendations);
+//     debugLog("new Tracks", newTracks);
+
+//     const tracksToAdd = ["placeholder"];
+//     return tracksToAdd;
+// };
+
 export const ensureNewTracks = async (
-    playlist_id: string,
-    user_id: string,
-    newRecommendations: string[]
-): Promise<boolean> => {
+    accessToken: string,
+    userId: string,
+    newRecommendations: string[],
+    playlistData: MongoPlaylistData
+): Promise<string[]> => {
     setDebugMode(true);
     debugLog("Ensuring new tracks");
 
-    const trackHistory = await dbGetPlaylistHistory(user_id, playlist_id);
-    if (trackHistory.error) {
-        debugLog("Failed to get track history");
-        return false;
+    const { trackHistory, seeds, rules, preferences } = playlistData;
+
+    let newTracks = newRecommendations.filter((track) => !trackHistory.includes(track));
+    let loops = 0;
+
+    // Loop to fetch new recommendations if needed
+    while (newTracks.length < preferences.amount) {
+        if (loops < 4) {
+            // Get 50 new recommendations
+            console.log(`Loop ${loops + 1}: Fetching more recommendations`);
+            const newRecs = await getRecommendations(accessToken, preferences, seeds, rules);
+            if ("error" in newRecs) {
+                console.error("Error getting Recommendations in loop:", newRecs.error.message);
+                newTracks = [...newTracks, ...getRandomTrackIds(trackHistory, preferences.amount - newTracks.length)];
+                break;
+            }
+            newTracks = filterNewTracks(newRecs, trackHistory, newTracks);
+        } else if (loops < 7) {
+            console.log(`Loop ${loops + 1}: Fetching with one random Seed`);
+            // Get 50 new recommendations with one random added seed from trackHistory
+            const randomSeed = seedFromId(getRandomTrackIds(trackHistory, 1)[0]);
+            console.log("seeds: ", fillSeeds(seeds, [randomSeed]));
+            const newRecs = await getRecommendations(accessToken, preferences, fillSeeds(seeds, [randomSeed]), rules);
+            if ("error" in newRecs) {
+                console.error("Error getting Recommendations in loop:", newRecs.error.message);
+                newTracks = [...newTracks, ...getRandomTrackIds(trackHistory, preferences.amount - newTracks.length)];
+                break;
+            }
+            newTracks = filterNewTracks(newRecs, trackHistory, newTracks);
+        } else if (loops < 9) {
+            console.log(`Loop ${loops + 1}: Fetching with two random Seeds`);
+            // Get 50 new recommendations with two random seeds from trackHistory
+            const randomSeeds = getRandomTrackIds(trackHistory, 2).map((trackId) => seedFromId(trackId));
+            const updatedSeeds = fillSeeds(seeds, randomSeeds);
+            const newRecs = await getRecommendations(accessToken, preferences, updatedSeeds, rules);
+            if ("error" in newRecs) {
+                console.error("Error getting Recommendations in loop:", newRecs.error.message);
+                newTracks = [...newTracks, ...getRandomTrackIds(trackHistory, preferences.amount - newTracks.length)];
+                break;
+            }
+            newTracks = filterNewTracks(newRecs, trackHistory, newTracks);
+        } else {
+            console.log(`Loop ${loops + 1}: giving up, fill with random from history`);
+            // Fill the missing amount with random seeds from the trackHistory after 10 loops
+            const randomSeeds = getRandomTrackIds(trackHistory, preferences.amount - newTracks.length);
+            newTracks = [...newTracks, ...randomSeeds];
+            break;
+        }
+        loops++;
     }
-    debugLog("Track History:", trackHistory.data);
-    return true;
+    const tracksToAdd = newTracks.slice(0, preferences.amount);
+    console.log("Final new tracks", tracksToAdd);
+    return tracksToAdd;
+};
+
+// Helper functions
+
+// Get random tracks from the trackHistory
+const getRandomTrackIds = (trackHistory: string[], count: number): string[] => {
+    const trackCount = Math.min(count, trackHistory.length); // Ensure we don't request more than available
+    const randomIndices = new Set<number>();
+    var loops = 0;
+    while (randomIndices.size < trackCount) {
+        const randomIndex = Math.floor(Math.random() * trackHistory.length);
+        randomIndices.add(randomIndex);
+        loops++;
+        if (loops > 100) break; // Break after 100 loops to avoid infinite loop
+    }
+
+    return Array.from(randomIndices).map((index) => trackHistory[index]);
+};
+
+// // Vary the rules for generating recommendations
+// const varyRules = (rules: Rule[]): Rule[] => {
+//     // Implementation for varying the rules to get different recommendations
+// };
+
+// Filter out tracks already in the history and add only new tracks
+const filterNewTracks = (recommendations: string[], trackHistory: string[], currentTracks: string[]): string[] => {
+    const filteredTracks = recommendations.filter((track) => !trackHistory.includes(track));
+    return [...currentTracks, ...filteredTracks];
+};
+
+const seedFromId = (trackId: string) => {
+    return {
+        spotify: "filled up by random seed",
+        id: trackId,
+        title: "filled up by random seed",
+        description: "filled up by random seed",
+        type: "track",
+        thumbnail: "filled up by random seed",
+    };
+};
+
+const fillSeeds = (seeds: Seed[], newSeeds: Seed[]): Seed[] => {
+    const maxLength = 5;
+    // If the original seeds already exceed or meet the target length, replace the last elements with newSeeds
+    if (seeds.length + newSeeds.length >= maxLength) {
+        const seedsToReplace = Math.min(newSeeds.length, maxLength);
+        return [...seeds.slice(0, maxLength - seedsToReplace), ...newSeeds.slice(0, seedsToReplace)];
+    }
+    // Calculate how many seeds are needed to reach the target length
+    const seedsNeeded = Math.min(maxLength - seeds.length, newSeeds.length);
+    // Combine the original seeds with the needed amount of new seeds
+    return [...seeds, ...newSeeds.slice(0, seedsNeeded)];
 };
