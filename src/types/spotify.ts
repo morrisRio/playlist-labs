@@ -159,3 +159,9 @@ export interface MongoPlaylistData extends Document {
     rules?: Rule[];
     trackHistory: string[];
 }
+
+export interface MongoUserData extends Document {
+    name: string;
+    spotify_id: string;
+    playlists: MongoPlaylistData[];
+}

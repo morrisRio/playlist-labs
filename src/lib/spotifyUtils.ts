@@ -4,10 +4,6 @@ import { allRules } from "@/lib/spotifyConstants";
 import { spotifyGet } from "@/lib/serverUtils";
 import { ErrorRes } from "@/types/spotify";
 import { debugLog, setDebugMode } from "@/lib/utils";
-import { connectMongoDB } from "./db/dbConnect";
-import { dbGetPlaylistHistory } from "./db/dbActions";
-import { access } from "fs";
-import { debug } from "console";
 
 /**
  * Generates a description for a given item (Track or Artist).
@@ -81,7 +77,7 @@ export const getThumbnail = (item: Artist | Track): string => {
  */
 export const getRecommendations = async (
     accessToken: string,
-    preferences: Preferences,
+    amount: number,
     seeds: Seed[],
     rules?: Rule[]
 ): Promise<string[] | ErrorRes> => {
@@ -89,7 +85,7 @@ export const getRecommendations = async (
     try {
         debugLog(" - getting recommendations");
         //create the query string for the api call from the seeds and rules
-        const limitQuery = "limit=" + preferences.amount;
+        const limitQuery = "limit=" + amount;
         const seedQuery = "&" + getSeedQuery(seeds);
         const ruleQuery = rules ? "&" + getRuleQuery(rules) : "";
 
@@ -341,68 +337,96 @@ export const createPlaylistDescription = (preferences: Preferences, seeds: Seed[
 //     return tracksToAdd;
 // };
 
-export const ensureNewTracks = async (
+export const getOnlyNewRecommendations = async (
     accessToken: string,
-    userId: string,
-    newRecommendations: string[],
+    preferences: Preferences,
+    seeds: Seed[],
+    rules: Rule[] | undefined,
     playlistData: MongoPlaylistData
-): Promise<string[]> => {
-    setDebugMode(true);
-    debugLog("Ensuring new tracks");
+): Promise<string[] | ErrorRes> => {
+    try {
+        setDebugMode(true);
+        debugLog("Ensuring new tracks");
 
-    const { trackHistory, seeds, rules, preferences } = playlistData;
+        const { trackHistory, seeds: oldSeeds, rules: oldRules, preferences: oldPreferences } = playlistData;
 
-    let newTracks = newRecommendations.filter((track) => !trackHistory.includes(track));
-    let loops = 0;
-
-    // Loop to fetch new recommendations if needed
-    while (newTracks.length < preferences.amount) {
-        if (loops < 4) {
-            // Get 50 new recommendations
-            console.log(`Loop ${loops + 1}: Fetching more recommendations`);
-            const newRecs = await getRecommendations(accessToken, preferences, seeds, rules);
-            if ("error" in newRecs) {
-                console.error("Error getting Recommendations in loop:", newRecs.error.message);
-                newTracks = [...newTracks, ...getRandomTrackIds(trackHistory, preferences.amount - newTracks.length)];
-                break;
-            }
-            newTracks = filterNewTracks(newRecs, trackHistory, newTracks);
-        } else if (loops < 7) {
-            console.log(`Loop ${loops + 1}: Fetching with one random Seed`);
-            // Get 50 new recommendations with one random added seed from trackHistory
-            const randomSeed = seedFromId(getRandomTrackIds(trackHistory, 1)[0]);
-            console.log("seeds: ", fillSeeds(seeds, [randomSeed]));
-            const newRecs = await getRecommendations(accessToken, preferences, fillSeeds(seeds, [randomSeed]), rules);
-            if ("error" in newRecs) {
-                console.error("Error getting Recommendations in loop:", newRecs.error.message);
-                newTracks = [...newTracks, ...getRandomTrackIds(trackHistory, preferences.amount - newTracks.length)];
-                break;
-            }
-            newTracks = filterNewTracks(newRecs, trackHistory, newTracks);
-        } else if (loops < 9) {
-            console.log(`Loop ${loops + 1}: Fetching with two random Seeds`);
-            // Get 50 new recommendations with two random seeds from trackHistory
-            const randomSeeds = getRandomTrackIds(trackHistory, 2).map((trackId) => seedFromId(trackId));
-            const updatedSeeds = fillSeeds(seeds, randomSeeds);
-            const newRecs = await getRecommendations(accessToken, preferences, updatedSeeds, rules);
-            if ("error" in newRecs) {
-                console.error("Error getting Recommendations in loop:", newRecs.error.message);
-                newTracks = [...newTracks, ...getRandomTrackIds(trackHistory, preferences.amount - newTracks.length)];
-                break;
-            }
-            newTracks = filterNewTracks(newRecs, trackHistory, newTracks);
-        } else {
-            console.log(`Loop ${loops + 1}: giving up, fill with random from history`);
-            // Fill the missing amount with random seeds from the trackHistory after 10 loops
-            const randomSeeds = getRandomTrackIds(trackHistory, preferences.amount - newTracks.length);
-            newTracks = [...newTracks, ...randomSeeds];
-            break;
+        const recommandationIds = await getRecommendations(accessToken, 50, seeds, rules);
+        if ("error" in recommandationIds) {
+            throw new Error(recommandationIds.error.message);
         }
-        loops++;
+
+        let newTracks = recommandationIds.filter((track) => !trackHistory.includes(track));
+        let loops = 0;
+
+        // Loop to fetch new recommendations if needed
+        while (newTracks.length < preferences.amount) {
+            if (loops < 3) {
+                // Get 50 new recommendations
+                console.log(`Loop ${loops + 1}:  ${newTracks.length} -> Fetching more recommendations`);
+                console.log("newTracks:", newTracks);
+                const newRecs = await getRecommendations(accessToken, 50, seeds, rules);
+                if ("error" in newRecs) {
+                    console.error("Error getting Recommendations in loop:", newRecs.error.message);
+                    newTracks = [
+                        ...newTracks,
+                        ...getRandomTrackIds(trackHistory, preferences.amount - newTracks.length),
+                    ];
+                    break;
+                }
+                newTracks = filterNewTracks(newRecs, trackHistory, newTracks);
+            } else if (loops < 6) {
+                console.log(`Loop ${loops + 1}:  ${newTracks.length} -> Fetching with one random Seed`);
+                console.log("newTracks:", newTracks);
+                // Get 50 new recommendations with one random added seed from trackHistory
+                const randomSeed = seedFromId(getRandomTrackIds(trackHistory, 1)[0]);
+                console.log("new seed: ", randomSeed.id);
+                const updatedSeeds = fillSeeds(seeds, [randomSeed]);
+                const newRecs = await getRecommendations(accessToken, 50, updatedSeeds, rules);
+                if ("error" in newRecs) {
+                    console.error("Error getting Recommendations in loop:", newRecs.error.message);
+                    newTracks = [
+                        ...newTracks,
+                        ...getRandomTrackIds(trackHistory, preferences.amount - newTracks.length),
+                    ];
+                    break;
+                }
+                newTracks = filterNewTracks(newRecs, trackHistory, newTracks);
+            } else if (loops < 10) {
+                console.log(`Loop ${loops + 1}: ${newTracks.length} -> Fetching with two random Seeds`);
+                console.log("newTracks:", newTracks);
+                // Get 50 new recommendations with two random seeds from trackHistory
+                const randomSeeds = getRandomTrackIds(trackHistory, 2).map((trackId) => seedFromId(trackId));
+                const updatedSeeds = fillSeeds(seeds, randomSeeds);
+                console.log("new seeds: ", randomSeeds);
+                const newRecs = await getRecommendations(accessToken, 50, updatedSeeds, rules);
+                if ("error" in newRecs) {
+                    console.error("Error getting Recommendations in loop:", newRecs.error.message);
+                    newTracks = [
+                        ...newTracks,
+                        ...getRandomTrackIds(trackHistory, preferences.amount - newTracks.length),
+                    ];
+                    break;
+                }
+                newTracks = filterNewTracks(newRecs, trackHistory, newTracks);
+            } else {
+                console.log(`Loop ${loops + 1}: ${newTracks.length} -> giving up, fill with random from history`);
+                console.log("newTracks: ", newTracks);
+                // Fill the missing amount with random seeds from the trackHistory after 10 loops
+                const randomSeeds = getRandomTrackIds(trackHistory, preferences.amount - newTracks.length);
+                newTracks = [...newTracks, ...randomSeeds];
+                break;
+            }
+            loops++;
+        }
+        const tracksToAdd = newTracks.slice(0, preferences.amount);
+        console.log("Final new tracks", tracksToAdd);
+        return tracksToAdd;
+        //TODO: last resort to vary rules
+    } catch (e) {
+        console.error("API: Failed to get recommendations", e);
+        if (typeof e === "string") return { error: { message: e, status: 500 } };
+        return { error: { message: "Failed to get recommendations", status: 500 } };
     }
-    const tracksToAdd = newTracks.slice(0, preferences.amount);
-    console.log("Final new tracks", tracksToAdd);
-    return tracksToAdd;
 };
 
 // Helper functions
@@ -429,7 +453,9 @@ const getRandomTrackIds = (trackHistory: string[], count: number): string[] => {
 
 // Filter out tracks already in the history and add only new tracks
 const filterNewTracks = (recommendations: string[], trackHistory: string[], currentTracks: string[]): string[] => {
-    const filteredTracks = recommendations.filter((track) => !trackHistory.includes(track));
+    const filteredTracks = recommendations.filter(
+        (track) => !trackHistory.includes(track) && !currentTracks.includes(track)
+    );
     return [...currentTracks, ...filteredTracks];
 };
 

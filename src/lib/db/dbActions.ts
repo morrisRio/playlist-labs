@@ -135,12 +135,12 @@ export async function dbGetOnePlaylistData(userId: string, playlistId: string): 
     }
 }
 
-export async function dbGetOnePlaylist(userId: string, playlistId: string): Promise<DbRes<MongoPlaylistData | null>> {
+export async function dbGetOneUserPlaylist(userId: string, playlistId: string): Promise<DbRes<MongoUserData | null>> {
     //for fetching only one playlist: https://www.mongodb.com/docs/manual/tutorial/optimize-query-performance-with-indexes-and-projections/
     await connectMongoDB();
 
     // projection to only get the playlist with the id
-    const { playlists } = await User.findOne(
+    const userDoc = await User.findOne(
         { spotify_id: userId },
         {
             playlists: {
@@ -150,9 +150,9 @@ export async function dbGetOnePlaylist(userId: string, playlistId: string): Prom
         }
     );
 
-    const playlist = playlists[0];
+    // const playlist = playlists[0];
 
-    return { data: playlist as MongoPlaylistData, error: null };
+    return { data: userDoc as MongoUserData, error: null };
 }
 
 /**

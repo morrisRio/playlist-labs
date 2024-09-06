@@ -1,15 +1,21 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { spotifyPost, spotifyPut, spotifyGet } from "@/lib/serverUtils";
-import { getRecommendations, createPlaylistDescription, ensureNewTracks, trackIdsToQuery } from "@/lib/spotifyUtils";
+import {
+    getRecommendations,
+    createPlaylistDescription,
+    getOnlyNewRecommendations,
+    trackIdsToQuery,
+} from "@/lib/spotifyUtils";
 import { getToken } from "next-auth/jwt";
 import { PlaylistData } from "@/types/spotify";
-import { dbCreatePlaylist, dbGetOnePlaylist, dbUpdatePlaylist } from "@/lib/db/dbActions";
+import { dbCreatePlaylist, dbGetOneUserPlaylist, dbUpdatePlaylist } from "@/lib/db/dbActions";
 import { debugLog, setDebugMode } from "@/lib/utils";
 import { revalidateTag } from "next/cache";
 import { createCanvas } from "@napi-rs/canvas";
 import { createCanvasGradient } from "@/lib/utils";
 
+//needs to be here because of the canvas dependency leading to bundler issues if not in api route
 const generateCoverImage = async (hue: number): Promise<string> => {
     setDebugMode(false);
     debugLog("API: Generating Cover Image with Hue:", hue);
@@ -95,7 +101,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     debugLog(" - created playlist with id: " + idToWriteTo);
 
     //get the recommendations and add them to the body for the api call that adds the tracks to the playlist
-    const recommandationIds = await getRecommendations(accessToken, preferences, seeds, rules);
+    const recommandationIds = await getRecommendations(accessToken, preferences.amount, seeds, rules);
 
     if ("error" in recommandationIds) {
         const { message, status } = recommandationIds.error;
@@ -204,10 +210,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     const updatePlaylistDetails = await spotifyPut(
         `https://api.spotify.com/v1/playlists/${playlist_id}`,
         accessToken,
-        preferencesBody,
-        undefined,
-        undefined,
-        true
+        preferencesBody
     );
 
     if (updatePlaylistDetails.error) {
@@ -226,21 +229,33 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
         return NextResponse.json({ message: "Failed deleting old Tracks.\n" + message }, { status });
     }
 
-    const recommandationIds = await getRecommendations(accessToken, preferences, seeds, rules);
-    debugLog(" - got recommendations", recommandationIds);
-
-    if ("error" in recommandationIds) {
-        console.error("API: END: Failed to get Recommendations", recommandationIds.error);
-        const { message, status } = recommandationIds.error;
-        return NextResponse.json(
-            {
-                message: "Failed to get Recommendations. Maybe your Settings are very limiting.\n" + message,
-            },
-            { status }
-        );
+    const dbUserPlaylistData = await dbGetOneUserPlaylist(userId, playlist_id);
+    if (dbUserPlaylistData.error || !dbUserPlaylistData.data || dbUserPlaylistData.data.playlists.length === 0) {
+        return NextResponse.json({ message: "Failed to get playlist data from database." }, { status: 500 });
     }
+    const dbPlaylistData = dbUserPlaylistData.data.playlists[0];
+    let trackIdsToAdd = await getOnlyNewRecommendations(accessToken, preferences, seeds, rules, dbPlaylistData);
+    if ("error" in trackIdsToAdd) {
+        console.error("API: Failed to get only new Tracks", trackIdsToAdd.error);
+        console.error("trying simple recommandations instead");
+
+        const recommandationIds = await getRecommendations(accessToken, preferences.amount, seeds, rules);
+
+        if ("error" in recommandationIds) {
+            console.error("API: END: Failed to get Recommendations", recommandationIds.error);
+            const { message, status } = recommandationIds.error;
+            return NextResponse.json(
+                {
+                    message: "Failed to get Recommendations. \n" + message,
+                },
+                { status }
+            );
+        }
+        trackIdsToAdd = recommandationIds;
+    }
+
     //add the tracks to the playlist
-    const recommandationQuery = trackIdsToQuery(recommandationIds);
+    const recommandationQuery = trackIdsToQuery(trackIdsToAdd);
 
     const addBody = {
         uris: recommandationQuery,
@@ -250,8 +265,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
         `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
         accessToken,
         addBody,
-        undefined,
-        true
+        undefined
     );
 
     if (addRes.error) {
@@ -266,22 +280,14 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
         delete preferences.hue;
     }
 
-    //TODO: add new tracks to history
-    const dbPlaylistData = await dbGetOnePlaylist(userId, playlist_id);
-
-    if (dbPlaylistData.error || !dbPlaylistData.data) {
-        return NextResponse.json({ message: "Failed to get playlist data from database." }, { status: 500 });
-    }
-
-    const tracksToAdd = await ensureNewTracks(accessToken, userId, recommandationIds, dbPlaylistData.data);
-
     //TODO: save instead of update
     const dbSuccess = await dbUpdatePlaylist(userId, {
         playlist_id,
         preferences,
         seeds,
         rules,
-        trackHistory: [...dbPlaylistData.data.trackHistory, ...tracksToAdd],
+        trackHistory: [...dbPlaylistData.trackHistory, ...trackIdsToAdd],
+        // trackHistory: [...dbPlaylistData.data.trackHistory, ...tracksToAdd],
     });
 
     if (!dbSuccess) {
