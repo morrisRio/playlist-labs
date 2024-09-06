@@ -1,9 +1,10 @@
+//@ts-nocheck
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { debugLog, setDebugMode } from "@/lib/utils";
 import { dbGetOnePlaylistData } from "@/lib/db/dbActions";
 import { getToken } from "next-auth/jwt";
-import { ensureNewTracks, getRecommendations } from "@/lib/spotifyUtils";
+import { getOnlyNewRecommendations, getRecommendations } from "@/lib/spotifyUtils";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
