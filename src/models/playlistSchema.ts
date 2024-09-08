@@ -1,16 +1,13 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-// i shoul incorporate this into the user model
-
 interface Rule {
     rule_name: string;
     rule_value: number | boolean | [number, number];
 }
 
 interface Playlist extends Document {
-    // Define other fields here
     playlist_id: string;
-    user_id: string;
+    lastUpdated: Date;
     preferences: {
         playlist_name: string;
         playlist_description: string;
@@ -32,6 +29,10 @@ export const playlistSchema = new Schema<Playlist>({
         type: String,
         required: true,
         unique: true,
+    },
+    lastUpdated: {
+        type: Date,
+        default: Date.now,
     },
     preferences: {
         name: {

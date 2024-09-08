@@ -26,6 +26,7 @@ export default function PreferencesForm({ preferences, onChange }: PreferencesPr
                     <option value="daily">Daily</option>
                     <option value="weekly">Weekly</option>
                     <option value="monthly">Monthly</option>
+                    <option value="never">Never</option>
                 </select>
             </label>
             <div>

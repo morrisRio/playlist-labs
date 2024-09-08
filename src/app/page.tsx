@@ -10,6 +10,7 @@ import Logo from "../../public/logo-small-v2.svg";
 import { auth } from "@/lib/serverUtils";
 import { redirect } from "next/navigation";
 import { dbGetUsersPlaylists } from "@/lib/db/dbActions";
+import FetchButton from "@/components/FetchButton";
 
 export default async function Home() {
     let playlistData: PlaylistData[] | null = null;
@@ -27,6 +28,7 @@ export default async function Home() {
 
     return (
         <div className="min-h-full w-full p-4 flex flex-col gap-5">
+            <FetchButton></FetchButton>
             <div className="flex justify-between gap-2 mt-8">
                 <Image src={Logo} alt="playlistLabs Logo" width={14} height={14} className="-mb-1"></Image>
                 <h3 className="font-normal text-themetext-nerfed flex-grow">playlistLabs</h3>

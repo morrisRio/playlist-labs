@@ -9,6 +9,17 @@ import { debugLog, setDebugMode } from "@/lib/utils";
 import { auth } from "../serverUtils";
 import { revalidateTag } from "next/cache";
 
+export async function dbGetAllPlaylists(): Promise<any> {
+    await connectMongoDB();
+    try {
+        const playlists = await UserModel.find({});
+        return playlists;
+    } catch (error) {
+        console.error("Error getting playlists: ", error);
+        return [];
+    }
+}
+
 interface MongoUserData extends Document {
     name: string;
     spotify_id: string;

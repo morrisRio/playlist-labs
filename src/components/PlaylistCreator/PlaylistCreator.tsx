@@ -24,8 +24,8 @@ interface PlaylistFormProps {
 function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
     const router = useRouter();
 
-    // const fetcher = (url: string) => fetch(url).then((res) => res.json());
-    // preload(`/api/spotify/top-items/tracks?time_range=short_term`, fetcher);
+    const fetcher = (url: string) => fetch(url).then((res) => res.json());
+    preload(`/api/spotify/top-items/tracks?time_range=short_term`, fetcher);
 
     const [showSubmitErrors, setShowSubmitErrors] = useState(false);
     const [submitting, setSubmitting] = useState(false);
@@ -140,7 +140,8 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
         if (
             preferences.frequency !== "daily" &&
             preferences.frequency !== "weekly" &&
-            preferences.frequency !== "monthly"
+            preferences.frequency !== "monthly" &&
+            preferences.frequency !== "never"
         )
             errors.push(
                 "There's something wrong with the frequency. That's strange 😉\n Try changing it to something supported"

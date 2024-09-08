@@ -35,7 +35,6 @@ async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
             )}
             {playlistData && (
                 <>
-                    {/* <FetchButton playlistId={playlist_id}></FetchButton> */}
                     <PlaylistCreator pageTitle="Edit Playlist" playlist={playlistData}></PlaylistCreator>)
                 </>
             )}

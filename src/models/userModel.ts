@@ -10,6 +10,7 @@ const userSchema = new Schema({
     spotify_id: {
         type: String,
         required: true,
+        unique: true,
     },
 
     playlists: [playlistSchema],

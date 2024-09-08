@@ -1,28 +1,24 @@
 "use client";
 
-interface FetchButtonProps {
-    playlistId: string;
-}
-
-function FetchButton({ playlistId }: FetchButtonProps) {
+function FetchButton() {
     const testFunction = async () => {
         console.log("Test started");
-        const res = await fetch(`/api/spotify/test`, {
-            method: "POST",
-            body: JSON.stringify({ playlistId: playlistId }),
+        const res = await fetch(`/api/cron`, {
+            method: "GET",
             headers: {
                 "Content-Type": "application/json",
             },
         })
             .then(async (res) => {
-                await res.json();
+                const response = await res.json();
+                return response;
             })
-            .then((data) => {
-                return data;
-            })
-            .catch((err) => console.error(err));
+            .catch((err) => {
+                console.error(err);
+                return { data: null, message: "smthn went wrong" };
+            });
 
-        console.log("Test ended", res);
+        if ("data" in res) console.log("Test ended", res.data);
     };
     return (
         <div className="flex flex-col p-6 gap-10 rounded-md border border-pink-600">
