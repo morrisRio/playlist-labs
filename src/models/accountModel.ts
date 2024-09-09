@@ -20,6 +20,6 @@ const accountSchema = new Schema({
     },
 });
 
-const UserModel = mongoose.models.Account || mongoose.model("Account", accountSchema);
+const AccountModel = mongoose.models.Account || mongoose.model("Account", accountSchema);
 
-export default UserModel;
+export default AccountModel;

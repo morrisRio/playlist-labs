@@ -4,6 +4,7 @@ import { connectMongoDB } from "@/lib/db/dbConnect";
 import { PlaylistData, MongoPlaylistData } from "@/types/spotify";
 import User from "@/models/userModel";
 import UserModel from "@/models/userModel";
+import AccountModel from "@/models/accountModel";
 import { Document } from "mongoose";
 import { debugLog, setDebugMode } from "@/lib/utils";
 import { auth } from "../serverUtils";
@@ -53,6 +54,13 @@ export async function dbRegisterUser(userId: string, name: string): Promise<bool
             playlists: [],
         });
         debugLog("User created successfully", user);
+        const account = await AccountModel.create({
+            spotify_id: userId,
+            access_token: "",
+            refresh_token: "",
+            token_expires: new Date(0),
+        });
+        debugLog("Account created successfully", account);
         return true;
     } catch (error) {
         console.error("Error creating User:", error);
