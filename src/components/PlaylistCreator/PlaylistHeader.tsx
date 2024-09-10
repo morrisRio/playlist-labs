@@ -83,7 +83,11 @@ function PlaylistHeader({
     const options = {
         revalidateOnFocus: false,
     };
-    const { data: coverUrl, error, isLoading } = useSWR(`/api/spotify/playlist/cover/${playlist_id}`, fetcher, options);
+    const {
+        data: coverUrl,
+        error,
+        isLoading,
+    } = useSWR(playlist_id ? `/api/spotify/playlist/cover/${playlist_id}` : null, fetcher, options);
     const [bgImage, setBgImage] = useState<string>(
         hue !== undefined ? getCssHueGradient(hue) : isLoading || error ? "" : coverUrl ? `url(${coverUrl})` : ""
     );

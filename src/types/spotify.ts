@@ -165,3 +165,10 @@ export interface MongoUserData extends Document {
     spotify_id: string;
     playlists: MongoPlaylistData[];
 }
+
+export interface MongoAccount extends Document {
+    spotify_id: string;
+    access_token: string;
+    refresh_token: string;
+    token_expires: number;
+}
