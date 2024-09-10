@@ -146,7 +146,7 @@ function assignDbTokenToJWT(token: JWT, accountDB: MongoAccount) {
     };
 }
 
-async function updateAccountTokenInDb(accountDB: MongoAccount, refreshToken: JWT) {
+export async function updateAccountTokenInDb(accountDB: MongoAccount, refreshToken: JWT) {
     debugLog("-> updating account token in db", refreshToken.accessToken);
     accountDB.access_token = refreshToken.accessToken;
     accountDB.refresh_token = refreshToken.refreshToken;

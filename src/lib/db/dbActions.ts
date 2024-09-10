@@ -9,16 +9,27 @@ import { Document } from "mongoose";
 import { debugLog, setDebugMode } from "@/lib/utils";
 import { auth } from "../serverUtils";
 import { revalidateTag } from "next/cache";
-import { Account } from "next-auth";
 
-export async function dbGetAllPlaylists(): Promise<any> {
+type DbRes<T> =
+    | {
+          data: T;
+          error: string | null;
+      }
+    | DbError;
+
+interface DbError {
+    data: null;
+    error: string;
+}
+
+export async function dbGetAllUsers(): Promise<DbRes<MongoUserData[]>> {
     await connectMongoDB();
     try {
         const playlists = await UserModel.find({});
-        return playlists;
-    } catch (error) {
+        return { data: playlists as MongoUserData[], error: null };
+    } catch (error: any) {
         console.error("Error getting playlists: ", error);
-        return [];
+        return { data: null, error: error.message };
     }
 }
 
@@ -106,16 +117,6 @@ export async function dbGetAccountByUserId(userId: string): Promise<DbRes<MongoA
  * @throws {Error} Will throw an error if the user is not found or if the user has no playlists.
  */
 
-type DbRes<T> =
-    | {
-          data: T;
-          error: string | null;
-      }
-    | DbError;
-interface DbError {
-    data: null;
-    error: string;
-}
 export async function dbGetUsersPlaylists(userId: string): Promise<DbRes<PlaylistData[]>> {
     setDebugMode(false);
     await connectMongoDB();

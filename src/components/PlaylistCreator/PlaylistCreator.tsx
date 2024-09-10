@@ -34,18 +34,22 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
     //to differentiate between creating a new playlist and updating an existing one
     const playlist_id = playlist?.playlist_id ? playlist.playlist_id : false;
 
+    const emptyPlaylist = {
+        preferences: {
+            name: "Playlist Name",
+            frequency: "Weekly",
+            amount: 5,
+            hue: Math.floor(Math.random() * 360),
+        } as Preferences,
+        seeds: [],
+        rules: [],
+    };
+
     const initialState = {
-        preferences: playlist?.preferences
-            ? playlist.preferences
-            : {
-                  name: "Playlist Name",
-                  frequency: "weekly",
-                  amount: 25,
-                  hue: Math.floor(Math.random() * 360),
-              },
-        seeds: playlist?.seeds ? playlist.seeds : [],
+        preferences: playlist?.preferences ? playlist.preferences : emptyPlaylist.preferences,
+        seeds: playlist?.seeds ? playlist.seeds : emptyPlaylist.seeds,
         //if the playlist has rules, complete them as the db only stores the name and value
-        rules: playlist?.rules ? completeRules(playlist.rules) : [],
+        rules: playlist?.rules ? completeRules(playlist.rules) : emptyPlaylist.rules,
     };
 
     //Preferences ______________________________________________________________________________________________
@@ -53,9 +57,11 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
 
     const handlePrefChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target;
+        let valueParsed: string | number = value;
+        if (name === "amount") valueParsed = parseInt(value);
         setPreferences((prevState) => ({
             ...prevState,
-            [name]: value,
+            [name]: valueParsed,
         }));
     };
 
@@ -175,11 +181,11 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
                     setSubmitErrors([]);
                     router.replace("/pages/edit-playlist/" + data);
                     router.refresh();
-                    setCurrentState({
-                        preferences: preferences,
-                        seeds: seeds,
-                        rules: rules,
-                    });
+                    // setCurrentState({
+                    //     preferences: preferences,
+                    //     seeds: seeds,
+                    //     rules: rules,
+                    // });
                     setSubmitting(false);
                 })
                 .catch((err) => {
@@ -209,20 +215,25 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
         },
         [finishSubmit, preferences, seeds, validateForm]
     );
-    const resetSettings = () => {
+
+    const resetSettings = useCallback(() => {
         setPreferences(initialState.preferences);
         setSeeds(initialState.seeds);
         setRules(initialState.rules);
-    };
+    }, []);
 
-    //check if the playlist has changed
-    const [currentState, setCurrentState] = useState({
-        preferences: preferences,
-        seeds: seeds,
-        rules: rules,
-    });
-
-    const changed = JSON.stringify(initialState) !== JSON.stringify(currentState);
+    const emptySettings = useCallback(() => {
+        setPreferences({
+            name: preferences.name,
+            amount: emptyPlaylist.preferences.amount,
+            frequency: emptyPlaylist.preferences.frequency,
+            hue: playlist_id ? undefined : emptyPlaylist.preferences.hue,
+        });
+        setSeeds(emptyPlaylist.seeds);
+        setRules(emptyPlaylist.rules);
+    }, []);
+    const changed =
+        JSON.stringify({ preferences: preferences, seeds: seeds, rules: rules }) !== JSON.stringify(initialState);
 
     return (
         <>
@@ -243,6 +254,7 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
                 changed={changed}
                 action={handleSubmit}
                 resetSettings={resetSettings}
+                emptySettings={emptySettings}
                 router={router}
             ></PlaylistHeader>
             <form

@@ -38,6 +38,7 @@ interface PlaylistHeaderProps {
     changed: boolean;
     submitting: boolean;
     resetSettings: () => void;
+    emptySettings: () => void;
     router: AppRouterInstance;
 }
 
@@ -50,6 +51,7 @@ function PlaylistHeader({
     changed,
     submitting,
     resetSettings,
+    emptySettings,
     router,
 }: PlaylistHeaderProps) {
     const [showNameModal, setShowNameModal] = useState(playlist_id === false);
@@ -103,6 +105,8 @@ function PlaylistHeader({
         backgroundSize: "cover",
         filter: `saturate(0.7) brightness(0.45)`,
     };
+
+    const somethingToRestore = changed && playlist_id;
     return (
         <>
             <header ref={headerRef} className="sticky top-0 z-40">
@@ -138,7 +142,7 @@ function PlaylistHeader({
                             </a>
                             <button onPointerDown={() => setShowResetModal(true)} className="text-ui-500">
                                 <MdRefresh />
-                                Reset Settings
+                                {somethingToRestore ? "Restore Settings" : "Reset Settings"}{" "}
                             </button>
                             <button onPointerDown={() => setShowConfirmModal(true)} className="text-red-800">
                                 <MdOutlineDelete />
@@ -156,15 +160,19 @@ function PlaylistHeader({
 
                     {showResetModal && (
                         <UniModal
-                            title="Reset Settings"
+                            title={(somethingToRestore ? "Restore" : "Reset") + "Settings"}
                             action={() => {
-                                resetSettings();
+                                somethingToRestore ? resetSettings() : emptySettings();
                                 setShowResetModal(false);
                             }}
-                            actionTitle="Reset"
+                            actionTitle={somethingToRestore ? "Restore" : "Reset"}
                             onClose={() => setShowResetModal(false)}
                         >
-                            <p>Are you sure you want to reset all settings?</p>
+                            {somethingToRestore ? (
+                                <p>Are you sure you want to restore the Settings to the previously saved Settings?</p>
+                            ) : (
+                                <p>Are you sure you want to reset all settings?</p>
+                            )}
                         </UniModal>
                     )}
 
