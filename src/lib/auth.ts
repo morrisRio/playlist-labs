@@ -88,14 +88,21 @@ export const authOptions: NextAuthOptions = {
                 //check if it's more recent than the one in jwt
                 if (accountDB.token_expires > token.accessTokenExpires) {
                     //this will happen when automatic playlist update refreshed the token without user interaction
-                    debugLog("JWT: DB account is more recent", accountDB.access_token);
+                    debugLog(
+                        "JWT: DB account is more recent: db:",
+                        accountDB.token_expires,
+                        "jwt:",
+                        token.accessTokenExpires
+                    );
+                    debugLog("-> switching from:", token.accessToken);
+                    debugLog("-> to:", accountDB.access_token);
                     token = assignDbTokenToJWT(token, accountDB);
                 }
 
                 // now token is always the recent one
                 if (token.accessTokenExpires && Date.now() / 1000 >= token.accessTokenExpires) {
                     //access token has expired, try to update it
-                    debugLog("JWT: old token EXPIRED ", token.accessToken);
+                    debugLog("JWT: old token EXPIRED", token.accessToken);
                     let refreshToken = (await refreshAccessToken(token)) as JWT;
                     debugLog("JWT: new token", refreshToken.accessToken);
                     token = refreshToken;
@@ -103,10 +110,11 @@ export const authOptions: NextAuthOptions = {
 
                 // update token in db if the current token is more recent
                 if (accountDB.token_expires < token.accessTokenExpires) {
+                    debugLog("JWT: jwt more recent than db, updating db token");
                     if (token) await updateAccountTokenInDb(accountDB, token);
                 }
+                debugLog("JWT: using token:", token);
 
-                debugLog("JWT: returning token while finding in DB:", token);
                 return token;
             } else {
                 console.error("JWT: NO_ACCOUNT_FOUND");
@@ -147,7 +155,8 @@ function assignDbTokenToJWT(token: JWT, accountDB: MongoAccount) {
 }
 
 export async function updateAccountTokenInDb(accountDB: MongoAccount, refreshToken: JWT) {
-    debugLog("-> updating account token in db", refreshToken.accessToken);
+    debugLog("-> updating account token in db from", accountDB.access_token);
+    debugLog("-> to", refreshToken.accessToken);
     accountDB.access_token = refreshToken.accessToken;
     accountDB.refresh_token = refreshToken.refreshToken;
     accountDB.token_expires = refreshToken.accessTokenExpires;
@@ -184,8 +193,9 @@ export async function refreshAccessToken(token: JWT) {
                 refresh_token: token.refreshToken,
             }),
         });
-        debugLog("-> refresh = ", response.ok);
+        debugLog("-> refresh success = ", response.ok);
         const refreshedToken = await response.json();
+        debugLog("-> new token = ", refreshedToken);
 
         if (!response.ok) throw new Error("NETWORK RESPONSE ERROR");
 

@@ -93,6 +93,7 @@ export interface Preferences {
     frequency: string;
     amount: number;
     hue?: number;
+    on?: number;
 }
 
 export type Rule = BooleanRule | AxisRule | RangeRule;
@@ -158,6 +159,7 @@ export interface MongoPlaylistData extends Document {
     seeds: Seed[];
     rules?: Rule[];
     trackHistory: string[];
+    lastUpdated: Date;
 }
 
 export interface MongoUserData extends Document {

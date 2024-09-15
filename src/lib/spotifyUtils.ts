@@ -1,9 +1,166 @@
 import formatter from "numbuffix";
-import { Seed, Rule, Preferences, Track, Artist, MongoPlaylistData } from "@/types/spotify";
+import { Seed, Rule, Preferences, Track, Artist, MongoPlaylistData, PlaylistData } from "@/types/spotify";
 import { allRules } from "@/lib/spotifyConstants";
-import { spotifyGet } from "@/lib/serverUtils";
+import { spotifyGet, spotifyPost, spotifyPut } from "@/lib/serverUtils";
 import { ErrorRes } from "@/types/spotify";
 import { debugLog, setDebugMode } from "@/lib/utils";
+import { dbGetOneUserPlaylist, dbUpdatePlaylist } from "./db/dbActions";
+import { revalidateTag } from "next/cache";
+
+//TODO: more specific types to determine whether updatePlaylistCover is needed
+//when playlistData: PlaylistData and preferences.hgue is defined, updatePlaylistCover is needed
+export const regeneratePlaylist = async (
+    playlistData: MongoPlaylistData | PlaylistData,
+    accessToken: string,
+    userId: string,
+    ignoreHistory?: boolean,
+    updatePlaylistCover?: (hue: number, playlist_id: string, accessToken: string) => Promise<void>
+): Promise<Boolean> => {
+    const { playlist_id, preferences, seeds, rules } = playlistData;
+
+    if (!preferences || !seeds || !playlist_id) {
+        console.error("Missing data for playlist regeneration");
+        return false;
+    }
+
+    debugLog("regenerating Playlist" + preferences.name);
+
+    //check if the playlist exists, could be deleted by user (spotify handles deleting by unfollowing)
+    const exists = await spotifyGet(
+        `https://api.spotify.com/v1/playlists/${playlist_id}/followers/contains`,
+        accessToken
+    );
+    debugLog("-checked if playlist exists", exists);
+    //if the playlist does not exist, follow the old one again
+    if (!exists[0]) {
+        const followRes = await spotifyPut(
+            `https://api.spotify.com/v1/playlists/${playlist_id}/followers`,
+            accessToken,
+            { public: false }
+        );
+        if (followRes.error) {
+            const { status } = followRes.error;
+            console.error("API: Failed to follow Playlist", followRes.error);
+            return false;
+        }
+    }
+
+    //TODO: fidelity check if the settings still the same, compare with db
+    //complete the request body with the description and public fields
+    const preferencesBody = {
+        name: preferences.name,
+        description: createPlaylistDescription(preferences, seeds, rules),
+        public: false,
+    };
+
+    const updatePlaylistDetails = await spotifyPut(
+        `https://api.spotify.com/v1/playlists/${playlist_id}`,
+        accessToken,
+        preferencesBody
+    );
+
+    if (updatePlaylistDetails.error) {
+        const { message, status } = updatePlaylistDetails.error;
+        console.error("Problem updating Playlist details.\n" + message, status);
+        return false;
+    }
+
+    //flush the playlist
+    debugLog(" - flushing the playlist");
+    const flushRes = await spotifyPut(`https://api.spotify.com/v1/playlists/${playlist_id}/tracks`, accessToken, {
+        uris: [],
+    });
+
+    if (flushRes.error) {
+        const { message, status } = flushRes.error;
+        console.error("Problem flushing Playlist.\n" + message, status);
+    }
+
+    let dbPlaylistData: MongoPlaylistData;
+    if (!ignoreHistory && !playlistData.trackHistory) {
+        const dbUserPlaylistData = await dbGetOneUserPlaylist(userId, playlist_id);
+        if (dbUserPlaylistData.error || !dbUserPlaylistData.data || dbUserPlaylistData.data.playlists.length === 0) {
+            console.error("Failed to get Playlist Data from DB", dbUserPlaylistData.error);
+            return false;
+        }
+        dbPlaylistData = dbUserPlaylistData.data.playlists[0];
+    } else {
+        dbPlaylistData = playlistData as MongoPlaylistData;
+    }
+
+    let trackIdsToAdd: string[] | ErrorRes = [];
+    if (ignoreHistory) {
+        if (playlistData.trackHistory) playlistData.trackHistory = [];
+        trackIdsToAdd = await getRecommendations(accessToken, preferences.amount, seeds, rules);
+    } else {
+        trackIdsToAdd = await getOnlyNewRecommendations(accessToken, preferences, seeds, rules, dbPlaylistData);
+    }
+
+    if ("error" in trackIdsToAdd) {
+        console.error("Failed to get only new Tracks", trackIdsToAdd.error);
+        console.error("trying simple recommandations instead");
+
+        const recommandationIds = await getRecommendations(accessToken, preferences.amount, seeds, rules);
+
+        if ("error" in recommandationIds) {
+            console.error("Failed to get Recommendations", recommandationIds.error);
+            const { message, status } = recommandationIds.error;
+            return false;
+        }
+        trackIdsToAdd = recommandationIds;
+    }
+
+    //add the tracks to the playlist
+    const recommandationQuery = trackIdsToQuery(trackIdsToAdd);
+
+    const addBody = {
+        uris: recommandationQuery,
+    };
+
+    const addRes = await spotifyPost(
+        `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
+        accessToken,
+        addBody,
+        undefined
+    );
+
+    if (addRes.error) {
+        const { message, status } = addRes.error;
+        console.error("Failed to add Recommendations", addRes.error);
+        return false;
+    }
+
+    if (preferences.hue !== undefined && updatePlaylistCover != undefined) {
+        await updatePlaylistCover(preferences.hue, playlist_id, accessToken).catch((error) => {
+            console.error("Failed to update Cover Image: ", error);
+        });
+        delete preferences.hue;
+    }
+
+    //TODO: saving subdocuments does not work this way
+    // try {
+    //     dbPlaylistData.trackHistory = [...dbPlaylistData.trackHistory, ...trackIdsToAdd];
+    //     dbPlaylistData.save();
+    // } catch (e) {
+    //     console.error("Failed to save updated Playlist Data", e);
+    //     return false;
+    // }
+    //TODO: save instead of update, ch3ck if it works
+    const dbSuccess = await dbUpdatePlaylist(userId, {
+        playlist_id,
+        preferences,
+        seeds,
+        rules,
+        trackHistory: [...dbPlaylistData.trackHistory, ...trackIdsToAdd],
+        // trackHistory: [...dbPlaylistData.data.trackHistory, ...tracksToAdd],
+    });
+    if (!dbSuccess) {
+        console.error("Failed to save updated Playlist Data");
+    }
+
+    if (!playlistData.trackHistory) revalidateTag("playlists");
+    return true;
+};
 
 /**
  * Generates a description for a given item (Track or Artist).

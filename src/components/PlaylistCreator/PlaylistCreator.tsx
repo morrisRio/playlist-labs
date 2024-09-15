@@ -37,9 +37,10 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
     const emptyPlaylist = {
         preferences: {
             name: "Playlist Name",
-            frequency: "Weekly",
-            amount: 5,
+            frequency: "weekly",
+            amount: 20,
             hue: Math.floor(Math.random() * 360),
+            on: 4,
         } as Preferences,
         seeds: [],
         rules: [],
@@ -58,7 +59,14 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
     const handlePrefChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target;
         let valueParsed: string | number = value;
-        if (name === "amount") valueParsed = parseInt(value);
+        if (name === "amount" || name === "on") valueParsed = parseInt(value);
+        if (name === "frequency") {
+            let resettedOn = 0;
+            if (value === "weekly") resettedOn = 4;
+            else resettedOn = 0;
+
+            setPreferences((prevState) => ({ ...prevState, on: resettedOn }));
+        }
         setPreferences((prevState) => ({
             ...prevState,
             [name]: valueParsed,
@@ -152,7 +160,7 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
             errors.push(
                 "There's something wrong with the frequency. That's strange 😉\n Try changing it to something supported"
             );
-        if (seeds.length < 1) errors.push("We'll need atleast one Seed for creating the Playlist.\n");
+        if (seeds.length < 1) errors.push("We'll need at least one Seed for creating the Playlist.\n");
         if (seeds.length > 5) errors.push("We can only handle 5 seeds at a time.\n");
         return errors;
     }, []);

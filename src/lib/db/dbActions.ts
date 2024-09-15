@@ -239,17 +239,17 @@ export async function dbUpdatePlaylist(
     await connectMongoDB();
     try {
         let updateOperation: any = {
-            $set: { "playlists.$": playlistData },
+            $set: { "playlists.$": { ...playlistData, lastUpdated: Date.now() } },
         };
 
-        // If newTracks are provided, add them to the trackHistory
-        if (newTracks && newTracks.length > 0) {
-            updateOperation.$push = {
-                "playlists.$.trackHistory": {
-                    $each: newTracks,
-                },
-            };
-        }
+        // // If newTracks are provided, add them to the trackHistory
+        // if (newTracks && newTracks.length > 0) {
+        //     updateOperation.$push = {
+        //         "playlists.$.trackHistory": {
+        //             $each: newTracks,
+        //         },
+        //     };
+        // }
 
         const result = await UserModel.updateOne(
             {

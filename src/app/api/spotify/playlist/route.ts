@@ -54,12 +54,12 @@ const updatePlaylistCover = async (hue: number, idToWriteTo: string, accessToken
 };
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
-    setDebugMode(false);
+    setDebugMode(true);
 
     const data = await req.json();
     const { preferences, seeds, rules }: PlaylistData = data;
 
-    debugLog("API: PLAYLIST POST - creating new playlist " + preferences.name);
+    debugLog("API: PLAYLIST POST - creating new playlist ", preferences);
     //add the token to the request for the api call
     const token = await getToken({ req });
     if (!token) {

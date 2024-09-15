@@ -28,9 +28,8 @@ export default async function Home() {
 
     return (
         <div className="min-h-full w-full p-4 flex flex-col gap-5">
-            <FetchButton />
-            <div className="flex justify-between gap-2 mt-8">
-                <Image src={Logo} alt="playlistLabs Logo" width={14} height={14} className="-mb-1"></Image>
+            <div className="flex justify-between gap-2 mt-8 items-center">
+                <Logo className="w-4 h-4 -mb-1"></Logo>
                 <h3 className="font-normal text-themetext-nerfed flex-grow">playlistLabs</h3>
                 <Profile></Profile>
             </div>

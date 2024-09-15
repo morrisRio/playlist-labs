@@ -12,7 +12,7 @@ export async function GET(
         params: { id: string };
     }
 ): Promise<NextResponse> {
-    setDebugMode(false);
+    setDebugMode(true);
     debugLog("API: GETTING THE PLAYLIST COVER IMAGE -----------------------");
     const token = await getToken({ req });
     if (!token) {
