@@ -63,6 +63,8 @@ export async function GET(req: NextRequest) {
             ) {
                 console.log("Updating Playlist: " + playlist.preferences.name);
                 (await regeneratePlaylist(playlist, access_token, user.spotify_id)) && playlistCount++;
+            } else {
+                console.log("Skipping Playlist: " + playlist.preferences.name);
             }
             // if (
             //     playlist.preferences.frequency === "never" ||
