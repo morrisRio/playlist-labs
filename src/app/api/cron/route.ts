@@ -56,10 +56,10 @@ export async function GET(req: NextRequest) {
             debugLog("Playlist: " + playlist.preferences.name);
             //TODO: could: find elegant way to check fetchCount
             if (
-                (playlist.preferences.frequency === "daily" ||
-                    (playlist.preferences.frequency === "weekly" && playlist.preferences.on === now.getDay()) ||
-                    (playlist.preferences.frequency === "monthly" && playlist.preferences.on === now.getDate())) &&
-                playlist.lastUpdated.getDay() !== now.getDay()
+                playlist.preferences.frequency === "daily" ||
+                (playlist.preferences.frequency === "weekly" && playlist.preferences.on === now.getDay()) ||
+                (playlist.preferences.frequency === "monthly" && playlist.preferences.on === now.getDate())
+                // && playlist.lastUpdated.getDay() !== now.getDay()
             ) {
                 console.log("Updating Playlist: " + playlist.preferences.name);
                 (await regeneratePlaylist(playlist, access_token, user.spotify_id)) && playlistCount++;
