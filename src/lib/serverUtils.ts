@@ -231,6 +231,7 @@ export const fetchFromSpotify = async (
 export const testFunction = async () => {
     "use server";
     console.log("Test started");
+    console.log("appUrl", getAppUrl());
     const res = await fetch(`${getAppUrl()}/api/cron`, {
         method: "GET",
         headers: {
