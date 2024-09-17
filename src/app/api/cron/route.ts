@@ -9,12 +9,12 @@ export async function GET(req: NextRequest) {
     try {
         console.log("CRON: GET request received", req);
         setDebugMode(true);
-        const authHeader = req.headers.get("Authorization");
-        if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-            console.error(process.env.CRON_SECRET);
-            console.error("no env variable found", !process.env.CRON_SECRET);
-            console.error("wrong auth: ", process.env.CRON_SECRET !== authHeader);
-            console.error("authHeader: ", authHeader);
+        if (req.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
+            console.error(
+                process.env.CRON_SECRET ? `CRON SECRET: ${process.env.CRON_SECRET}` : "CRON_SECRET not found"
+            );
+            console.error("secrets dont match");
+            console.error("authHeader: ", req.headers.get("Authorization"));
             return NextResponse.json({ success: false }, { status: 401 });
         }
         const now = new Date(Date.now());
