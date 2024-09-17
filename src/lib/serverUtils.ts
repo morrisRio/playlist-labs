@@ -235,7 +235,7 @@ export const testFunction = async () => {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-            authorization: `Bearer ${process.env.CRON_SECRET}`,
+            Authorization: `Bearer ${process.env.CRON_SECRET}`,
         },
     })
         .then(async (res) => {
