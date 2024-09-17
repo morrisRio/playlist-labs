@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
             );
             console.error("secrets dont match");
             console.error("authHeader: ", req.headers.get("Authorization"));
-            return NextResponse.json({ success: false }, { status: 401 });
+            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
         const now = new Date(Date.now());
 

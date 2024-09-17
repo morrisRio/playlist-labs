@@ -240,12 +240,16 @@ export const testFunction = async () => {
         },
     })
         .then(async (res) => {
+            if (!res.ok) {
+                console.log("Failed to fetch", res);
+                throw new Error("Failed to fetch");
+            }
             const response = await res.json();
             return response;
         })
         .catch((err) => {
             console.error(err);
-            return { data: null, message: "smthn went wrong" };
+            return { data: "error", message: "smthn went wrong" };
         });
 
     if ("data" in res) console.log("Test ended", res.data);
