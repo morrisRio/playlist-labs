@@ -7,12 +7,12 @@ import { regeneratePlaylist } from "@/lib/spotifyUtils";
 
 export async function GET(req: NextRequest) {
     setDebugMode(true);
-    const authHeader = req.headers.get("authorization");
+    const authHeader = req.headers.get("Authorization");
     if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-        console.log(process.env.CRON_SECRET);
-        console.log("no env variable found", !process.env.CRON_SECRET);
-        console.log("wrong auth: ", process.env.CRON_SECRET !== authHeader);
-        console.log("authHeader: ", authHeader);
+        console.error(process.env.CRON_SECRET);
+        console.error("no env variable found", !process.env.CRON_SECRET);
+        console.error("wrong auth: ", process.env.CRON_SECRET !== authHeader);
+        console.error("authHeader: ", authHeader);
         return NextResponse.json({ success: false }, { status: 401 });
     }
     const now = new Date(Date.now());
