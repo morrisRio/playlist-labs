@@ -4,7 +4,6 @@ import { dbGetAccountByUserId, dbRegisterUser } from "@/lib/db/dbActions";
 import { JWT } from "next-auth/jwt";
 import { debugLog, setDebugMode } from "./utils";
 import { MongoAccount } from "@/types/spotify";
-import { update } from "lodash";
 
 //scopes for future use
 // "user-read-playback-position",
@@ -72,7 +71,7 @@ export const authOptions: NextAuthOptions = {
         },
 
         async jwt({ token, account }: { token: JWT; account: Account | null; user: User }): Promise<JWT> {
-            setDebugMode(true);
+            setDebugMode(false);
             debugLog("JWT CALLBACK START =================================================== ");
             //on first sign in add the tokens from account to jwt
             if (account) {
@@ -88,23 +87,17 @@ export const authOptions: NextAuthOptions = {
                 //check if it's more recent than the one in jwt
                 if (accountDB.token_expires > token.accessTokenExpires) {
                     //this will happen when automatic playlist update refreshed the token without user interaction
-                    debugLog(
-                        "JWT: DB account is more recent: db:",
-                        accountDB.token_expires,
-                        "jwt:",
-                        token.accessTokenExpires
-                    );
-                    debugLog("-> switching from:", token.accessToken);
-                    debugLog("-> to:", accountDB.access_token);
+                    debugLog("-> switching from:", token.accessToken.slice(0, 10) + "...");
+                    debugLog("-> to:", accountDB.access_token.slice(0, 10) + "...");
                     token = assignDbTokenToJWT(token, accountDB);
                 }
 
                 // now token is always the recent one
                 if (token.accessTokenExpires && Date.now() / 1000 >= token.accessTokenExpires) {
                     //access token has expired, try to update it
-                    debugLog("JWT: old token EXPIRED", token.accessToken);
+                    debugLog("JWT: old token EXPIRED", token.accessToken.slice(0, 10) + "...");
                     let refreshToken = (await refreshAccessToken(token)) as JWT;
-                    debugLog("JWT: new token", refreshToken.accessToken);
+                    debugLog("JWT: new token", refreshToken.accessToken.slice(0, 10) + "...");
                     token = refreshToken;
                 }
 
@@ -113,16 +106,20 @@ export const authOptions: NextAuthOptions = {
                     debugLog("JWT: jwt more recent than db, updating db token");
                     if (token) await updateAccountTokenInDb(accountDB, token);
                 }
-                debugLog("JWT: using token:", token);
+                debugLog(
+                    "JWT: using token:",
+                    token.accessToken.slice(0, 10) + "...",
+                    token.refreshToken.slice(0, 10) + "..."
+                );
 
                 return token;
             } else {
                 console.error("JWT: NO_ACCOUNT_FOUND");
                 if (token.accessTokenExpires && Date.now() / 1000 >= token.accessTokenExpires) {
                     //access token has expired, try to update it
-                    debugLog("JWT: old token EXPIRED ", token.accessToken);
+                    debugLog("JWT: old token EXPIRED ", token.accessToken.slice(0, 10) + "...");
                     let refreshToken = (await refreshAccessToken(token)) as JWT;
-                    debugLog("JWT: new token", refreshToken.accessToken);
+                    debugLog("JWT: new token", refreshToken.accessToken.slice(0, 10) + "...");
                     token = refreshToken;
                 }
                 const newAccount = await dbRegisterUser(
@@ -132,8 +129,7 @@ export const authOptions: NextAuthOptions = {
                     token.refreshToken,
                     token.accessTokenExpires
                 );
-                debugLog("JWT: new account", newAccount);
-                debugLog("JWT: returning token without finding DB: ", token);
+                debugLog("JWT: returning token without finding DB: ", token.accessToken.slice(0, 10) + "...");
                 return token;
             }
         },

@@ -3,7 +3,6 @@ import { PlaylistData } from "@/types/spotify";
 import PlaylistCreator from "@/components/PlaylistCreator/PlaylistCreator";
 import { dbGetOnePlaylistData } from "@/lib/db/dbActions";
 import { redirect } from "next/navigation";
-import FetchButton from "@/components/FetchButton";
 
 async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
     const { playlist_id } = params;

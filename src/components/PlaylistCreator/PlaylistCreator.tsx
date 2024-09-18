@@ -1,5 +1,5 @@
 "use client";
-import { useState, FormEvent, useCallback } from "react";
+import { useState, FormEvent, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import PlaylistHeader from "./PlaylistHeader";
@@ -14,7 +14,7 @@ import { completeRules } from "@/lib/spotifyUtils";
 import Lottie from "lottie-react";
 import Loading from "@/lib/lotties/loading.json";
 
-import { preload } from "swr";
+import { preload, useSWRConfig } from "swr";
 
 interface PlaylistFormProps {
     pageTitle: string;
@@ -240,8 +240,25 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
         setSeeds(emptyPlaylist.seeds);
         setRules(emptyPlaylist.rules);
     }, []);
+
+    //handle button title and action ______________________________________________________________
     const changed =
-        JSON.stringify({ preferences: preferences, seeds: seeds, rules: rules }) !== JSON.stringify(initialState);
+        JSON.stringify({
+            preferences: preferences,
+            seeds: seeds,
+            rules: rules,
+        }) !== JSON.stringify(initialState);
+
+    const { mutate } = useSWRConfig();
+
+    useEffect(() => {
+        if (playlist) {
+            setTimeout(() => mutate(`/api/spotify/playlist/cover/${playlist_id}`), 300);
+            setPreferences(playlist.preferences);
+            setSeeds(playlist.seeds);
+            setRules(playlist.rules ? completeRules(playlist.rules) : emptyPlaylist.rules);
+        }
+    }, [playlist]);
 
     return (
         <>

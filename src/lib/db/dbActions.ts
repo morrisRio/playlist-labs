@@ -118,7 +118,6 @@ export async function dbGetAccountByUserId(userId: string): Promise<DbRes<MongoA
  */
 
 export async function dbGetUsersPlaylists(userId: string): Promise<DbRes<PlaylistData[]>> {
-    setDebugMode(false);
     await connectMongoDB();
     try {
         debugLog("searching for user", userId);
@@ -158,7 +157,6 @@ export async function dbGetOnePlaylistData(userId: string, playlistId: string): 
     //for fetching only one playlist: https://www.mongodb.com/docs/manual/tutorial/optimize-query-performance-with-indexes-and-projections/
     try {
         await connectMongoDB();
-        setDebugMode(false);
         // projection to only get the playlist with the id
         const { playlists } = (await User.findOne(
             { spotify_id: userId },

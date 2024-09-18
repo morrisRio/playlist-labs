@@ -13,7 +13,6 @@ export async function auth(
         | [NextApiRequest, NextApiResponse]
         | []
 ) {
-    setDebugMode(false);
     debugLog("auth() function called", calledBy);
     return getServerSession(...args, authOptions);
 }

@@ -82,14 +82,12 @@ function PlaylistHeader({
     };
 
     const fetcher: Fetcher<string> = (url: string) => fetch(url).then((res) => res.json());
-    const options = {
-        revalidateOnFocus: false,
-    };
+
     const {
         data: coverUrl,
         error,
         isLoading,
-    } = useSWR(playlist_id ? `/api/spotify/playlist/cover/${playlist_id}` : null, fetcher, options);
+    } = useSWR(playlist_id ? `/api/spotify/playlist/cover/${playlist_id}` : null, fetcher, { revalidateOnMount: true });
     const [bgImage, setBgImage] = useState<string>(
         hue !== undefined ? getCssHueGradient(hue) : isLoading || error ? "" : coverUrl ? `url(${coverUrl})` : ""
     );

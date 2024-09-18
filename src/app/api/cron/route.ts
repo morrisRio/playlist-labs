@@ -7,8 +7,8 @@ import { regeneratePlaylist } from "@/lib/spotifyUtils";
 
 export async function GET(req: NextRequest) {
     try {
-        console.log("CRON: GET request received", req);
         setDebugMode(true);
+        debugLog("CRON: GET request received", req);
         if (req.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
             console.error(
                 process.env.CRON_SECRET ? `CRON SECRET: ${process.env.CRON_SECRET}` : "CRON_SECRET not found"
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
         let userCount = 0;
 
         for (const user of users) {
-            console.log("User: " + user.name);
+            debugLog("User: " + user.name);
             userCount++;
             const accountFromDB = await dbGetAccountByUserId(user.spotify_id);
             if (accountFromDB.error || accountFromDB.data === null) {
@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
             }
             const accountDB = accountFromDB.data;
             const { access_token, refresh_token, token_expires } = accountDB;
-            debugLog("CRON: current access_token:", access_token);
+            debugLog("CRON: current access_token:", access_token.slice(0, 10) + "...");
             if (accountDB.token_expires < Date.now() / 1000) {
                 debugLog("CRON: token expired, refreshing");
                 let refreshToken = await refreshAccessToken({
@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
                     accessTokenExpires: token_expires,
                 });
                 if (refreshToken) {
-                    debugLog("CRON: new token saved to db:", refreshToken.accessToken);
+                    debugLog("CRON: new token saved to db:", refreshToken.accessToken.slice(0, 10) + "...");
                     updateAccountTokenInDb(accountDB, refreshToken);
                 }
             }
@@ -63,10 +63,10 @@ export async function GET(req: NextRequest) {
                     (playlist.preferences.frequency === "monthly" && playlist.preferences.on === now.getDate())
                     // && playlist.lastUpdated.getDay() !== now.getDay()
                 ) {
-                    console.log("Updating Playlist: " + playlist.preferences.name);
+                    debugLog("Updating Playlist: " + playlist.preferences.name);
                     (await regeneratePlaylist(playlist, access_token, user.spotify_id)) && playlistCount++;
                 } else {
-                    console.log("Skipping Playlist: " + playlist.preferences.name);
+                    debugLog("Skipping Playlist: " + playlist.preferences.name);
                 }
                 // if (
                 //     playlist.preferences.frequency === "never" ||
@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
                 //     (playlist.preferences.frequency === "weekly" && playlist.preferences.on !== now.getDay()) ||
                 //     (playlist.preferences.frequency === "monthly" && playlist.preferences.on !== now.getDate())
                 // ) {
-                //     console.log("Skipping Playlist: " + playlist.preferences.name);
+                //     debugLog("Skipping Playlist: " + playlist.preferences.name);
                 //     continue;
                 // }
                 //could be by returning the count from the function by default
@@ -84,9 +84,8 @@ export async function GET(req: NextRequest) {
             }
         }
 
-        const message = `updated ${playlistCount} Playlist for ${userCount} Users with ${fetchCount} fetches`;
-        console.log(message);
-        return NextResponse.json({ data: message }, { status: 200 });
+        debugLog(`updated ${playlistCount} Playlist for ${userCount} Users with ${fetchCount} fetches`);
+        return NextResponse.json({ success: true }, { status: 200 });
     } catch (error: any) {
         console.error("CRON: error in GET request", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
