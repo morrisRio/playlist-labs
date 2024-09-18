@@ -1,6 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { MdMailOutline } from "react-icons/md";
 import { MdLogout, MdOutlineDelete } from "react-icons/md";
 import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";

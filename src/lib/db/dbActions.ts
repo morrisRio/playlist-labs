@@ -1,7 +1,7 @@
 "use server";
 
 import { connectMongoDB } from "@/lib/db/dbConnect";
-import { PlaylistData, MongoPlaylistData } from "@/types/spotify";
+import { PlaylistData, MongoPlaylistData, MongoAccount } from "@/types/spotify";
 import User from "@/models/userModel";
 import UserModel from "@/models/userModel";
 import AccountModel from "@/models/accountModel";
@@ -10,14 +10,26 @@ import { debugLog, setDebugMode } from "@/lib/utils";
 import { auth } from "../serverUtils";
 import { revalidateTag } from "next/cache";
 
-export async function dbGetAllPlaylists(): Promise<any> {
+type DbRes<T> =
+    | {
+          data: T;
+          error: string | null;
+      }
+    | DbError;
+
+interface DbError {
+    data: null;
+    error: string;
+}
+
+export async function dbGetAllUsers(): Promise<DbRes<MongoUserData[]>> {
     await connectMongoDB();
     try {
         const playlists = await UserModel.find({});
-        return playlists;
-    } catch (error) {
+        return { data: playlists as MongoUserData[], error: null };
+    } catch (error: any) {
         console.error("Error getting playlists: ", error);
-        return [];
+        return { data: null, error: error.message };
     }
 }
 
@@ -34,37 +46,64 @@ interface MongoUserData extends Document {
  * @function dbRegisterUser
  * @param {string} userId - The Spotify ID of the user.
  * @param {string} name - The name of the user.
+ * @param {string} accessToken - The user's Spotify access token.
+ * @param {string} refreshToken - The user's Spotify refresh token.
+ * @param {number} expiresAt - The timestamp when the access token expires.
  * @returns {Promise<boolean>} A promise that resolves to true if the user is successfully registered or already exists, and false if an error occurs.
  */
-export async function dbRegisterUser(userId: string, name: string): Promise<boolean> {
-    setDebugMode(false);
-
+export async function dbRegisterUser(
+    userId: string,
+    name: string | null | undefined,
+    accessToken: string,
+    refreshToken: string,
+    expiresAt: number
+): Promise<boolean> {
     await connectMongoDB();
-    if (!userId || !name) return false;
+    if (!userId) return false;
 
-    if (await UserModel.exists({ spotify_id: userId })) {
+    if ((await UserModel.exists({ spotify_id: userId })) && (await AccountModel.exists({ spotify_id: userId }))) {
         debugLog("User already exists");
         return true;
     }
 
+    let accountSuccess = false;
+    let userSuccess = false;
     try {
-        const user = await UserModel.create({
-            name,
+        const userDoc = await UserModel.create({
+            name: name ? name : userId,
             spotify_id: userId,
             playlists: [],
         });
-        debugLog("User created successfully", user);
-        const account = await AccountModel.create({
+        debugLog("User created successfully", userDoc);
+        userSuccess = true;
+    } catch (error: any) {
+        console.error("Error creating User:", error.message);
+    }
+
+    try {
+        const accountDoc = await AccountModel.create({
             spotify_id: userId,
-            access_token: "",
-            refresh_token: "",
-            token_expires: new Date(0),
+            access_token: accessToken,
+            refresh_token: refreshToken,
+            token_expires: expiresAt,
         });
-        debugLog("Account created successfully", account);
-        return true;
-    } catch (error) {
-        console.error("Error creating User:", error);
-        return false;
+        debugLog("Account created successfully", accountDoc);
+        accountSuccess = true;
+    } catch (error: any) {
+        console.error("Error creating Account:", error.message);
+    }
+
+    return userSuccess || accountSuccess;
+}
+
+export async function dbGetAccountByUserId(userId: string): Promise<DbRes<MongoAccount>> {
+    await connectMongoDB();
+    try {
+        const account = await AccountModel.findOne({ spotify_id: userId });
+        return { data: account as MongoAccount, error: null };
+    } catch (error: any) {
+        console.error("Error getting account: ", error);
+        return { data: null, error: error.message };
     }
 }
 
@@ -78,18 +117,7 @@ export async function dbRegisterUser(userId: string, name: string): Promise<bool
  * @throws {Error} Will throw an error if the user is not found or if the user has no playlists.
  */
 
-type DbRes<T> =
-    | {
-          data: T;
-          error: string | null;
-      }
-    | DbError;
-interface DbError {
-    data: null;
-    error: string;
-}
 export async function dbGetUsersPlaylists(userId: string): Promise<DbRes<PlaylistData[]>> {
-    setDebugMode(false);
     await connectMongoDB();
     try {
         debugLog("searching for user", userId);
@@ -129,7 +157,6 @@ export async function dbGetOnePlaylistData(userId: string, playlistId: string): 
     //for fetching only one playlist: https://www.mongodb.com/docs/manual/tutorial/optimize-query-performance-with-indexes-and-projections/
     try {
         await connectMongoDB();
-        setDebugMode(false);
         // projection to only get the playlist with the id
         const { playlists } = (await User.findOne(
             { spotify_id: userId },
@@ -210,17 +237,17 @@ export async function dbUpdatePlaylist(
     await connectMongoDB();
     try {
         let updateOperation: any = {
-            $set: { "playlists.$": playlistData },
+            $set: { "playlists.$": { ...playlistData, lastUpdated: Date.now() } },
         };
 
-        // If newTracks are provided, add them to the trackHistory
-        if (newTracks && newTracks.length > 0) {
-            updateOperation.$push = {
-                "playlists.$.trackHistory": {
-                    $each: newTracks,
-                },
-            };
-        }
+        // // If newTracks are provided, add them to the trackHistory
+        // if (newTracks && newTracks.length > 0) {
+        //     updateOperation.$push = {
+        //         "playlists.$.trackHistory": {
+        //             $each: newTracks,
+        //         },
+        //     };
+        // }
 
         const result = await UserModel.updateOne(
             {
@@ -263,8 +290,9 @@ export async function dbDeleteUser(): Promise<boolean> {
     const userId = session?.user.id;
     await connectMongoDB();
     try {
-        const result = await UserModel.deleteOne({ spotify_id: userId });
-        if (!result.acknowledged) throw new Error("Change not acknowledged in DB");
+        const resultUser = await UserModel.deleteOne({ spotify_id: userId });
+        const resultAccount = await AccountModel.deleteOne({ spotify_id: userId });
+        if (!resultUser.acknowledged && !resultAccount.acknowledged) throw new Error("Change not acknowledged in DB");
         return true;
     } catch (error) {
         console.error("Error deleting user:", error);

@@ -85,6 +85,9 @@ import Image from "next/image";
 
 import Lottie from "lottie-react";
 import Loading from "@/lib/lotties/loading.json";
+import Logo from "../../public/logo.svg";
+import { useRouter } from "next/navigation";
+import { mutate } from "swr";
 
 interface PlaylistProps {
     playlist: PlaylistData;
@@ -92,25 +95,51 @@ interface PlaylistProps {
 
 function PlaylistEntry({ playlist }: PlaylistProps) {
     //TODO: migration auth(req, res) call
-
+    const router = useRouter();
     const { playlist_id, seeds } = playlist;
     const { name, frequency, amount } = playlist.preferences;
 
-    const fetcher: Fetcher<string> = (url: string) => fetch(url).then((res) => res.json());
-    const options = {
-        revalidateOnFocus: false,
-    };
+    const fetcher: Fetcher<string> = (url: string) =>
+        fetch(url).then((res) => {
+            try {
+                if (!res.ok) {
+                    if (res.status === 401) {
+                        console.log("401 error");
+                        router.refresh();
+                        mutate(`/api/spotify/playlist/cover/${playlist_id}`);
+                    }
+                    throw new Error("response !ok: " + res.status);
+                }
+                return res.json();
+            } catch (error) {
+                console.log("Error getting coverUrls", error);
+                return "fallback";
+            }
+        });
+    // const options = {
+    //     revalidateOnMount: true,
+    // };
 
-    const { data: coverUrl, error, isLoading } = useSWR(`/api/spotify/playlist/cover/${playlist_id}`, fetcher, options);
-
+    //TODO: on 401 (token expired) refresh router
+    const { data: coverUrl, error, isLoading } = useSWR(`/api/spotify/playlist/cover/${playlist_id}`, fetcher);
+    if (error) {
+        console.log("Error getting cover image:", error);
+        // if(errorrouter
+    }
+    console.log("CoverUrl:", coverUrl);
     return (
         <Link href={`/pages/edit-playlist/${playlist_id}`}>
             <div className="flex gap-4 items-center w-full bg-ui-900 border border-ui-700 rounded-lg">
-                {coverUrl && (
-                    <div className="size-24 bg-ui-800 rounded-l-lg relative overflow-hidden flex-none">
-                        <Image src={coverUrl} alt="playlist cover image" fill={true} sizes="96px" />
-                    </div>
-                )}
+                {coverUrl &&
+                    (coverUrl === "fallback" ? (
+                        <div className="size-24 bg-ui-800 rounded-l-lg text-ui-700 relative flex-none p-4">
+                            <Logo />
+                        </div>
+                    ) : (
+                        <div className="size-24 bg-ui-800 rounded-l-lg relative overflow-hidden flex-none">
+                            <Image src={coverUrl} alt="playlist cover image" fill={true} sizes="96px" />
+                        </div>
+                    ))}
                 {isLoading && (
                     <div className="size-24 bg-ui-850 rounded-l-lg flex-none p-5">
                         <Lottie animationData={Loading}> </Lottie>

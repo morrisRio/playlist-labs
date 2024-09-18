@@ -15,7 +15,7 @@ const accountSchema = new Schema({
         required: true,
     },
     token_expires: {
-        type: Date,
+        type: Number,
         required: true,
     },
 });

@@ -14,7 +14,7 @@ function Login() {
     return (
         <div className="flex flex-col min-h-screen items-center justify-center gap-5 max-w-80 p-8 mx-auto">
             <div className="flex items-center gap-2 -mb-1">
-                <Image src={Logo} alt="playlistLabs Logo" width={20} height={20} className="-mb-1"></Image>
+                <Logo className="size-5 -mb-1" />
                 <h2 className="font-normal">playlistLabs</h2>
             </div>
             <div className="text-ui-500 text-center">

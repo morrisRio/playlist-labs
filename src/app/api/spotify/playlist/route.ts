@@ -17,7 +17,6 @@ import { createCanvasGradient } from "@/lib/utils";
 
 //needs to be here because of the canvas dependency leading to bundler issues if not in api route
 const generateCoverImage = async (hue: number): Promise<string> => {
-    setDebugMode(false);
     debugLog("API: Generating Cover Image with Hue:", hue);
     const canvas = createCanvas(640, 640);
     createCanvasGradient(canvas, hue);
@@ -27,7 +26,6 @@ const generateCoverImage = async (hue: number): Promise<string> => {
 };
 
 const updatePlaylistCover = async (hue: number, idToWriteTo: string, accessToken: string): Promise<void> => {
-    setDebugMode(false);
     const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error("Playlist cover update timed out after 10s")), 10 * 60 * 1000); //10 minutes
     });
@@ -59,7 +57,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const data = await req.json();
     const { preferences, seeds, rules }: PlaylistData = data;
 
-    debugLog("API: PLAYLIST POST - creating new playlist " + preferences.name);
+    debugLog("API: PLAYLIST POST - creating new playlist ", preferences);
     //add the token to the request for the api call
     const token = await getToken({ req });
     if (!token) {
@@ -280,7 +278,6 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
         delete preferences.hue;
     }
 
-    //TODO: save instead of update
     const dbSuccess = await dbUpdatePlaylist(userId, {
         playlist_id,
         preferences,

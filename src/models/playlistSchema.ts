@@ -9,9 +9,10 @@ interface Playlist extends Document {
     playlist_id: string;
     lastUpdated: Date;
     preferences: {
-        playlist_name: string;
-        playlist_description: string;
-        playlist_length: number;
+        name: string;
+        amount: string;
+        frequency: string;
+        on?: number;
     };
     seeds: {
         seed_id: string;
@@ -32,7 +33,7 @@ export const playlistSchema = new Schema<Playlist>({
     },
     lastUpdated: {
         type: Date,
-        default: Date.now,
+        default: Date.now(),
     },
     preferences: {
         name: {
@@ -42,6 +43,18 @@ export const playlistSchema = new Schema<Playlist>({
         frequency: {
             type: String,
             required: true,
+        },
+        on: {
+            type: Number,
+            required: [
+                function (this: Playlist) {
+                    if (this.preferences.frequency === "weekly" || this.preferences.frequency === "monthly") {
+                        return true;
+                    }
+                    return false;
+                },
+                "On field is required for weekly or monthly playlists",
+            ],
         },
         amount: {
             type: Number,

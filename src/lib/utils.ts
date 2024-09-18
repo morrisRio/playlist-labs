@@ -19,7 +19,7 @@ export const getAppUrl = () => {
         if (process.env.NEXTAUTH_URL) {
             return process.env.NEXTAUTH_URL;
         } else if (process.env.VERCEL_ENV === "preview") {
-            return `https://playlist-labs-git-dev-maurices-projects-1e3466ea.vercel.app`;
+            return `https://playlist-labs-git-database-session-maurices-projects-1e3466ea.vercel.app`;
         } else if (process.env.VERCEL_URL) {
             return `https://${process.env.VERCEL_URL}`;
         } else {

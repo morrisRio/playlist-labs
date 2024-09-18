@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import SessionProvider from "../components/SessionProvider";
-import { auth } from "@/lib/serverUtils";
 
 const ibmPlexSans = localFont({
     src: [
@@ -28,13 +26,10 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-    const session = await auth("layout");
     return (
         <html lang="en">
             <body className={`${ibmPlexSans.variable} font-ibm antialiased relative overflow-x-hidden`}>
-                <SessionProvider session={session}>
-                    <main className="min-h-screen h-screen">{children}</main>
-                </SessionProvider>
+                <main className="min-h-screen h-screen">{children}</main>
             </body>
         </html>
     );

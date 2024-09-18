@@ -1,4 +1,5 @@
 import { twUi700, twUi500 } from "@/lib/utils";
+import { MdInfoOutline } from "react-icons/md";
 
 interface PreferencesProps {
     preferences: Preferences;
@@ -9,15 +10,18 @@ interface Preferences {
     frequency: string;
     amount: number;
     description?: string;
+    on?: number;
 }
 
 export default function PreferencesForm({ preferences, onChange }: PreferencesProps) {
     return (
         <div className="flex flex-col gap-4 rounded-xl p-4">
-            <label className="flex space-between items-center justify-between text-base text-ui-500">
+            <label htmlFor="frequency" className="flex items-center justify-between text-base  text-ui-500">
                 Update Frequency
+            </label>
+            <div className="flex w-full justify-between gap-2 items-center">
                 <select
-                    className="block p-2 rounded-lg border border-ui-700 bg-ui-850 text-ui-500 focus:outline-none focus:ring focus:border-themetext text-sm"
+                    className="flex-grow block p-2 rounded-lg border border-ui-700 bg-ui-850 text-ui-500 focus:outline-none focus:ring focus:border-themetext text-sm"
                     name="frequency"
                     value={preferences.frequency}
                     onChange={onChange}
@@ -28,9 +32,66 @@ export default function PreferencesForm({ preferences, onChange }: PreferencesPr
                     <option value="monthly">Monthly</option>
                     <option value="never">Never</option>
                 </select>
-            </label>
+                {
+                    {
+                        daily: (
+                            <>
+                                <MdInfoOutline size="1.5rem" className="text-ui-650"></MdInfoOutline>
+                                <p className="text-sm text-ui-600">
+                                    Daily playlists are updated every day at midnight.
+                                </p>
+                            </>
+                        ),
+                        weekly: (
+                            <>
+                                <p className="text-base text-ui-600">on</p>
+                                <select
+                                    className="flex-grow block p-2 rounded-lg border border-ui-700 bg-ui-850 text-ui-500 focus:outline-none focus:ring focus:border-themetext text-sm"
+                                    name="on"
+                                    value={preferences.on}
+                                    onChange={onChange}
+                                    required
+                                >
+                                    <option value="0">Mondays</option>
+                                    <option value="1">Tuesdays</option>
+                                    <option value="2">Wednesdays</option>
+                                    <option value="3">Thursdays</option>
+                                    <option value="4">Fridays</option>
+                                    <option value="5">Saturdays</option>
+                                    <option value="6">Sundays</option>
+                                </select>
+                            </>
+                        ),
+                        monthly: (
+                            <>
+                                <p className="text-base text-ui-600">at the</p>
+                                <select
+                                    className="flex-grow block p-2 rounded-lg border border-ui-700 bg-ui-850 text-ui-500 focus:outline-none focus:ring focus:border-themetext text-sm"
+                                    name="on"
+                                    value={preferences.on}
+                                    onChange={onChange}
+                                    required
+                                >
+                                    <option value="0">beginning</option>
+                                    <option value="15">middle</option>
+                                    <option value="28">end</option>
+                                </select>
+                                <p className="text-base text-ui-600">of the Month</p>
+                            </>
+                        ),
+                        never: (
+                            <>
+                                <MdInfoOutline size="2rem" className="text-ui-700"></MdInfoOutline>
+                                <p className=" flex-grow text-sm text-ui-600">
+                                    This Playlist will never be updated automatically.
+                                </p>
+                            </>
+                        ),
+                    }[preferences.frequency]
+                }
+            </div>
             <div>
-                <label htmlFor="amount" className="flex items-center justify-between text-base  text-ui-500">
+                <label htmlFor="amount" className="flex items-center justify-between text-base text-ui-500">
                     Number of Tracks
                     <input
                         type="number"

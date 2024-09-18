@@ -4,18 +4,16 @@ import Link from "next/link";
 import { MdAdd } from "react-icons/md";
 import { PlaylistData } from "@/types/spotify";
 
-import Image from "next/image";
 import Logo from "../../public/logo-small-v2.svg";
 
 import { auth } from "@/lib/serverUtils";
 import { redirect } from "next/navigation";
 import { dbGetUsersPlaylists } from "@/lib/db/dbActions";
-import FetchButton from "@/components/FetchButton";
+import SessionProvider from "../components/SessionProvider";
 
 export default async function Home() {
     let playlistData: PlaylistData[] | null = null;
 
-    //this on every server side render instead of middleware
     const session = await auth("page");
     if (!session || !session.user || !session.user.id) {
         console.error("No session found");
@@ -28,11 +26,12 @@ export default async function Home() {
 
     return (
         <div className="min-h-full w-full p-4 flex flex-col gap-5">
-            <FetchButton></FetchButton>
-            <div className="flex justify-between gap-2 mt-8">
-                <Image src={Logo} alt="playlistLabs Logo" width={14} height={14} className="-mb-1"></Image>
+            <div className="flex justify-between gap-2 mt-8 items-center">
+                <Logo className="w-4 h-4 -mb-1"></Logo>
                 <h3 className="font-normal text-themetext-nerfed flex-grow">playlistLabs</h3>
-                <Profile></Profile>
+                <SessionProvider session={session}>
+                    <Profile></Profile>
+                </SessionProvider>
             </div>
             <Link href="/pages/create-playlist">
                 <div
