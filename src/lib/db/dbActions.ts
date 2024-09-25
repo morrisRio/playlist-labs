@@ -6,10 +6,9 @@ import User from "@/models/userModel";
 import UserModel from "@/models/userModel";
 import AccountModel from "@/models/accountModel";
 import { Document } from "mongoose";
-import { debugLog, setDebugMode } from "@/lib/utils";
+import { debugLog } from "@/lib/utils";
 import { auth } from "../serverUtils";
 import { revalidateTag } from "next/cache";
-import { last } from "lodash";
 
 type DbRes<T> =
     | {

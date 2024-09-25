@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
-import { spotifyPost, spotifyPut, spotifyGet } from "@/lib/serverUtils";
+import { spotifyPost, spotifyPut } from "@/lib/serverUtils";
 import {
     getRecommendations,
     createPlaylistDescription,
-    getOnlyNewRecommendations,
     trackIdsToQuery,
     regeneratePlaylist,
     regenerateRes,
