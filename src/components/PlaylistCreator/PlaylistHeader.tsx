@@ -27,6 +27,7 @@ import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.share
 
 import Lottie from "lottie-react";
 import Loading from "@/lib/lotties/loading.json";
+import { IconType } from "react-icons";
 
 interface PlaylistHeaderProps {
     pageTitle: string;
@@ -35,11 +36,13 @@ interface PlaylistHeaderProps {
     name: string;
     hue: number | undefined;
     action: (e: FormEvent<HTMLFormElement>) => void;
-    changed: boolean;
+    actionName: String;
+    actionIcon: IconType;
     submitting: boolean;
     resetSettings: () => void;
     emptySettings: () => void;
     router: AppRouterInstance;
+    somethingToRestore: boolean;
 }
 
 function PlaylistHeader({
@@ -48,27 +51,19 @@ function PlaylistHeader({
     onChange,
     name,
     hue,
-    changed,
+    actionName,
+    actionIcon: ActionIcon,
     submitting,
     resetSettings,
     emptySettings,
     router,
+    somethingToRestore,
 }: PlaylistHeaderProps) {
     const [showNameModal, setShowNameModal] = useState(playlist_id === false);
     const [showGradient, setShowGradient] = useState(false);
 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [showResetModal, setShowResetModal] = useState(false);
-
-    const actionTitle = !changed ? "Regenerate" : playlist_id ? "Save Changes" : "Generate";
-
-    const actionIcon = !changed ? (
-        <MdShuffle size="1.2rem" />
-    ) : playlist_id ? (
-        <AiOutlineSave size="1.2rem" />
-    ) : (
-        <BsStars size="1.2rem" />
-    );
 
     const headerRef = useRef<HTMLDivElement>(null);
     const actionButtonRef = useRef<HTMLButtonElement>(null);
@@ -104,7 +99,6 @@ function PlaylistHeader({
         filter: `saturate(0.7) brightness(0.45)`,
     };
 
-    const somethingToRestore = changed && playlist_id;
     return (
         <>
             <header ref={headerRef} className="sticky top-0 z-40">
@@ -125,8 +119,8 @@ function PlaylistHeader({
                             collapsed ? "opacity-100" : "invisible opacity-0"
                         }`}
                     >
-                        {actionIcon}
-                        {actionTitle}
+                        <ActionIcon />
+                        {actionName}
                     </button>
                     {playlist_id ? (
                         <ContextMenu contextTitle={"Playlist Options"}>
@@ -232,8 +226,8 @@ function PlaylistHeader({
                                 disabled={submitting}
                                 ref={actionButtonRef}
                             >
-                                {actionIcon}
-                                {actionTitle}
+                                <ActionIcon />
+                                {actionName}
                             </button>
                             <a
                                 href={`https://open.spotify.com/playlist/${playlist_id}`}

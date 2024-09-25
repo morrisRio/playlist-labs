@@ -144,17 +144,25 @@ export interface AxisRuleInput extends EventTarget {
 
 //Mongo Types================================================================
 
+export type PlaylistUpdate = {
+    playlist_id: string;
+    preferences?: Preferences;
+    seeds?: Seed[];
+    rules?: Rule[];
+    trackHistory?: string[];
+};
+
 export interface PlaylistData {
     playlist_id?: string;
     preferences: Preferences;
     seeds: Seed[];
     rules?: Rule[];
-    trackHistory: string[];
+    trackHistory?: string[];
     coverUrl?: string;
 }
 
 export interface MongoPlaylistData extends Document {
-    playlist_id?: string;
+    playlist_id: string;
     preferences: Preferences;
     seeds: Seed[];
     rules?: Rule[];

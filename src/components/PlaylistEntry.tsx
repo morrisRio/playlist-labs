@@ -124,14 +124,13 @@ function PlaylistEntry({ playlist }: PlaylistProps) {
     const { data: coverUrl, error, isLoading } = useSWR(`/api/spotify/playlist/cover/${playlist_id}`, fetcher);
     if (error) {
         console.log("Error getting cover image:", error);
-        // if(errorrouter
     }
     console.log("CoverUrl:", coverUrl);
     return (
         <Link href={`/pages/edit-playlist/${playlist_id}`}>
             <div className="flex gap-4 items-center w-full bg-ui-900 border border-ui-700 rounded-lg">
-                {coverUrl &&
-                    (coverUrl === "fallback" ? (
+                {coverUrl ? (
+                    coverUrl === "fallback" ? (
                         <div className="size-24 bg-ui-800 rounded-l-lg text-ui-700 relative flex-none p-4">
                             <Logo />
                         </div>
@@ -139,16 +138,19 @@ function PlaylistEntry({ playlist }: PlaylistProps) {
                         <div className="size-24 bg-ui-800 rounded-l-lg relative overflow-hidden flex-none">
                             <Image src={coverUrl} alt="playlist cover image" fill={true} sizes="96px" />
                         </div>
-                    ))}
-                {isLoading && (
+                    )
+                ) : isLoading ? (
                     <div className="size-24 bg-ui-850 rounded-l-lg flex-none p-5">
                         <Lottie animationData={Loading}> </Lottie>
                     </div>
-                )}
-                {error && (
+                ) : error ? (
                     <div className="size-24 bg-ui-850 rounded-l-lg flex-none p-5">
-                        <p className="text-ui-600">:&&#40;</p>
+                        <p className="text-ui-600">
+                            <Logo></Logo>
+                        </p>
                     </div>
+                ) : (
+                    <div className="size-24 bg-ui-800 rounded-l-lg"></div>
                 )}
                 <div className="flex flex-col overflow-hidden flex-grow">
                     <SmartMarquee divider={true}>

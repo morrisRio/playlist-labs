@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import type { GetServerSidePropsContext, NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 import { debugLog, getAppUrl, setDebugMode } from "@/lib/utils";
+import { ErrorRes } from "@/types/spotify";
 
 /* helper function for getServerSession() to avoid passing authOptions around */
 export async function auth(
@@ -103,8 +104,6 @@ export const spotifyPut = async (
 
     return fetchFromSpotify(url, options, validationFunction, debug);
 };
-
-import { ErrorRes } from "@/types/spotify";
 
 /**
  * Represents a validation function that takes in data and returns an object

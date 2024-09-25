@@ -8,6 +8,7 @@ import Rules from "./RulesForm/Rules";
 import Seeds from "./SeedsForm/Seeds";
 import UniModal from "../UniModal";
 
+import { useSubmitCase } from "@/lib/hooks/useSubmitCase";
 import { Seed, Rule, Preferences, RuleInput, PlaylistData } from "@/types/spotify";
 import { completeRules } from "@/lib/spotifyUtils";
 
@@ -15,6 +16,7 @@ import Lottie from "lottie-react";
 import Loading from "@/lib/lotties/loading.json";
 
 import { preload, useSWRConfig } from "swr";
+import { getAppUrl } from "@/lib/utils";
 
 interface PlaylistFormProps {
     pageTitle: string;
@@ -42,15 +44,15 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
             hue: Math.floor(Math.random() * 360),
             on: 4,
         } as Preferences,
-        seeds: [],
-        rules: [],
+        seeds: [] as Seed[],
+        rules: [] as Rule[],
     };
 
     const initialState = {
         preferences: playlist?.preferences ? playlist.preferences : emptyPlaylist.preferences,
         seeds: playlist?.seeds ? playlist.seeds : emptyPlaylist.seeds,
         //if the playlist has rules, complete them as the db only stores the name and value
-        rules: playlist?.rules ? completeRules(playlist.rules) : emptyPlaylist.rules,
+        rules: playlist?.rules && playlist?.rules.length > 0 ? completeRules(playlist.rules) : emptyPlaylist.rules,
     };
 
     //Preferences ______________________________________________________________________________________________
@@ -168,16 +170,21 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
     //TODO: feature: differentiate saving the settings and regenerating the playlist
 
     const finishSubmit = useCallback(async () => {
+        //TODO: differentiate between saving the settings and regenerating the playlist
+        //only get difference between the current state and the initial state
+        //if difference.seeds || difference.rules => PUT else PATCH
         const finishSubmit = async () => {
+            let submitPayload: any = {};
+            submitPayload.playlist_id = sendId && playlist_id ? playlist_id : undefined;
+            submitPayload.preferences = sendPrefs ? preferences : undefined;
+            submitPayload.rules = sendRules ? rules : undefined;
+            submitPayload.seeds = sendSeeds ? seeds : undefined;
+            submitPayload.newSongsSettings = newSongSettings;
+
             //create a new playlist and populate it with the tracks
             await fetch("/api/spotify/playlist", {
-                method: playlist_id ? "PUT" : "POST",
-                body: JSON.stringify({
-                    playlist_id: playlist_id,
-                    preferences,
-                    seeds,
-                    rules,
-                }),
+                method: submitMethod,
+                body: JSON.stringify(submitPayload),
             })
                 .then(async (res) => {
                     setSubmitting(false);
@@ -189,11 +196,6 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
                     setSubmitErrors([]);
                     router.replace("/pages/edit-playlist/" + data);
                     router.refresh();
-                    // setCurrentState({
-                    //     preferences: preferences,
-                    //     seeds: seeds,
-                    //     rules: rules,
-                    // });
                     setSubmitting(false);
                 })
                 .catch((err) => {
@@ -242,16 +244,28 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
     }, []);
 
     //handle button title and action ______________________________________________________________
-    const changed =
-        JSON.stringify({
-            preferences: preferences,
-            seeds: seeds,
-            rules: rules,
-        }) !== JSON.stringify(initialState);
+    const {
+        submitMethod,
+        actionIcon,
+        actionName,
+        somethingToRestore,
+        sendId,
+        sendPrefs,
+        sendRules,
+        sendSeeds,
+        newSongSettings,
+    } = useSubmitCase({
+        initialState,
+        playlist_id,
+        preferences,
+        seeds,
+        rules,
+    });
 
     const { mutate } = useSWRConfig();
 
     useEffect(() => {
+        console.log("Use effect runs, playlist: ", playlist);
         if (playlist) {
             setTimeout(() => mutate(`/api/spotify/playlist/cover/${playlist_id}`), 300);
             setPreferences(playlist.preferences);
@@ -276,8 +290,10 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
                 onChange={handlePrefChange}
                 hue={preferences.hue}
                 submitting={submitting}
-                changed={changed}
                 action={handleSubmit}
+                actionName={actionName}
+                actionIcon={actionIcon}
+                somethingToRestore={somethingToRestore}
                 resetSettings={resetSettings}
                 emptySettings={emptySettings}
                 router={router}

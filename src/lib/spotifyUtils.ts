@@ -3,24 +3,27 @@ import { Seed, Rule, Preferences, Track, Artist, MongoPlaylistData, PlaylistData
 import { allRules } from "@/lib/spotifyConstants";
 import { spotifyGet, spotifyPost, spotifyPut } from "@/lib/serverUtils";
 import { ErrorRes } from "@/types/spotify";
-import { debugLog } from "@/lib/utils";
+import { debugLog, setDebugMode } from "@/lib/utils";
 import { dbGetOneUserPlaylist, dbUpdatePlaylist } from "./db/dbActions";
 import { revalidateTag } from "next/cache";
 
-//TODO: more specific types to determine whether updatePlaylistCover is needed
-//when playlistData: PlaylistData and preferences.hgue is defined, updatePlaylistCover is needed
+interface RegenError extends ErrorRes {
+    data: null;
+}
+
+export type regenerateRes = { data: PlaylistData; error: null } | RegenError;
+
 export const regeneratePlaylist = async (
     playlistData: MongoPlaylistData | PlaylistData,
     accessToken: string,
     userId: string,
-    ignoreHistory?: boolean,
-    updatePlaylistCover?: (hue: number, playlist_id: string, accessToken: string) => Promise<void>
-): Promise<Boolean> => {
-    const { playlist_id, preferences, seeds, rules } = playlistData;
+    newSettings?: boolean
+): Promise<regenerateRes> => {
+    let { playlist_id, preferences, seeds, rules, trackHistory } = playlistData;
 
     if (!preferences || !seeds || !playlist_id) {
         console.error("Missing data for playlist regeneration");
-        return false;
+        return { data: null, error: { message: "Missing data for playlist regeneration", status: 500 } };
     }
 
     debugLog("regenerating Playlist" + preferences.name);
@@ -41,28 +44,8 @@ export const regeneratePlaylist = async (
         if (followRes.error) {
             const { status } = followRes.error;
             console.error("API: Failed to follow Playlist", followRes.error);
-            return false;
+            return { data: null, error: { message: "Seems like the Playlist doesn't exist anymore", status } };
         }
-    }
-
-    //TODO: fidelity check if the settings still the same, compare with db
-    //complete the request body with the description and public fields
-    const preferencesBody = {
-        name: preferences.name,
-        description: createPlaylistDescription(preferences, seeds, rules),
-        public: false,
-    };
-
-    const updatePlaylistDetails = await spotifyPut(
-        `https://api.spotify.com/v1/playlists/${playlist_id}`,
-        accessToken,
-        preferencesBody
-    );
-
-    if (updatePlaylistDetails.error) {
-        const { message, status } = updatePlaylistDetails.error;
-        console.error("Problem updating Playlist details.\n" + message, status);
-        return false;
     }
 
     //flush the playlist
@@ -76,26 +59,53 @@ export const regeneratePlaylist = async (
         console.error("Problem flushing Playlist.\n" + message, status);
     }
 
-    let dbPlaylistData: MongoPlaylistData;
-    if (!ignoreHistory && !playlistData.trackHistory) {
-        const dbUserPlaylistData = await dbGetOneUserPlaylist(userId, playlist_id);
-        if (dbUserPlaylistData.error || !dbUserPlaylistData.data || dbUserPlaylistData.data.playlists.length === 0) {
-            console.error("Failed to get Playlist Data from DB", dbUserPlaylistData.error);
-            return false;
-        }
-        dbPlaylistData = dbUserPlaylistData.data.playlists[0];
-    } else {
-        dbPlaylistData = playlistData as MongoPlaylistData;
-    }
-
     let trackIdsToAdd: string[] | ErrorRes = [];
-    if (ignoreHistory) {
-        if (playlistData.trackHistory) playlistData.trackHistory = [];
-        trackIdsToAdd = await getRecommendations(accessToken, preferences.amount, seeds, rules);
-    } else {
-        trackIdsToAdd = await getOnlyNewRecommendations(accessToken, preferences, seeds, rules, dbPlaylistData);
+    //TODO: fidelity: could: add a toogle in preferences to allow old tracks
+    //FOR NOW: always get new tracks
+    if (newSettings) {
+        //update the description with new settings
+        const preferencesBody = {
+            name: preferences.name,
+            description: createPlaylistDescription(preferences, seeds, rules),
+            public: false,
+        };
+
+        const updatePlaylistDetails = await spotifyPut(
+            `https://api.spotify.com/v1/playlists/${playlist_id}`,
+            accessToken,
+            preferencesBody
+        );
+
+        if (updatePlaylistDetails.error) {
+            const { message, status } = updatePlaylistDetails.error;
+            console.error("Problem updating Playlist details.\n" + message, status);
+        }
     }
 
+    // preparation for allowing old tracks
+    //if the settings are still the same and we want to aknowldge the history we need the db entry
+    //if we dont have the db entry we need to get it
+    // let trackHistory: string[];
+    // if (!newSettings && playlistData.trackHistory !== undefined) {
+    //     const dbUserPlaylistData = await dbGetOneUserPlaylist(userId, playlist_id);
+    //     if (dbUserPlaylistData.error || !dbUserPlaylistData.data || dbUserPlaylistData.data.playlists.length === 0) {
+    //         console.error("Failed to get Playlist Data from DB", dbUserPlaylistData.error);
+    //         return { data: null, error: { message: "Failed to get Playlist Data from DB", status: 404 } };
+    //     }
+    //     trackHistory = dbUserPlaylistData.data.playlists[0].trackHistory;
+    // } else {
+    //     trackHistory = playlistData.trackHistory!;
+    // }
+    //     if (playlistData.trackHistory) playlistData.trackHistory = [];
+    //     trackIdsToAdd = await getRecommendations(accessToken, preferences.amount, seeds, rules);
+    // } else {
+    //     trackIdsToAdd = await getOnlyNewRecommendations(accessToken, preferences.amount, seeds, rules, trackHistory);
+    // }
+
+    if (!trackHistory) trackHistory = [];
+    trackIdsToAdd = await getOnlyNewRecommendations(accessToken, preferences.amount, seeds, rules, trackHistory);
+
+    //double failsafe
     if ("error" in trackIdsToAdd) {
         console.error("Failed to get only new Tracks", trackIdsToAdd.error);
         console.error("trying simple recommandations instead");
@@ -104,8 +114,8 @@ export const regeneratePlaylist = async (
 
         if ("error" in recommandationIds) {
             console.error("Failed to get Recommendations", recommandationIds.error);
-            const { message, status } = recommandationIds.error;
-            return false;
+            const { status } = recommandationIds.error;
+            return { data: null, error: { message: "Failed to get Recommendations", status } };
         }
         trackIdsToAdd = recommandationIds;
     }
@@ -127,39 +137,27 @@ export const regeneratePlaylist = async (
     if (addRes.error) {
         const { message, status } = addRes.error;
         console.error("Failed to add Recommendations", addRes.error);
-        return false;
+        return { data: null, error: { message: "Failed to add Recommendations" + message, status } };
     }
 
-    if (preferences.hue !== undefined && updatePlaylistCover != undefined) {
-        await updatePlaylistCover(preferences.hue, playlist_id, accessToken).catch((error) => {
-            console.error("Failed to update Cover Image: ", error);
-        });
-        delete preferences.hue;
-    }
+    //TODO: fidelity: save all tracks to history with date and settingshash, so versions can be shown in frontend
+    // const dbSuccess = await dbUpdatePlaylist(userId, {
+    //     playlist_id,
+    //     preferences,
+    //     seeds,
+    //     rules,
+    //     trackHistory: [...trackHistory, ...trackIdsToAdd],
+    // });
 
-    //TODO: saving subdocuments does not work this way
-    // try {
-    //     dbPlaylistData.trackHistory = [...dbPlaylistData.trackHistory, ...trackIdsToAdd];
-    //     dbPlaylistData.save();
-    // } catch (e) {
-    //     console.error("Failed to save updated Playlist Data", e);
-    //     return false;
+    // if (!dbSuccess) {
+    //     console.error("Failed to save updated Playlist Data");
     // }
-    //TODO: save instead of update, ch3ck if it works
-    const dbSuccess = await dbUpdatePlaylist(userId, {
-        playlist_id,
-        preferences,
-        seeds,
-        rules,
-        trackHistory: [...dbPlaylistData.trackHistory, ...trackIdsToAdd],
-        // trackHistory: [...dbPlaylistData.data.trackHistory, ...tracksToAdd],
-    });
-    if (!dbSuccess) {
-        console.error("Failed to save updated Playlist Data");
-    }
 
-    if (!playlistData.trackHistory) revalidateTag("playlists");
-    return true;
+    if (newSettings) revalidateTag("playlists");
+    return {
+        data: { playlist_id, preferences, seeds, rules, trackHistory: [...trackHistory, ...trackIdsToAdd] },
+        error: null,
+    };
 };
 
 /**
@@ -348,8 +346,14 @@ interface MongoRule {
  * @returns An array of Rule objects with matched rule names and corresponding values.
  */
 export const completeRules = (rules: MongoRule[]): Rule[] => {
+    setDebugMode(true);
+    if (rules.length === 0) {
+        debugLog("returning empty rules array");
+        return [] as Rule[];
+    }
+    debugLog("Completing Rules");
     //match the rule
-    const completeRules = rules.map((rule) => {
+    return rules.map((rule) => {
         const completeRule = allRules.find((r) => r.name === rule.name);
         if (!completeRule) {
             return {} as Rule;
@@ -359,8 +363,6 @@ export const completeRules = (rules: MongoRule[]): Rule[] => {
             value: rule.value,
         } as Rule;
     });
-
-    return completeRules;
 };
 
 /**
@@ -468,15 +470,13 @@ export const createPlaylistDescription = (preferences: Preferences, seeds: Seed[
 
 export const getOnlyNewRecommendations = async (
     accessToken: string,
-    preferences: Preferences,
+    amount: number,
     seeds: Seed[],
     rules: Rule[] | undefined,
-    playlistData: MongoPlaylistData
+    trackHistory: string[]
 ): Promise<string[] | ErrorRes> => {
     try {
         debugLog("Ensuring new tracks");
-
-        const { trackHistory, seeds: oldSeeds, rules: oldRules, preferences: oldPreferences } = playlistData;
 
         const recommandationIds = await getRecommendations(accessToken, 50, seeds, rules);
         if ("error" in recommandationIds) {
@@ -487,17 +487,14 @@ export const getOnlyNewRecommendations = async (
         let loops = 0;
 
         // Loop to fetch new recommendations if needed
-        while (newTracks.length < preferences.amount) {
+        while (newTracks.length < amount) {
             if (loops < 3) {
                 // Get 50 new recommendations
                 debugLog(`Loop ${loops + 1}:  ${newTracks.length} tracks -> Fetching more recommendations`);
                 const newRecs = await getRecommendations(accessToken, 50, seeds, rules);
                 if ("error" in newRecs) {
                     console.error("Error getting Recommendations in loop:", newRecs.error.message);
-                    newTracks = [
-                        ...newTracks,
-                        ...getRandomTrackIds(trackHistory, preferences.amount - newTracks.length),
-                    ];
+                    newTracks = [...newTracks, ...getRandomTrackIds(trackHistory, amount - newTracks.length)];
                     break;
                 }
                 newTracks = filterNewTracks(newRecs, trackHistory, newTracks);
@@ -509,10 +506,7 @@ export const getOnlyNewRecommendations = async (
                 const newRecs = await getRecommendations(accessToken, 50, updatedSeeds, rules);
                 if ("error" in newRecs) {
                     console.error("Error getting Recommendations in loop:", newRecs.error.message);
-                    newTracks = [
-                        ...newTracks,
-                        ...getRandomTrackIds(trackHistory, preferences.amount - newTracks.length),
-                    ];
+                    newTracks = [...newTracks, ...getRandomTrackIds(trackHistory, amount - newTracks.length)];
                     break;
                 }
                 newTracks = filterNewTracks(newRecs, trackHistory, newTracks);
@@ -525,23 +519,20 @@ export const getOnlyNewRecommendations = async (
                 const newRecs = await getRecommendations(accessToken, 50, updatedSeeds, rules);
                 if ("error" in newRecs) {
                     console.error("Error getting Recommendations in loop:", newRecs.error.message);
-                    newTracks = [
-                        ...newTracks,
-                        ...getRandomTrackIds(trackHistory, preferences.amount - newTracks.length),
-                    ];
+                    newTracks = [...newTracks, ...getRandomTrackIds(trackHistory, amount - newTracks.length)];
                     break;
                 }
                 newTracks = filterNewTracks(newRecs, trackHistory, newTracks);
             } else {
                 debugLog(`Loop ${loops + 1}: ${newTracks.length} tracks -> giving up, fill with random from history`);
                 // Fill the missing amount with random seeds from the trackHistory after 10 loops
-                const randomSeeds = getRandomTrackIds(trackHistory, preferences.amount - newTracks.length);
+                const randomSeeds = getRandomTrackIds(trackHistory, amount - newTracks.length);
                 newTracks = [...newTracks, ...randomSeeds];
                 break;
             }
             loops++;
         }
-        const tracksToAdd = newTracks.slice(0, preferences.amount);
+        const tracksToAdd = newTracks.slice(0, amount);
         debugLog("Final new tracks", tracksToAdd.length);
         return tracksToAdd;
         //TODO: last resort to vary rules

@@ -1,7 +1,7 @@
 "use server";
 
 import { connectMongoDB } from "@/lib/db/dbConnect";
-import { PlaylistData, MongoPlaylistData, MongoAccount } from "@/types/spotify";
+import { PlaylistData, MongoPlaylistData, MongoAccount, Preferences, PlaylistUpdate } from "@/types/spotify";
 import User from "@/models/userModel";
 import UserModel from "@/models/userModel";
 import AccountModel from "@/models/accountModel";
@@ -9,6 +9,7 @@ import { Document } from "mongoose";
 import { debugLog, setDebugMode } from "@/lib/utils";
 import { auth } from "../serverUtils";
 import { revalidateTag } from "next/cache";
+import { last } from "lodash";
 
 type DbRes<T> =
     | {
@@ -181,24 +182,29 @@ export async function dbGetOnePlaylistData(userId: string, playlistId: string): 
     }
 }
 
-export async function dbGetOneUserPlaylist(userId: string, playlistId: string): Promise<DbRes<MongoUserData | null>> {
+export async function dbGetOneUserPlaylist(userId: string, playlistId: string): Promise<DbRes<MongoUserData>> {
     //for fetching only one playlist: https://www.mongodb.com/docs/manual/tutorial/optimize-query-performance-with-indexes-and-projections/
-    await connectMongoDB();
+    try {
+        await connectMongoDB();
 
-    // projection to only get the playlist with the id
-    const userDoc = await User.findOne(
-        { spotify_id: userId },
-        {
-            playlists: {
-                $elemMatch: { playlist_id: playlistId },
-            },
-            _id: 0,
-        }
-    );
+        // projection to only get the playlist with the id
+        const userDoc = await User.findOne(
+            { spotify_id: userId },
+            {
+                playlists: {
+                    $elemMatch: { playlist_id: playlistId },
+                },
+                _id: 0,
+            }
+        );
 
-    // const playlist = playlists[0];
+        // const playlist = playlists[0];
 
-    return { data: userDoc as MongoUserData, error: null };
+        return { data: userDoc as MongoUserData, error: null };
+    } catch (error: any) {
+        console.error("Error getting playlist:", error);
+        return { data: null, error: error.message };
+    }
 }
 
 /**
@@ -231,14 +237,36 @@ export async function dbCreatePlaylist(userId: string, playlistData: PlaylistDat
  */
 export async function dbUpdatePlaylist(
     userId: string,
-    playlistData: PlaylistData,
+    playlistData: PlaylistUpdate,
     newTracks?: string[]
-): Promise<boolean> {
+): Promise<DbRes<boolean>> {
     await connectMongoDB();
     try {
-        let updateOperation: any = {
-            $set: { "playlists.$": { ...playlistData, lastUpdated: Date.now() } },
-        };
+        // let updateOperation: any ={
+        //     $set: { "playlists.$": { ...playlistData.preferences, lastUpdated: Date.now() } },
+        // };
+
+        const updateOperation: any = {};
+        const setOperation: any = {};
+
+        if (playlistData.preferences) {
+            setOperation["playlists.$.preferences"] = playlistData.preferences;
+        }
+        if (playlistData.seeds) {
+            setOperation["playlists.$.seeds"] = playlistData.seeds;
+        }
+        if (playlistData.rules !== undefined) {
+            setOperation["playlists.$.rules"] = playlistData.rules;
+        }
+        if (playlistData.trackHistory) {
+            setOperation["playlists.$.trackHistory"] = playlistData.trackHistory;
+        }
+
+        setOperation["playlists.$.lastUpdated"] = Date.now();
+
+        updateOperation.$set = setOperation;
+
+        debugLog("Update Operation:", updateOperation);
 
         // // If newTracks are provided, add them to the trackHistory
         // if (newTracks && newTracks.length > 0) {
@@ -258,10 +286,10 @@ export async function dbUpdatePlaylist(
         );
 
         if (!result.acknowledged) throw new Error("Change not acknowledged in DB");
-        return true;
-    } catch (error) {
+        return { data: true, error: null };
+    } catch (error: any) {
         console.error("Error updating playlist:", error);
-        return false;
+        return { data: false, error: error.message };
     }
 }
 
@@ -297,29 +325,5 @@ export async function dbDeleteUser(): Promise<boolean> {
     } catch (error) {
         console.error("Error deleting user:", error);
         return false;
-    }
-}
-
-export async function dbGetPlaylistHistory(userId: string, playlistId: string): Promise<DbRes<string[]>> {
-    await connectMongoDB();
-    try {
-        // Query to find the specific track history of the playlist
-        const result = await User.findOne(
-            { spotify_id: userId, "playlists.playlist_id": playlistId },
-            {
-                playlists: { $elemMatch: { playlist_id: playlistId } },
-                "playlists.trackhistory": 1,
-                _id: 0,
-            }
-        ).lean();
-
-        console.log("Result: ", result);
-        // Extract the trackhistory if it exists
-        // const trackHistory = result?.playlistst?.[0]?.trackhistory || ["No history found"];
-        const trackHistory = ["No history found"];
-        return { data: trackHistory, error: null };
-    } catch (error: any) {
-        console.error("Error getting playlist history: ", error);
-        return { data: [], error: error.message };
     }
 }
