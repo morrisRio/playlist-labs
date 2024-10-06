@@ -1,0 +1,484 @@
+first image:
+http://192.168.178.28:3000/_next/image?url=https%3A%2F%2Fimage-cdn-ak.spotifycdn.com%2Fimage%2Fab67706c0000bebb01041e6317a3227897635291&w=256&q=75
+second image:
+http://192.168.178.28:3000/_next/image?url=https%3A%2F%2Fimage-cdn-ak.spotifycdn.com%2Fimage%2Fab67706c0000bebb353f514b820b0f19337d63a4&w=256&q=75
+third image:
+http://192.168.178.28:3000/_next/image?url=https%3A%2F%2Fimage-cdn-ak.spotifycdn.com%2Fimage%2Fab67706c0000bebb8108a954d9069db1dc2a1362&w=256&q=75
+
+
+
+MIDDLEWARE ACTIVE ===================================================
+with the wrong token
+
+1 jwt call, 1 with wrong token
+
+JWT callback at:  10/4/2024, 5:08:05 PM
+getting account info for:  karate_morris
+10/4/2024, 5:08:05 PM JWT: found account in db {
+  _id: new ObjectId('66e73ec6ad74853f2bb91bc4'),
+  spotify_id: 'karate_morris',
+  access_token: 'BQDIghJ4wxq2eqxVGeXGWO4oqyMRoriQ45GxwOVnX9O_O-MB_Z5dpeLvIUuEJEOUDAT9zO5kqBe8PaccytEVWoYqHwQv3_nAXt4I0Ed-dt3AWUJgsOygMDLaRxnjNupEIgB5ZQIo8oQMLTSfKxbfDYTqidqz5JyZOTSYGwM0e1ZC1onuYZecC46_Fic2l-OcsLT-GuFiTUPFHFHqBn1aoT9z3fwHkop-orBrYvzNNrTvWIi_6ksYLCsz138ZLJl6CVffDiZZ_zkHVBLt_TYs3LGmEN7kqXfQFwDPGxIV_Y8LztmVq7dz2S8',
+  refresh_token: 'AQCFNIesZRXdd14NAIq7iWx87SZ_J-i8F4PE40FWca3Lg8wLlpalhFdp7lwhyRY8WWIe8KUai0u7qsxF_BTj4an6vL3QjqZMhDpcbFVtKc3ryL6lnANC-vt3O6TgrT2ymWU',
+  token_expires: 1728000742,
+  __v: 0
+}
+10/4/2024, 5:08:05 PM JWT: old token EXPIRED BQDIghJ4wx...
+10/4/2024, 5:08:05 PM JWT: new token BQCWIFMPu7...
+10/4/2024, 5:08:05 PM JWT: jwt more recent than db, updating db token
+10/4/2024, 5:08:05 PM JWT: using token: BQCWIFMPu7... AQCFNIesZR...
+
+
+-------------
+
+getting playlists
+DB: Using cached connection
+searching for user karate_morris
+CoverUrl: undefined
+CoverUrl: undefined
+CoverUrl: undefined
+
+-------------
+
+
+
+2 jwt calls, 1 with wrong token
+db already has the new token,
+so it gets overwritten with the one from the db
+(maybe this is because of auth in layout and in the page, or its because react strict mode)
+
+JWT callback at:  10/4/2024, 5:08:07 PM
+
+-------------
+
+
+
+request with old even though it got updated
+
+DB: Using new connection
+getting account info for:  karate_morris
+API: GET - token from req: BQDIghJ4wxq2eqxVGeXGWO4oqyMRoriQ45GxwOVnX9O_O-MB_Z5dpeLvIUuEJEOUDAT9zO5kqBe8PaccytEVWoYqHwQv3_nAXt4I0Ed-dt3AWUJgsOygMDLaRxnjNupEIgB5ZQIo8oQMLTSfKxbfDYTqidqz5JyZOTSYGwM0e1ZC1onuYZecC46_Fic2l-OcsLT-GuFiTUPFHFHqBn1aoT9z3fwHkop-orBrYvzNNrTvWIi_6ksYLCsz138ZLJl6CVffDiZZ_zkHVBLt_TYs3LGmEN7kqXfQFwDPGxIV_Y8LztmVq7dz2S8
+API: GET - token from req: BQDIghJ4wxq2eqxVGeXGWO4oqyMRoriQ45GxwOVnX9O_O-MB_Z5dpeLvIUuEJEOUDAT9zO5kqBe8PaccytEVWoYqHwQv3_nAXt4I0Ed-dt3AWUJgsOygMDLaRxnjNupEIgB5ZQIo8oQMLTSfKxbfDYTqidqz5JyZOTSYGwM0e1ZC1onuYZecC46_Fic2l-OcsLT-GuFiTUPFHFHqBn1aoT9z3fwHkop-orBrYvzNNrTvWIi_6ksYLCsz138ZLJl6CVffDiZZ_zkHVBLt_TYs3LGmEN7kqXfQFwDPGxIV_Y8LztmVq7dz2S8
+API: GET - token from req: BQDIghJ4wxq2eqxVGeXGWO4oqyMRoriQ45GxwOVnX9O_O-MB_Z5dpeLvIUuEJEOUDAT9zO5kqBe8PaccytEVWoYqHwQv3_nAXt4I0Ed-dt3AWUJgsOygMDLaRxnjNupEIgB5ZQIo8oQMLTSfKxbfDYTqidqz5JyZOTSYGwM0e1ZC1onuYZecC46_Fic2l-OcsLT-GuFiTUPFHFHqBn1aoT9z3fwHkop-orBrYvzNNrTvWIi_6ksYLCsz138ZLJl6CVffDiZZ_zkHVBLt_TYs3LGmEN7kqXfQFwDPGxIV_Y8LztmVq7dz2S8
+
+-------------
+
+
+
+2 jwt calls, 1 with the correct token
+
+10/4/2024, 5:08:07 PM JWT: found account in db {
+  _id: new ObjectId('66e73ec6ad74853f2bb91bc4'),
+  spotify_id: 'karate_morris',
+  access_token: 'BQCWIFMPu7AFxRFe3fAyd8HVMNxMJBBW6RCzpY03RVGEpM-WkOQ-rFo5b_YgEVFGGjwpqj7cXE2p0GMelG0IkvyG8q-3BMlMr7AgYnKs0hIKmVTiYlU6ObCF_uXbCYrW_fsoEqe4tMeTheQ4ZuWl5JPLCs-lS4jsJ0NYlGjnWzhlYEqntzt1yU8l3BQbnRHN4vy9jlm568Y2JXSCQC5yAu9pwzBgjgnDVAjyB9x48WYl18vl-k8rQ7oRJ3Z7hfipCgApKMiNVTMRhSVZcl5s2844gJgEX4p_vi_GITpwLFgSjR81E-SxKg4',
+  refresh_token: 'AQCFNIesZRXdd14NAIq7iWx87SZ_J-i8F4PE40FWca3Lg8wLlpalhFdp7lwhyRY8WWIe8KUai0u7qsxF_BTj4an6vL3QjqZMhDpcbFVtKc3ryL6lnANC-vt3O6TgrT2ymWU',
+  token_expires: 1728058086,
+  __v: 0,
+}
+10/4/2024, 5:08:07 PM JWT: db has newer accessToken. Old token: BQDIghJ4wx...
+10/4/2024, 5:08:07 PM JWT: new Token BQCWIFMPu7...
+10/4/2024, 5:08:07 PM JWT: token is still valid BQCWIFMPu7...
+10/4/2024, 5:08:07 PM JWT: using token: BQCWIFMPu7... AQCFNIesZR...
+
+-------------
+
+
+
+3 api calls, 3 with the wrong token
+still the old token is used for the request that started before the token was updated
+ GET /api/auth/session 200 in 893ms
+
+API - error { message: 'Unauthorized', status: 401 }
+API: END OF GET -----------------------
+ GET /api/spotify/playlist/cover/0WTiVx8SGpwziNj2xvMlRh 401 in 971ms
+
+API - error { message: 'Unauthorized', status: 401 }
+API: END OF GET -----------------------
+ GET /api/spotify/playlist/cover/1EC5GJHy9zw8YOpUmlqrAd 401 in 973ms
+
+API - error { message: 'Unauthorized', status: 401 }
+API: END OF GET -----------------------
+ GET /api/spotify/playlist/cover/3AkK2mdsSpwXVdOBvsfmcS 401 in 974ms
+
+resulting in 401s for the requests that started before the token was updated
+
+-------------
+
+
+
+2 middleware calls for the same url, 1 with correct token
+
+MIDDLEWARE ACTIVE ===================================================
+TOKEN:  {
+  name: 'karate_morris',
+  email: 'maurice.rio@gmx.de',
+  picture: 'https://i.scdn.co/image/ab67757000003b821f98e5b65389ae5851e831ca',
+  sub: 'karate_morris',
+  accessToken: 'BQCWIFMPu7AFxRFe3fAyd8HVMNxMJBBW6RCzpY03RVGEpM-WkOQ-rFo5b_YgEVFGGjwpqj7cXE2p0GMelG0IkvyG8q-3BMlMr7AgYnKs0hIKmVTiYlU6ObCF_uXbCYrW_fsoEqe4tMeTheQ4ZuWl5JPLCs-lS4jsJ0NYlGjnWzhlYEqntzt1yU8l3BQbnRHN4vy9jlm568Y2JXSCQC5yAu9pwzBgjgnDVAjyB9x48WYl18vl-k8rQ7oRJ3Z7hfipCgApKMiNVTMRhSVZcl5s2844gJgEX4p_vi_GITpwLFgSjR81E-SxKg4',
+  refreshToken: 'AQCFNIesZRXdd14NAIq7iWx87SZ_J-i8F4PE40FWca3Lg8wLlpalhFdp7lwhyRY8WWIe8KUai0u7qsxF_BTj4an6vL3QjqZMhDpcbFVtKc3ryL6lnANC-vt3O6TgrT2ymWU',
+  userId: 'karate_morris',
+  accessTokenExpires: 1728058086,
+  iat: 1728054487,
+  exp: 1730646487,
+  jti: '958cdde2-8699-42bd-9b31-d0c8b0a89c14'
+}
+PATHNAME:  /
+TOKEN FOUND OR AUTH API, CONTINUE
+
+-------------
+
+
+
+ 3 jwt calls, 2 with the correct token
+
+JWT callback at:  10/4/2024, 5:08:08 PM
+DB: Using cached connection
+getting account info for:  karate_morris
+
+-------------
+
+
+
+ 1 random request with the correct token
+
+API: GET - token from req: BQCWIFMPu7AFxRFe3fAyd8HVMNxMJBBW6RCzpY03RVGEpM-WkOQ-rFo5b_YgEVFGGjwpqj7cXE2p0GMelG0IkvyG8q-3BMlMr7AgYnKs0hIKmVTiYlU6ObCF_uXbCYrW_fsoEqe4tMeTheQ4ZuWl5JPLCs-lS4jsJ0NYlGjnWzhlYEqntzt1yU8l3BQbnRHN4vy9jlm568Y2JXSCQC5yAu9pwzBgjgnDVAjyB9x48WYl18vl-k8rQ7oRJ3Z7hfipCgApKMiNVTMRhSVZcl5s2844gJgEX4p_vi_GITpwLFgSjR81E-SxKg4
+
+
+3 middleware calls for the same url, 2 with correct token
+MIDDLEWARE ACTIVE ===================================================
+TOKEN:  {
+  name: 'karate_morris',
+  email: 'maurice.rio@gmx.de',
+  picture: 'https://i.scdn.co/image/ab67757000003b821f98e5b65389ae5851e831ca',
+  sub: 'karate_morris',
+  accessToken: 'BQCWIFMPu7AFxRFe3fAyd8HVMNxMJBBW6RCzpY03RVGEpM-WkOQ-rFo5b_YgEVFGGjwpqj7cXE2p0GMelG0IkvyG8q-3BMlMr7AgYnKs0hIKmVTiYlU6ObCF_uXbCYrW_fsoEqe4tMeTheQ4ZuWl5JPLCs-lS4jsJ0NYlGjnWzhlYEqntzt1yU8l3BQbnRHN4vy9jlm568Y2JXSCQC5yAu9pwzBgjgnDVAjyB9x48WYl18vl-k8rQ7oRJ3Z7hfipCgApKMiNVTMRhSVZcl5s2844gJgEX4p_vi_GITpwLFgSjR81E-SxKg4',
+  refreshToken: 'AQCFNIesZRXdd14NAIq7iWx87SZ_J-i8F4PE40FWca3Lg8wLlpalhFdp7lwhyRY8WWIe8KUai0u7qsxF_BTj4an6vL3QjqZMhDpcbFVtKc3ryL6lnANC-vt3O6TgrT2ymWU',
+  userId: 'karate_morris',
+  accessTokenExpires: 1728058086,
+  iat: 1728054487,
+  exp: 1730646487,
+  jti: '958cdde2-8699-42bd-9b31-d0c8b0a89c14'
+}
+PATHNAME:  /
+TOKEN FOUND OR AUTH API, CONTINUE
+
+
+
+1 successfull request for image with correct token
+- the request was for second image
+
+API: SUCCESS https://image-cdn-ak.spotifycdn.com/image/ab67706c0000bebb353f514b820b0f19337d63a4
+API: END OF GET -----------------------
+ GET /api/spotify/playlist/cover/3AkK2mdsSpwXVdOBvsfmcS 200 in 128ms
+
+-------------
+
+
+
+now the auth function gets called for the page
+
+auth() function called page
+
+-------------
+
+
+
+3 jwt calls, 2 with the correct token, it took some time to fetch the database entry -> finishing the 3 one
+
+10/4/2024, 5:08:08 PM JWT: found account in db {
+  _id: new ObjectId('66e73ec6ad74853f2bb91bc4'),
+  spotify_id: 'karate_morris',
+  access_token: 'BQCWIFMPu7AFxRFe3fAyd8HVMNxMJBBW6RCzpY03RVGEpM-WkOQ-rFo5b_YgEVFGGjwpqj7cXE2p0GMelG0IkvyG8q-3BMlMr7AgYnKs0hIKmVTiYlU6ObCF_uXbCYrW_fsoEqe4tMeTheQ4ZuWl5JPLCs-lS4jsJ0NYlGjnWzhlYEqntzt1yU8l3BQbnRHN4vy9jlm568Y2JXSCQC5yAu9pwzBgjgnDVAjyB9x48WYl18vl-k8rQ7oRJ3Z7hfipCgApKMiNVTMRhSVZcl5s2844gJgEX4p_vi_GITpwLFgSjR81E-SxKg4',
+  refresh_token: 'AQCFNIesZRXdd14NAIq7iWx87SZ_J-i8F4PE40FWca3Lg8wLlpalhFdp7lwhyRY8WWIe8KUai0u7qsxF_BTj4an6vL3QjqZMhDpcbFVtKc3ryL6lnANC-vt3O6TgrT2ymWU',
+  token_expires: 1728058086,
+  __v: 0
+}
+10/4/2024, 5:08:08 PM JWT: db has older or same accessToken
+10/4/2024, 5:08:08 PM JWT: token is still valid BQCWIFMPu7...
+10/4/2024, 5:08:08 PM JWT: using token: BQCWIFMPu7... AQCFNIesZR...
+
+db token was the same so no update is needed
+
+-------------
+
+
+
+4 jwt call, 3 with the correct token
+
+JWT callback at:  10/4/2024, 5:08:08 PM
+DB: Using cached connection
+getting account info for:  karate_morris
+DB: Using cached connection
+searching for user karate_morris
+
+-------------
+
+
+
+4 middleware calls, 3 with the correct token
+
+MIDDLEWARE ACTIVE ===================================================
+TOKEN:  {
+  name: 'karate_morris',
+  email: 'maurice.rio@gmx.de',
+  picture: 'https://i.scdn.co/image/ab67757000003b821f98e5b65389ae5851e831ca',
+  sub: 'karate_morris',
+  accessToken: 'BQCWIFMPu7AFxRFe3fAyd8HVMNxMJBBW6RCzpY03RVGEpM-WkOQ-rFo5b_YgEVFGGjwpqj7cXE2p0GMelG0IkvyG8q-3BMlMr7AgYnKs0hIKmVTiYlU6ObCF_uXbCYrW_fsoEqe4tMeTheQ4ZuWl5JPLCs-lS4jsJ0NYlGjnWzhlYEqntzt1yU8l3BQbnRHN4vy9jlm568Y2JXSCQC5yAu9pwzBgjgnDVAjyB9x48WYl18vl-k8rQ7oRJ3Z7hfipCgApKMiNVTMRhSVZcl5s2844gJgEX4p_vi_GITpwLFgSjR81E-SxKg4',
+  refreshToken: 'AQCFNIesZRXdd14NAIq7iWx87SZ_J-i8F4PE40FWca3Lg8wLlpalhFdp7lwhyRY8WWIe8KUai0u7qsxF_BTj4an6vL3QjqZMhDpcbFVtKc3ryL6lnANC-vt3O6TgrT2ymWU',
+  userId: 'karate_morris',
+  accessTokenExpires: 1728058086,
+  iat: 1728054487,
+  exp: 1730646487,
+  jti: '958cdde2-8699-42bd-9b31-d0c8b0a89c14'
+}
+PATHNAME:  /
+TOKEN FOUND OR AUTH API, CONTINUE
+
+-------------
+
+
+
+2 successfull requests for images with the correct token
+2 calls for the last image 
+
+API: SUCCESS https://image-cdn-ak.spotifycdn.com/image/ab67706c0000bebb8108a954d9069db1dc2a1362
+API: END OF GET -----------------------
+ GET /api/spotify/playlist/cover/0WTiVx8SGpwziNj2xvMlRh 200 in 175ms
+
+-------------
+
+
+ 
+4 jwt call, 3 with the correct token (finishing the 4)
+
+10/4/2024, 5:08:08 PM JWT: found account in db {
+  _id: new ObjectId('66e73ec6ad74853f2bb91bc4'),
+  spotify_id: 'karate_morris',
+  access_token: 'BQCWIFMPu7AFxRFe3fAyd8HVMNxMJBBW6RCzpY03RVGEpM-WkOQ-rFo5b_YgEVFGGjwpqj7cXE2p0GMelG0IkvyG8q-3BMlMr7AgYnKs0hIKmVTiYlU6ObCF_uXbCYrW_fsoEqe4tMeTheQ4ZuWl5JPLCs-lS4jsJ0NYlGjnWzhlYEqntzt1yU8l3BQbnRHN4vy9jlm568Y2JXSCQC5yAu9pwzBgjgnDVAjyB9x48WYl18vl-k8rQ7oRJ3Z7hfipCgApKMiNVTMRhSVZcl5s2844gJgEX4p_vi_GITpwLFgSjR81E-SxKg4',
+  refresh_token: 'AQCFNIesZRXdd14NAIq7iWx87SZ_J-i8F4PE40FWca3Lg8wLlpalhFdp7lwhyRY8WWIe8KUai0u7qsxF_BTj4an6vL3QjqZMhDpcbFVtKc3ryL6lnANC-vt3O6TgrT2ymWU',
+  token_expires: 1728058086,
+  __v: 0
+}
+10/4/2024, 5:08:08 PM JWT: db has older or same accessToken
+10/4/2024, 5:08:08 PM JWT: token is still valid BQCWIFMPu7...
+10/4/2024, 5:08:08 PM JWT: using token: BQCWIFMPu7... AQCFNIesZR...
+
+
+-------------
+
+
+
+2 getting playlists again
+
+DB: Using cached connection
+searching for user karate_morris
+ GET /?_rsc=r3yhw 200 in 170ms
+
+-------------
+
+
+
+auth function gets called for the page
+
+auth() function called page
+
+-------------
+
+
+
+5 jwt call, 4 with the correct token
+
+JWT callback at:  10/4/2024, 5:08:08 PM
+DB: Using cached connection
+getting account info for:  karate_morris
+10/4/2024, 5:08:08 PM JWT: found account in db {
+  _id: new ObjectId('66e73ec6ad74853f2bb91bc4'),
+  spotify_id: 'karate_morris',
+  access_token: 'BQCWIFMPu7AFxRFe3fAyd8HVMNxMJBBW6RCzpY03RVGEpM-WkOQ-rFo5b_YgEVFGGjwpqj7cXE2p0GMelG0IkvyG8q-3BMlMr7AgYnKs0hIKmVTiYlU6ObCF_uXbCYrW_fsoEqe4tMeTheQ4ZuWl5JPLCs-lS4jsJ0NYlGjnWzhlYEqntzt1yU8l3BQbnRHN4vy9jlm568Y2JXSCQC5yAu9pwzBgjgnDVAjyB9x48WYl18vl-k8rQ7oRJ3Z7hfipCgApKMiNVTMRhSVZcl5s2844gJgEX4p_vi_GITpwLFgSjR81E-SxKg4',
+  refresh_token: 'AQCFNIesZRXdd14NAIq7iWx87SZ_J-i8F4PE40FWca3Lg8wLlpalhFdp7lwhyRY8WWIe8KUai0u7qsxF_BTj4an6vL3QjqZMhDpcbFVtKc3ryL6lnANC-vt3O6TgrT2ymWU',
+  token_expires: 1728058086,
+  __v: 0
+}
+10/4/2024, 5:08:08 PM JWT: db has older or same accessToken
+10/4/2024, 5:08:08 PM JWT: token is still valid BQCWIFMPu7...
+10/4/2024, 5:08:08 PM JWT: using token: BQCWIFMPu7... AQCFNIesZR...
+
+-------------
+
+
+
+3 getting playlists again
+
+DB: Using cached connection
+searching for user karate_morris
+ GET /?_rsc=r3yhw 200 in 74ms
+ GET /?_rsc=r3yhw 200 in 58ms
+
+-------------
+
+2 successfull requests for images with the correct token
+this time for the first image
+
+API: SUCCESS https://image-cdn-ak.spotifycdn.com/image/ab67706c0000bebb01041e6317a3227897635291
+API: END OF GET -----------------------
+ GET /api/spotify/playlist/cover/1EC5GJHy9zw8YOpUmlqrAd 200 in 255ms
+
+
+
+=====> now its silent, no more requests, no more logs
+
+in conclusion:
+
+jwt calls ==========================        
+with corect token:  4
+with wrong token:   1
+total:              5
+
+middlware calls ====================
+with correct token: 3
+with wrong token:   1
+total:              4
+
+api calls ==========================
+with correct token:  3
+with wrong token:    3
+total:               6
+
+
+
+
+
+
+
+JWT callback at:  10/5/2024, 6:19:54 PM
+DB: Using cached connection
+getting account info for:  karate_morris
+API - error { message: 'Unauthorized', status: 401 }
+API: END OF GET -----------------------
+ GET /api/spotify/playlist/cover/3AkK2mdsSpwXVdOBvsfmcS 401 in 245ms
+API - error { message: 'Unauthorized', status: 401 }
+API: END OF GET -----------------------
+ GET /api/spotify/playlist/cover/1EC5GJHy9zw8YOpUmlqrAd 401 in 249ms
+API - error { message: 'Unauthorized', status: 401 }
+API: END OF GET -----------------------
+ GET /api/spotify/playlist/cover/0WTiVx8SGpwziNj2xvMlRh 401 in 252ms
+10/5/2024, 6:19:54 PM JWT: found account in db {
+  _id: new ObjectId('66e73ec6ad74853f2bb91bc4'),
+  spotify_id: 'karate_morris',
+  access_token: 'BQBi6ftUiJBtBOcRRTL0PCekhyu61IjFb5cuLu5ACGqvGP3ryveUGFaT38ADqJ6c8Tz5LbfThnAlE8bXSjihOckS1C3eoVTYxSxZc873QhStyRoaofufx1o6whkEj_Ocb2vgHTMuOsjEXWEfqK43cAKl4w7n-mmwUkOnxzD392d1QpbSaK6nkdcykr8eDwnxDPsZ6iTYD3JLMG4JHUFCy8X8ag4QxTBHhhRHR3VeJdq1W6CujGd6mH89NIn-OsKQDLB0RcydjMwgyrbBvDHDI7BgTKI9urC6XhhmrlKWLpBdTSUEnQoC_RQ',
+  refresh_token: 'AQCFNIesZRXdd14NAIq7iWx87SZ_J-i8F4PE40FWca3Lg8wLlpalhFdp7lwhyRY8WWIe8KUai0u7qsxF_BTj4an6vL3QjqZMhDpcbFVtKc3ryL6lnANC-vt3O6TgrT2ymWU',
+  token_expires: 1728087142,
+  __v: 0
+}
+10/5/2024, 6:19:54 PM JWT: db has newer accessToken. Old token: BQCWIFMPu7...
+10/5/2024, 6:19:54 PM JWT: new Token BQBi6ftUiJ...
+10/5/2024, 6:19:54 PM JWT: old token EXPIRED BQBi6ftUiJ...
+-> refreshing token BQBi6ftUiJBtBOcRRTL0PCekhyu61IjFb5cuLu5ACGqvGP3ryveUGFaT38ADqJ6c8Tz5LbfThnAlE8bXSjihOckS1C3eoVTYxSxZc873QhStyRoaofufx1o6whkEj_Ocb2vgHTMuOsjEXWEfqK43cAKl4w7n-mmwUkOnxzD392d1QpbSaK6nkdcykr8eDwnxDPsZ6iTYD3JLMG4JHUFCy8X8ag4QxTBHhhRHR3VeJdq1W6CujGd6mH89NIn-OsKQDLB0RcydjMwgyrbBvDHDI7BgTKI9urC6XhhmrlKWLpBdTSUEnQoC_RQ
+-> refresh success =  true
+-> new token =  {
+  access_token: 'BQBt8fQiZkJ9OCHADRCOY04mK_kPGd_QYZZVl6Ftssr-ZOdlm0_ZA_Z7XqXgseiK23HTRFtev9u38GbkzBKU5Lgca_Ewtw2ufeNvsoVLOBG7Ia_bZYl8uM9sluEpNc6OfTNQYyEiXnBzarxlQvDlahRifxdMIIPSLtWWr75Fl4gegVDaBYFRbKpw24C8qr3d-wQluzQ28A9zNpRgWYIipgTRIEhJpkum0zy_k6uECIxSFmzG3ia2hShd2w1TerZderCOgJMzVEuve4pcx10weFn9_G_Q4YsWdwGbixdflOFc-IMNjiXDe7Y',
+  token_type: 'Bearer',
+  expires_in: 3600,
+  scope: 'playlist-read-private playlist-read-collaborative ugc-image-upload playlist-modify-private user-read-email user-read-private app-remote-control user-modify-playback-state user-library-read playlist-modify-public user-read-playback-state user-read-currently-playing user-read-recently-played user-read-playback-position user-top-read'
+}
+10/5/2024, 6:19:54 PM JWT: new token BQBt8fQiZk...
+10/5/2024, 6:19:54 PM JWT: jwt more recent than db, updating db token
+-> updating account token in db from BQBi6ftUiJBtBOcRRTL0PCekhyu61IjFb5cuLu5ACGqvGP3ryveUGFaT38ADqJ6c8Tz5LbfThnAlE8bXSjihOckS1C3eoVTYxSxZc873QhStyRoaofufx1o6whkEj_Ocb2vgHTMuOsjEXWEfqK43cAKl4w7n-mmwUkOnxzD392d1QpbSaK6nkdcykr8eDwnxDPsZ6iTYD3JLMG4JHUFCy8X8ag4QxTBHhhRHR3VeJdq1W6CujGd6mH89NIn-OsKQDLB0RcydjMwgyrbBvDHDI7BgTKI9urC6XhhmrlKWLpBdTSUEnQoC_RQ
+-> to BQBt8fQiZkJ9OCHADRCOY04mK_kPGd_QYZZVl6Ftssr-ZOdlm0_ZA_Z7XqXgseiK23HTRFtev9u38GbkzBKU5Lgca_Ewtw2ufeNvsoVLOBG7Ia_bZYl8uM9sluEpNc6OfTNQYyEiXnBzarxlQvDlahRifxdMIIPSLtWWr75Fl4gegVDaBYFRbKpw24C8qr3d-wQluzQ28A9zNpRgWYIipgTRIEhJpkum0zy_k6uECIxSFmzG3ia2hShd2w1TerZderCOgJMzVEuve4pcx10weFn9_G_Q4YsWdwGbixdflOFc-IMNjiXDe7Y
+10/5/2024, 6:19:54 PM JWT: using token: BQBt8fQiZk... AQCFNIesZR...
+ GET /api/auth/session 200 in 630ms
+MIDDLEWARE ACTIVE ===================================================
+TOKEN:  {
+  name: 'karate_morris',
+  email: 'maurice.rio@gmx.de',
+  picture: 'https://i.scdn.co/image/ab67757000003b821f98e5b65389ae5851e831ca',
+  sub: 'karate_morris',
+  accessToken: 'BQBt8fQiZkJ9OCHADRCOY04mK_kPGd_QYZZVl6Ftssr-ZOdlm0_ZA_Z7XqXgseiK23HTRFtev9u38GbkzBKU5Lgca_Ewtw2ufeNvsoVLOBG7Ia_bZYl8uM9sluEpNc6OfTNQYyEiXnBzarxlQvDlahRifxdMIIPSLtWWr75Fl4gegVDaBYFRbKpw24C8qr3d-wQluzQ28A9zNpRgWYIipgTRIEhJpkum0zy_k6uECIxSFmzG3ia2hShd2w1TerZderCOgJMzVEuve4pcx10weFn9_G_Q4YsWdwGbixdflOFc-IMNjiXDe7Y',
+  refreshToken: 'AQCFNIesZRXdd14NAIq7iWx87SZ_J-i8F4PE40FWca3Lg8wLlpalhFdp7lwhyRY8WWIe8KUai0u7qsxF_BTj4an6vL3QjqZMhDpcbFVtKc3ryL6lnANC-vt3O6TgrT2ymWU',
+  userId: 'karate_morris',
+  accessTokenExpires: 1728148794,
+  iat: 1728145194,
+  exp: 1730737194,
+  jti: 'f062b429-3414-4e48-99e9-abec44c2ecb8'
+}
+PATHNAME:  /
+TOKEN FOUND OR AUTH API, CONTINUE
+JWT callback at:  10/5/2024, 6:19:54 PM
+DB: Using cached connection
+getting account info for:  karate_morris
+MIDDLEWARE ACTIVE ===================================================
+TOKEN:  {
+  name: 'karate_morris',
+  email: 'maurice.rio@gmx.de',
+  picture: 'https://i.scdn.co/image/ab67757000003b821f98e5b65389ae5851e831ca',
+  sub: 'karate_morris',
+  accessToken: 'BQBt8fQiZkJ9OCHADRCOY04mK_kPGd_QYZZVl6Ftssr-ZOdlm0_ZA_Z7XqXgseiK23HTRFtev9u38GbkzBKU5Lgca_Ewtw2ufeNvsoVLOBG7Ia_bZYl8uM9sluEpNc6OfTNQYyEiXnBzarxlQvDlahRifxdMIIPSLtWWr75Fl4gegVDaBYFRbKpw24C8qr3d-wQluzQ28A9zNpRgWYIipgTRIEhJpkum0zy_k6uECIxSFmzG3ia2hShd2w1TerZderCOgJMzVEuve4pcx10weFn9_G_Q4YsWdwGbixdflOFc-IMNjiXDe7Y',
+  refreshToken: 'AQCFNIesZRXdd14NAIq7iWx87SZ_J-i8F4PE40FWca3Lg8wLlpalhFdp7lwhyRY8WWIe8KUai0u7qsxF_BTj4an6vL3QjqZMhDpcbFVtKc3ryL6lnANC-vt3O6TgrT2ymWU',
+  userId: 'karate_morris',
+  accessTokenExpires: 1728148794,
+  iat: 1728145194,
+  exp: 1730737194,
+  jti: 'f062b429-3414-4e48-99e9-abec44c2ecb8'
+}
+PATHNAME:  /
+TOKEN FOUND OR AUTH API, CONTINUE
+JWT callback at:  10/5/2024, 6:19:54 PM
+DB: Using cached connection
+getting account info for:  karate_morris
+DB: Using cached connection
+searching for user karate_morris
+MIDDLEWARE ACTIVE ===================================================
+TOKEN:  {
+  name: 'karate_morris',
+  email: 'maurice.rio@gmx.de',
+  picture: 'https://i.scdn.co/image/ab67757000003b821f98e5b65389ae5851e831ca',
+  sub: 'karate_morris',
+  accessToken: 'BQBt8fQiZkJ9OCHADRCOY04mK_kPGd_QYZZVl6Ftssr-ZOdlm0_ZA_Z7XqXgseiK23HTRFtev9u38GbkzBKU5Lgca_Ewtw2ufeNvsoVLOBG7Ia_bZYl8uM9sluEpNc6OfTNQYyEiXnBzarxlQvDlahRifxdMIIPSLtWWr75Fl4gegVDaBYFRbKpw24C8qr3d-wQluzQ28A9zNpRgWYIipgTRIEhJpkum0zy_k6uECIxSFmzG3ia2hShd2w1TerZderCOgJMzVEuve4pcx10weFn9_G_Q4YsWdwGbixdflOFc-IMNjiXDe7Y',
+  refreshToken: 'AQCFNIesZRXdd14NAIq7iWx87SZ_J-i8F4PE40FWca3Lg8wLlpalhFdp7lwhyRY8WWIe8KUai0u7qsxF_BTj4an6vL3QjqZMhDpcbFVtKc3ryL6lnANC-vt3O6TgrT2ymWU',
+  userId: 'karate_morris',
+  accessTokenExpires: 1728148794,
+  iat: 1728145194,
+  exp: 1730737194,
+  jti: 'f062b429-3414-4e48-99e9-abec44c2ecb8'
+}
+PATHNAME:  /
+TOKEN FOUND OR AUTH API, CONTINUE
+auth() function called page
+JWT callback at:  10/5/2024, 6:19:54 PM
+DB: Using cached connection
+getting account info for:  karate_morris
+10/5/2024, 6:19:54 PM JWT: found account in db {
+  _id: new ObjectId('66e73ec6ad74853f2bb91bc4'),
+  spotify_id: 'karate_morris',
+  access_token: 'BQBt8fQiZkJ9OCHADRCOY04mK_kPGd_QYZZVl6Ftssr-ZOdlm0_ZA_Z7XqXgseiK23HTRFtev9u38GbkzBKU5Lgca_Ewtw2ufeNvsoVLOBG7Ia_bZYl8uM9sluEpNc6OfTNQYyEiXnBzarxlQvDlahRifxdMIIPSLtWWr75Fl4gegVDaBYFRbKpw24C8qr3d-wQluzQ28A9zNpRgWYIipgTRIEhJpkum0zy_k6uECIxSFmzG3ia2hShd2w1TerZderCOgJMzVEuve4pcx10weFn9_G_Q4YsWdwGbixdflOFc-IMNjiXDe7Y',
+  refresh_token: 'AQCFNIesZRXdd14NAIq7iWx87SZ_J-i8F4PE40FWca3Lg8wLlpalhFdp7lwhyRY8WWIe8KUai0u7qsxF_BTj4an6vL3QjqZMhDpcbFVtKc3ryL6lnANC-vt3O6TgrT2ymWU',
+  token_expires: 1728148794,
+  __v: 0
+}
+10/5/2024, 6:19:54 PM JWT: db has older or same accessToken
+10/5/2024, 6:19:54 PM JWT: token is still valid BQBt8fQiZk...
+10/5/2024, 6:19:54 PM JWT: using token: BQBt8fQiZk... AQCFNIesZR...
+DB: Using cached connection
+searching for user karate_morris
+ GET /?_rsc=r3yhw 200 in 62ms
+API: SUCCESS https://image-cdn-ak.spotifycdn.com/image/ab67706c0000bebb353f514b820b0f19337d63a4
+API: END OF GET -----------------------
+ GET /api/spotify/playlist/cover/3AkK2mdsSpwXVdOBvsfmcS 200 in 180ms
+API: SUCCESS https://image-cdn-ak.spotifycdn.com/image/ab67706c0000bebb01041e6317a3227897635291
+API: END OF GET -----------------------
+ GET /api/spotify/playlist/cover/1EC5GJHy9zw8YOpUmlqrAd 200 in 162ms
+API: SUCCESS https://image-cdn-ak.spotifycdn.com/image/ab67706c0000bebb8108a954d9069db1dc2a1362
+API: END OF GET -----------------------
+ GET /api/spotify/playlist/cover/0WTiVx8SGpwziNj2xvMlRh 200 in 188ms
+ GET /?_rsc=r3yhw 200 in 262ms
+10/5/2024, 6:19:54 PM JWT: found account in db {
+  _id: new ObjectId('66e73ec6ad74853f2bb91bc4'),
+  spotify_id: 'karate_morris',
+  access_token: 'BQBt8fQiZkJ9OCHADRCOY04mK_kPGd_QYZZVl6Ftssr-ZOdlm0_ZA_Z7XqXgseiK23HTRFtev9u38GbkzBKU5Lgca_Ewtw2ufeNvsoVLOBG7Ia_bZYl8uM9sluEpNc6OfTNQYyEiXnBzarxlQvDlahRifxdMIIPSLtWWr75Fl4gegVDaBYFRbKpw24C8qr3d-wQluzQ28A9zNpRgWYIipgTRIEhJpkum0zy_k6uECIxSFmzG3ia2hShd2w1TerZderCOgJMzVEuve4pcx10weFn9_G_Q4YsWdwGbixdflOFc-IMNjiXDe7Y',
+  refresh_token: 'AQCFNIesZRXdd14NAIq7iWx87SZ_J-i8F4PE40FWca3Lg8wLlpalhFdp7lwhyRY8WWIe8KUai0u7qsxF_BTj4an6vL3QjqZMhDpcbFVtKc3ryL6lnANC-vt3O6TgrT2ymWU',
+  token_expires: 1728148794,
+  __v: 0
+}
+10/5/2024, 6:19:54 PM JWT: db has older or same accessToken
+10/5/2024, 6:19:54 PM JWT: token is still valid BQBt8fQiZk...
+10/5/2024, 6:19:54 PM JWT: using token: BQBt8fQiZk... AQCFNIesZR...
+DB: Using cached connection

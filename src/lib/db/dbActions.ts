@@ -99,6 +99,7 @@ export async function dbRegisterUser(
 export async function dbGetAccountByUserId(userId: string): Promise<DbRes<MongoAccount>> {
     await connectMongoDB();
     try {
+        debugLog("getting account info for: ", userId);
         const account = await AccountModel.findOne({ spotify_id: userId });
         return { data: account as MongoAccount, error: null };
     } catch (error: any) {

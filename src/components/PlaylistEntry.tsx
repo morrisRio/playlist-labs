@@ -96,6 +96,7 @@ interface PlaylistProps {
 function PlaylistEntry({ playlist }: PlaylistProps) {
     //TODO: migration auth(req, res) call
     const router = useRouter();
+
     const { playlist_id, seeds } = playlist;
     const { name, frequency, amount } = playlist.preferences;
 
@@ -105,8 +106,10 @@ function PlaylistEntry({ playlist }: PlaylistProps) {
                 if (!res.ok) {
                     if (res.status === 401) {
                         console.log("401 error");
-                        router.refresh();
-                        mutate(`/api/spotify/playlist/cover/${playlist_id}`);
+                        setTimeout(() => {
+                            router.refresh();
+                            mutate(`/api/spotify/playlist/cover/${playlist_id}`);
+                        }, 500);
                     }
                     throw new Error("response !ok: " + res.status);
                 }
@@ -116,6 +119,7 @@ function PlaylistEntry({ playlist }: PlaylistProps) {
                 return "fallback";
             }
         });
+
     // const options = {
     //     revalidateOnMount: true,
     // };
