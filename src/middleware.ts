@@ -7,14 +7,14 @@ import { getAppUrl } from "@/lib/utils";
 export async function middleware(req: NextRequest) {
     setDebugMode(true);
 
-    debugLog("MIDDLEWARE ACTIVE =================================================== ");
+    debugLog("=============================================== MIDDLEWARE ACTIVE");
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-    debugLog("TOKEN: ", token);
+    debugLog("TOKEN in MIDDLEWARE: ", token?.accessToken);
     const { pathname } = req.nextUrl;
     debugLog("PATHNAME: ", pathname);
 
     if (pathname.includes("/api/auth") || token) {
-        debugLog("TOKEN FOUND OR AUTH API, CONTINUE");
+        debugLog("===============================TOKEN FOUND OR AUTH API, CONTINUE");
         return NextResponse.next();
     }
 

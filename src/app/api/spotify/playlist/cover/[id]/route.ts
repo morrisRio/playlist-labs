@@ -12,17 +12,25 @@ export async function GET(
         params: { id: string };
     }
 ): Promise<NextResponse> {
-    setDebugMode(false);
-    debugLog("API: GETTING THE PLAYLIST COVER IMAGE -----------------------");
+    setDebugMode(true);
+
+    debugLog("API: GETTING THE PLAYLIST COVER IMAGE");
     const token = await getToken({ req });
     if (!token) {
         console.error("No token found");
         debugLog("API: END OF GET-----------------------");
         return NextResponse.json({ error: "No token found" }, { status: 401 });
     }
-    debugLog("API: GET - token from req:", token?.accessToken);
 
     const { accessToken } = token;
+    debugLog("API: GET - TOKEN FROM REQ:", accessToken);
+    //This is the debug routine for testing the error handling
+    if (accessToken === "error1")
+        return NextResponse.json("https://upload.wikimedia.org/wikipedia/commons/1/1f/SMirC-thumbsup.svg", {
+            status: 200,
+        });
+    return NextResponse.json({ error: "Wrong Token: " + accessToken }, { status: 401 });
+
     const playlistId = params.id;
 
     const validatePlaylistImage = (data: any) => {
@@ -36,7 +44,7 @@ export async function GET(
         `https://api.spotify.com/v1/playlists/${playlistId}/images`,
         accessToken,
         validatePlaylistImage,
-        false // Enable debug mode
+        true
     );
 
     if (imageResponseData.error) {

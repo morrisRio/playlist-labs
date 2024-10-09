@@ -9,6 +9,7 @@ import { dbDeleteUser } from "@/lib/db/dbActions";
 
 const Profile = () => {
     const { data: session } = useSession();
+
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [showInfoModal, setShowInfoModal] = useState(false);
 

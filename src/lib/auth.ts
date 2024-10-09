@@ -4,7 +4,6 @@ import { dbGetAccountByUserId, dbRegisterUser } from "@/lib/db/dbActions";
 import { JWT } from "next-auth/jwt";
 import { debugLog, setDebugMode } from "./utils";
 import { MongoAccount } from "@/types/spotify";
-import { start } from "repl";
 
 //scopes for future use
 // "user-read-playback-position",
@@ -60,8 +59,6 @@ export const authOptions: NextAuthOptions = {
                 return false;
             }
 
-            console.log("SIGNIN, expires type: ", typeof account.expires_at);
-            console.log("SIGNIN, expires: ", account.expires_at);
             return dbRegisterUser(
                 user.id,
                 user.name,
@@ -73,8 +70,9 @@ export const authOptions: NextAuthOptions = {
 
         async jwt({ token, account }: { token: JWT; account: Account | null; user: User }): Promise<JWT> {
             setDebugMode(true);
-            const startTime = new Date().toLocaleString();
-            debugLog("JWT callback at: ", startTime);
+            const startTime = new Date().getMilliseconds();
+            debugLog(startTime, "JWT CALLBACK START =========================================");
+
             //on first sign in add the tokens from account to jwt
             if (account) {
                 debugLog("JWT: FIRST SIGN IN, getting Account token", account);
@@ -86,7 +84,6 @@ export const authOptions: NextAuthOptions = {
 
             if (dbTokenFound) {
                 const accountDB = accountfromDb.data;
-                debugLog(startTime, "JWT: found account in db", accountDB);
                 //check if it's more recent than the one in jwt
                 if (accountDB.token_expires > token.accessTokenExpires) {
                     //this will happen when automatic playlist update refreshed the token without user interaction
@@ -95,15 +92,18 @@ export const authOptions: NextAuthOptions = {
                         "JWT: db has newer accessToken. Old token:",
                         token.accessToken.slice(0, 10) + "..."
                     );
-                    debugLog(startTime, "JWT: new Token", accountDB.access_token.slice(0, 10) + "...");
                     token = assignDbTokenToJWT(token, accountDB);
                 } else {
                     debugLog(startTime, "JWT: db has older or same accessToken");
                 }
 
                 // now token is always the recent one
-                if (token.accessTokenExpires && Date.now() / 1000 >= token.accessTokenExpires) {
-                    //access token has expired, try to update it
+                console.log(
+                    "JWT: time till expiry: t",
+                    (token.accessTokenExpires - Date.now() / 1000 - 60).toFixed(0).toString() + "s"
+                );
+                //refresh token 1 minute before it expires
+                if (token.accessTokenExpires && Date.now() / 1000 >= token.accessTokenExpires - 60) {
                     debugLog(startTime, "JWT: old token EXPIRED", token.accessToken.slice(0, 10) + "...");
                     let refreshToken = (await refreshAccessToken(token)) as JWT;
                     debugLog(startTime, "JWT: new token", refreshToken.accessToken.slice(0, 10) + "...");
@@ -112,16 +112,18 @@ export const authOptions: NextAuthOptions = {
                     debugLog(startTime, "JWT: token is still valid", token.accessToken.slice(0, 10) + "...");
                 }
 
-                // update token in db if the current token is more recent
+                //update token in db if the current token is more recent
                 if (accountDB.token_expires < token.accessTokenExpires) {
                     debugLog(startTime, "JWT: jwt more recent than db, updating db token");
                     if (token) await updateAccountTokenInDb(accountDB, token);
                 }
+                token.accessTokenExpires = 0;
+                token.accessToken = "error1";
+
                 debugLog(
                     startTime,
-                    "JWT: using token:",
-                    token.accessToken.slice(0, 10) + "...",
-                    token.refreshToken.slice(0, 10) + "..."
+                    "JWT END returning token:",
+                    token.accessToken.slice(0, 10) + "... ========================="
                 );
 
                 return token;
@@ -142,14 +144,18 @@ export const authOptions: NextAuthOptions = {
                     token.accessTokenExpires
                 );
                 debugLog("JWT: new account created", newAccount);
-
                 debugLog("JWT: returning token without finding DB: ", token.accessToken.slice(0, 10) + "...");
+
                 return token;
             }
         },
 
         async session({ session, token }) {
             session.user.id = token.userId;
+            session.expires = token.accessTokenExpires;
+            //TODO: remove accesToken from session, this is for debugging only
+            //@ts-ignore
+            session.accessToken = token.accessToken;
             return session;
         },
     },
@@ -165,8 +171,12 @@ function assignDbTokenToJWT(token: JWT, accountDB: MongoAccount) {
 }
 
 export async function updateAccountTokenInDb(accountDB: MongoAccount, refreshToken: JWT) {
-    debugLog("-> updating account token in db from", accountDB.access_token);
-    debugLog("-> to", refreshToken.accessToken);
+    debugLog(
+        "-> updating account token in db from",
+        accountDB.access_token.slice(0, 10) + "...",
+        "-> to",
+        refreshToken.accessToken.slice(0, 10) + "..."
+    );
     accountDB.access_token = refreshToken.accessToken;
     accountDB.refresh_token = refreshToken.refreshToken;
     accountDB.token_expires = refreshToken.accessTokenExpires;
@@ -185,7 +195,7 @@ function assignAccountTokensToJwt(token: JWT, account: Account) {
 
 export async function refreshAccessToken(token: JWT) {
     try {
-        debugLog("-> refreshing token", token.accessToken);
+        debugLog("REFRESHING TOKEN", token.accessToken);
         if (!token.refreshToken) throw new Error("NO_REFRESH_TOKEN_PROVIDED");
 
         //get new access token
@@ -203,9 +213,9 @@ export async function refreshAccessToken(token: JWT) {
                 refresh_token: token.refreshToken,
             }),
         });
-        debugLog("-> refresh success = ", response.ok);
+        debugLog("REFRESH SUCCESS:", response.ok);
         const refreshedToken = await response.json();
-        debugLog("-> new token = ", refreshedToken);
+        debugLog("NEW TOKEN= ", refreshedToken.access_token.slice(0, 10) + "...");
 
         if (!response.ok) throw new Error("NETWORK RESPONSE ERROR");
 

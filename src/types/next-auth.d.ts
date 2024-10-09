@@ -14,7 +14,7 @@ declare module "next-auth" {
             email?: string | null;
             image?: string | null;
         };
-        expires_in: string;
+        expires: number;
     }
 }
 

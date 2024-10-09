@@ -25,7 +25,6 @@ if (!cached) {
 
 export const connectMongoDB = async () => {
     if (cached.conn) {
-        debugLog("DB: Using cached connection");
         return cached.conn;
     }
 
@@ -49,6 +48,5 @@ export const connectMongoDB = async () => {
         cached.promise = null;
         throw e;
     }
-    debugLog("DB: Using new connection");
     return cached.conn;
 };
