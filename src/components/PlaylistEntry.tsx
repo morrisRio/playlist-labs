@@ -1,8 +1,5 @@
 "use client";
 
-import useSWR, { Fetcher, SWRConfiguration, Revalidator, RevalidatorOptions } from "swr";
-import { useSession } from "next-auth/react";
-
 import { PlaylistData } from "@/types/spotify";
 import Link from "next/link";
 import SmartMarquee from "@/components/SmartMarquee";
@@ -14,8 +11,7 @@ import Lottie from "lottie-react";
 import Loading from "@/lib/lotties/loading.json";
 import Logo from "../../public/logo.svg";
 
-import { useState } from "react";
-import { useSWRConfig } from "swr";
+import useSwrTokenRefresh from "@/lib/hooks/useSwrTokenRefresh";
 interface PlaylistProps {
     playlist: PlaylistData;
 }
@@ -24,62 +20,12 @@ function PlaylistEntry({ playlist }: PlaylistProps) {
     const { playlist_id, seeds } = playlist;
     const { name, frequency, amount } = playlist.preferences;
 
-    const { data: session, update: updateSession } = useSession();
-
-    //@ts-ignore
-    if (session && session.accessToken) {
-        //@ts-ignore
-        console.log("Token in client component: ", session.accessToken.slice(0, 10) + "...");
-    }
-
-    const fetchWithToken: Fetcher<string> = (url: string) =>
-        fetch(url).then(async (res) => {
-            //double failsafe if the token was updated in the backend an client sill uses old token
-            if (!res.ok) {
-                const errorRes = await res.json();
-                const error = new Error("Error on fetch");
-                //@ts-ignore
-                error.info = errorRes;
-                //@ts-ignore
-                error.status = res.status;
-                console.error("Error fetching cover image:", errorRes);
-                throw error;
-            }
-            const result = await res.json();
-            console.log("Got it:", result);
-            return result;
-        });
-
-    const options: SWRConfiguration = {
-        revalidateOnMount: true,
-        onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
-            (async () => {
-                console.log("retrying", error, retryCount);
-                if (error.status === 404) {
-                    console.log("Resource not found: ", error.message);
-                    return;
-                }
-                if (error.status === 401) {
-                    console.log("Unauthorized, trying to refresh");
-                    await updateSession();
-                }
-
-                if (retryCount >= 4) {
-                    return;
-                }
-                revalidate({ retryCount });
-            })();
-        },
-    };
-
     const {
         data: coverUrl,
         error,
         isLoading,
-    } = useSWR(`/api/spotify/playlist/cover/${playlist_id}`, fetchWithToken, options);
-    if (error) {
-        console.log("Error getting cover image:", error);
-    }
+    } = useSwrTokenRefresh<string>(`/api/spotify/playlist/cover/${playlist_id}`);
+
     return (
         <Link href={`/pages/edit-playlist/${playlist_id}`}>
             <div className="flex gap-4 items-center w-full bg-ui-900 border border-ui-700 rounded-lg">

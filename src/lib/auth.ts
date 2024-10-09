@@ -118,7 +118,7 @@ export const authOptions: NextAuthOptions = {
                     if (token) await updateAccountTokenInDb(accountDB, token);
                 }
                 token.accessTokenExpires = 0;
-                token.accessToken = "error3";
+                token.accessToken = "error4";
 
                 debugLog(
                     startTime,
