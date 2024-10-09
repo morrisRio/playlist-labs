@@ -25,7 +25,7 @@ export async function GET(
     const { accessToken } = token;
     debugLog("API: GET - TOKEN FROM REQ:", accessToken);
     //This is the debug routine for testing the error handling
-    if (accessToken === "error1")
+    if (accessToken === "error3")
         return NextResponse.json("https://upload.wikimedia.org/wikipedia/commons/1/1f/SMirC-thumbsup.svg", {
             status: 200,
         });
