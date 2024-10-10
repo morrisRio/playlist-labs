@@ -54,8 +54,6 @@ export const useSubmitCase = ({
         [preferences, initialState.preferences]
     );
 
-    console.log("settingsToBeSaved", settingsToBeSaved);
-
     const settingsToBeApplied = useMemo(
         () =>
             hasChanged(
@@ -72,9 +70,7 @@ export const useSubmitCase = ({
             ),
         [preferences, initialState.preferences, seeds, rules]
     );
-    console.log("settingsToBeApplied", settingsToBeApplied);
 
-    // const getSubmitCase = useCallback((): SubmitCase => {
     const submitCases = {
         regenerate: {
             //if the playlist already exists
@@ -135,8 +131,6 @@ export const useSubmitCase = ({
     else if (settingsToBeApplied) submitCase = submitCases.applyChanges;
     else if (settingsToBeSaved) submitCase = submitCases.saveChanges;
     else submitCase = submitCases.regenerate;
-
-    console.log("submitCase", submitCase);
 
     return submitCase;
 };

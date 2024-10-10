@@ -1,9 +1,10 @@
 import useSWR, { Fetcher, SWRConfiguration, SWRResponse } from "swr";
 import { useSession } from "next-auth/react";
 
-export function useSpotifyFetch<T>(url: string): SWRResponse<T, Error> {
+export function useSwrTokenRefresh<T>(url: string | null): SWRResponse<T, Error> {
     const { data: session, update: updateSession } = useSession();
 
+    //TODO: remove accesToken from session, this is for debugging only
     //@ts-ignore
     if (session && session.accessToken) {
         //@ts-ignore
@@ -47,4 +48,4 @@ export function useSpotifyFetch<T>(url: string): SWRResponse<T, Error> {
     return useSWR<T>(url, fetcher, options);
 }
 
-export default useSpotifyFetch;
+export default useSwrTokenRefresh;

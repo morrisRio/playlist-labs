@@ -3,6 +3,7 @@ import { PlaylistData } from "@/types/spotify";
 import PlaylistCreator from "@/components/PlaylistCreator/PlaylistCreator";
 import { dbGetOnePlaylistData } from "@/lib/db/dbActions";
 import { redirect } from "next/navigation";
+import ClientSessionProvider from "@/components/ClientSessionProvider";
 
 async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
     const { playlist_id } = params;
@@ -33,9 +34,9 @@ async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
                 </div>
             )}
             {playlistData && (
-                <>
+                <ClientSessionProvider session={session}>
                     <PlaylistCreator pageTitle="Edit Playlist" playlist={playlistData}></PlaylistCreator>)
-                </>
+                </ClientSessionProvider>
             )}
         </div>
     );

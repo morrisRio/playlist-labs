@@ -1,17 +1,6 @@
 "use client";
-import {
-    MdChevronLeft,
-    MdModeEdit,
-    MdPalette,
-    MdOpenInNew,
-    MdShuffle,
-    MdOutlineDelete,
-    MdRefresh,
-} from "react-icons/md";
-import { BsStars } from "react-icons/bs";
-import { AiOutlineSave } from "react-icons/ai";
+import { MdChevronLeft, MdModeEdit, MdPalette, MdOpenInNew, MdOutlineDelete, MdRefresh } from "react-icons/md";
 import { FormEvent, useEffect, useRef, useState } from "react";
-import useSWR, { Fetcher } from "swr";
 import { getCssHueGradient } from "@/lib/utils";
 
 import Link from "next/link";
@@ -21,6 +10,7 @@ import GradientModal from "@/components/GradientModal";
 import ContextMenu from "@/components/Context";
 import UniModal from "@/components/UniModal";
 import { useHeaderState } from "@/lib/hooks/useHeaderState";
+import useSwrTokenRefresh from "@/lib/hooks/useSwrTokenRefresh";
 
 import { dbDeletePlaylist } from "@/lib/db/dbActions";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
@@ -76,13 +66,12 @@ function PlaylistHeader({
         router.refresh();
     };
 
-    const fetcher: Fetcher<string> = (url: string) => fetch(url).then((res) => res.json());
-
     const {
         data: coverUrl,
         error,
         isLoading,
-    } = useSWR(playlist_id ? `/api/spotify/playlist/cover/${playlist_id}` : null, fetcher, { revalidateOnMount: true });
+    } = useSwrTokenRefresh(playlist_id ? `/api/spotify/playlist/cover/${playlist_id}` : null);
+
     const [bgImage, setBgImage] = useState<string>(
         hue !== undefined ? getCssHueGradient(hue) : isLoading || error ? "" : coverUrl ? `url(${coverUrl})` : ""
     );
@@ -102,6 +91,7 @@ function PlaylistHeader({
     return (
         <>
             <header ref={headerRef} className="sticky top-0 z-40">
+                {/* headerBg */}
                 <div className="absolute inset-0 overflow-hidden rounded-b-lg">
                     <div className="w-full aspect-square" style={bgStyle}>
                         <div className="absolute inset-0" style={{ backdropFilter: `blur(64px)` }}></div>

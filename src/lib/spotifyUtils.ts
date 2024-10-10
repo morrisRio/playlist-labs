@@ -346,7 +346,7 @@ interface MongoRule {
  * @returns An array of Rule objects with matched rule names and corresponding values.
  */
 export const completeRules = (rules: MongoRule[]): Rule[] => {
-    setDebugMode(true);
+    setDebugMode(false);
     if (rules.length === 0) {
         debugLog("returning empty rules array");
         return [] as Rule[];

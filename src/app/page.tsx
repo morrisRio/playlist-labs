@@ -9,7 +9,7 @@ import Logo from "../../public/logo-small-v2.svg";
 import { auth } from "@/lib/serverUtils";
 import { redirect } from "next/navigation";
 import { dbGetUsersPlaylists } from "@/lib/db/dbActions";
-import SessionProvider from "../components/SessionProvider";
+import ClientSessionProvider from "@/components/ClientSessionProvider";
 
 export default async function Home() {
     let playlistData: PlaylistData[] | null = null;
@@ -27,7 +27,7 @@ export default async function Home() {
 
     return (
         <div className="min-h-full w-full p-4 flex flex-col gap-5">
-            <SessionProvider session={session}>
+            <ClientSessionProvider session={session}>
                 <div className="flex justify-between gap-2 mt-8 items-center">
                     <Logo className="w-4 h-4 -mb-1"></Logo>
                     <h3 className="font-normal text-themetext-nerfed flex-grow">playlistLabs</h3>
@@ -60,7 +60,7 @@ export default async function Home() {
                             </p>
                         </div>
                     ))}
-            </SessionProvider>
+            </ClientSessionProvider>
         </div>
     );
 }

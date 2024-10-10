@@ -12,6 +12,7 @@ import Loading from "@/lib/lotties/loading.json";
 import Logo from "../../public/logo.svg";
 
 import useSwrTokenRefresh from "@/lib/hooks/useSwrTokenRefresh";
+
 interface PlaylistProps {
     playlist: PlaylistData;
 }
@@ -30,15 +31,9 @@ function PlaylistEntry({ playlist }: PlaylistProps) {
         <Link href={`/pages/edit-playlist/${playlist_id}`}>
             <div className="flex gap-4 items-center w-full bg-ui-900 border border-ui-700 rounded-lg">
                 {coverUrl ? (
-                    coverUrl === "fallback" ? (
-                        <div className="size-24 bg-ui-800 rounded-l-lg text-ui-700 relative flex-none p-4">
-                            <Logo />
-                        </div>
-                    ) : (
-                        <div className="size-24 bg-ui-800 rounded-l-lg relative overflow-hidden flex-none">
-                            <Image src={coverUrl} alt="playlist cover image" fill={true} sizes="96px" />
-                        </div>
-                    )
+                    <div className="size-24 bg-ui-800 rounded-l-lg relative overflow-hidden flex-none">
+                        <Image src={coverUrl} alt="playlist cover image" fill={true} sizes="96px" />
+                    </div>
                 ) : isLoading ? (
                     <div className="size-24 bg-ui-850 rounded-l-lg flex-none p-5">
                         <Lottie animationData={Loading}> </Lottie>
@@ -80,6 +75,7 @@ function PlaylistEntry({ playlist }: PlaylistProps) {
 }
 
 export default PlaylistEntry;
+
 // "use client";
 
 // import useSWR, { Fetcher, SWRConfiguration, Revalidator, RevalidatorOptions } from "swr";

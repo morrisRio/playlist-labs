@@ -24,12 +24,13 @@ export async function GET(
 
     const { accessToken } = token;
     debugLog("API: GET - TOKEN FROM REQ:", accessToken);
+
     //This is the debug routine for testing the error handling
-    if (accessToken === "error4")
-        return NextResponse.json("https://upload.wikimedia.org/wikipedia/commons/1/1f/SMirC-thumbsup.svg", {
-            status: 200,
-        });
-    return NextResponse.json({ error: "Wrong Token: " + accessToken }, { status: 401 });
+    // if (accessToken === "error4")
+    //     return NextResponse.json("https://upload.wikimedia.org/wikipedia/commons/1/1f/SMirC-thumbsup.svg", {
+    //         status: 200,
+    //     });
+    // return NextResponse.json({ error: "Wrong Token: " + accessToken }, { status: 401 });
 
     const playlistId = params.id;
 
@@ -44,7 +45,7 @@ export async function GET(
         `https://api.spotify.com/v1/playlists/${playlistId}/images`,
         accessToken,
         validatePlaylistImage,
-        true
+        false
     );
 
     if (imageResponseData.error) {

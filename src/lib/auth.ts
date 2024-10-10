@@ -117,8 +117,6 @@ export const authOptions: NextAuthOptions = {
                     debugLog(startTime, "JWT: jwt more recent than db, updating db token");
                     if (token) await updateAccountTokenInDb(accountDB, token);
                 }
-                token.accessTokenExpires = 0;
-                token.accessToken = "error4";
 
                 debugLog(
                     startTime,
