@@ -15,7 +15,7 @@ function SearchBar({ setSearch }: { setSearch: (value: string) => void }) {
     const [query, setQuery] = useState("");
 
     const debouncedSetSearch = useMemo(() => debounce((value) => setSearch(value), 500), [setSearch]);
-    
+
     const onChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
             setQuery(e.target.value);
@@ -32,7 +32,7 @@ function SearchBar({ setSearch }: { setSearch: (value: string) => void }) {
                 value={query}
                 onChange={onChange}
                 placeholder="Search"
-                className="w-full px-5 py-3 bg-ui-850 focus:outline-none placeholder-ui-600 text-lg  border-y border-ui-700"
+                className="w-full px-5 py-3 bg-ui-850 focus:outline-none placeholder-ui-600 text-lg  border-y border-ui-700 rounded-none"
             />
             <div className="absolute inset-y-0 right-0 flex items-center p-2 text-themetext/65">
                 {query.length > 0 ? (

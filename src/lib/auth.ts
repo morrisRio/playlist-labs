@@ -104,9 +104,9 @@ export const authOptions: NextAuthOptions = {
                 );
                 //refresh token 1 minute before it expires
                 if (token.accessTokenExpires && Date.now() / 1000 >= token.accessTokenExpires - 60) {
-                    debugLog(startTime, "JWT: old token EXPIRED", token.accessToken.slice(0, 10) + "...");
+                    debugLog(startTime, "JWT: old jwt token EXPIRED", token.accessToken.slice(0, 10) + "...");
                     let refreshToken = (await refreshAccessToken(token)) as JWT;
-                    debugLog(startTime, "JWT: new token", refreshToken.accessToken.slice(0, 10) + "...");
+                    debugLog(startTime, "JWT: new jwt token", refreshToken.accessToken.slice(0, 10) + "...");
                     token = refreshToken;
                 } else {
                     debugLog(startTime, "JWT: token is still valid", token.accessToken.slice(0, 10) + "...");
@@ -151,6 +151,7 @@ export const authOptions: NextAuthOptions = {
         async session({ session, token }) {
             session.user.id = token.userId;
             session.expires = token.accessTokenExpires;
+
             //TODO: remove accesToken from session, this is for debugging only
             //@ts-ignore
             session.accessToken = token.accessToken;

@@ -15,8 +15,6 @@ async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
         redirect("/api/auth/signin");
     }
 
-    console.log(session.user.id);
-
     const { data, error } = await dbGetOnePlaylistData(session.user.id, playlist_id);
     if (error) playlistData = null;
     else playlistData = data;

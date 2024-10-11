@@ -3,11 +3,12 @@ import UniModal from "@/components/UniModal";
 
 interface NameModalProps {
     name: string;
+    initialName: string;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onClose: () => void;
 }
 
-function NameModal({ name, onClose, onChange }: NameModalProps) {
+function NameModal({ name, onClose, onChange, initialName }: NameModalProps) {
     const inputElement = useRef<HTMLInputElement>(null);
     const [newName, setNewName] = useState(name);
 
@@ -29,7 +30,7 @@ function NameModal({ name, onClose, onChange }: NameModalProps) {
             title="Give Your Playlist a Name"
             onClose={onClose}
             action={saveName}
-            actionTitle="Rename"
+            actionTitle={initialName === name ? "Done" : "Rename"}
             bodyFullSize={true}
         >
             <input
@@ -41,7 +42,7 @@ function NameModal({ name, onClose, onChange }: NameModalProps) {
                 onChange={onChangeName}
                 onFocus={(e) => e.target.select()}
                 placeholder="Playlist Name"
-                className="p-3 px-6 w-full bg-ui-850 focus:outline-none placeholder-ui-600 text-lg text-ui-400 -mb-3 border border-ui-700 border-x-0"
+                className="p-3 px-6 w-full bg-ui-850 focus:outline-none placeholder-ui-600 text-lg text-ui-400 -mb-3 border border-ui-700 border-x-0 rounded-none"
             />
         </UniModal>
     );

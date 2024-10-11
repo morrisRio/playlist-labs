@@ -286,6 +286,7 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
             <PlaylistHeader
                 pageTitle={pageTitle}
                 name={preferences.name}
+                initialName={initialState.preferences.name}
                 playlist_id={playlist_id}
                 onChange={handlePrefChange}
                 hue={preferences.hue}

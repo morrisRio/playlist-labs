@@ -172,8 +172,6 @@ export async function dbGetOnePlaylistData(userId: string, playlistId: string): 
 
         delete playlist._id;
 
-        debugLog("Playlist found:", playlist);
-
         return { data: playlist as PlaylistData, error: null };
     } catch (error: any) {
         console.error("Error getting playlist:", error);

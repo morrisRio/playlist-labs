@@ -11,6 +11,8 @@ export function useSwrTokenRefresh<T>(url: string | null): SWRResponse<T, Error>
         console.log("Token in client component: ", session.accessToken.slice(0, 10) + "...");
     }
 
+    //TODO: performance avoid unnecessary session requests on state changes of parent component
+
     const fetcher: Fetcher<T> = async (fetchUrl: string) => {
         const res = await fetch(fetchUrl);
         if (!res.ok) {

@@ -1,6 +1,6 @@
 "use client";
 import { MdChevronLeft, MdModeEdit, MdPalette, MdOpenInNew, MdOutlineDelete, MdRefresh } from "react-icons/md";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { getCssHueGradient } from "@/lib/utils";
 
 import Link from "next/link";
@@ -19,11 +19,15 @@ import Lottie from "lottie-react";
 import Loading from "@/lib/lotties/loading.json";
 import { IconType } from "react-icons";
 
+import Image from "next/image";
+import { init } from "next/dist/compiled/webpack/webpack";
+
 interface PlaylistHeaderProps {
     pageTitle: string;
     playlist_id: string | false;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     name: string;
+    initialName: string;
     hue: number | undefined;
     action: (e: FormEvent<HTMLFormElement>) => void;
     actionName: String;
@@ -40,6 +44,7 @@ function PlaylistHeader({
     playlist_id,
     onChange,
     name,
+    initialName,
     hue,
     actionName,
     actionIcon: ActionIcon,
@@ -70,31 +75,41 @@ function PlaylistHeader({
         data: coverUrl,
         error,
         isLoading,
-    } = useSwrTokenRefresh(playlist_id ? `/api/spotify/playlist/cover/${playlist_id}` : null);
+    } = useSwrTokenRefresh<string>(playlist_id ? `/api/spotify/playlist/cover/${playlist_id}` : null);
 
-    const [bgImage, setBgImage] = useState<string>(
-        hue !== undefined ? getCssHueGradient(hue) : isLoading || error ? "" : coverUrl ? `url(${coverUrl})` : ""
-    );
+    const gradientImage = hue !== undefined ? getCssHueGradient(hue) : undefined;
 
-    useEffect(() => {
-        setBgImage(
-            hue !== undefined ? getCssHueGradient(hue) : isLoading || error ? "" : coverUrl ? `url(${coverUrl})` : ""
-        );
-    }, [coverUrl, hue, isLoading, error]);
-
-    const bgStyle = {
-        backgroundImage: bgImage,
-        backgroundSize: "cover",
+    const gradientStyle = {
+        background: gradientImage,
+    };
+    const gradientBackgroundStyle = {
+        background: gradientImage,
         filter: `saturate(0.7) brightness(0.45)`,
     };
 
+    const backgroundStyle = {
+        filter: `saturate(0.7) brightness(0.45)`,
+    };
+
+    console.log("loading", isLoading);
     return (
         <>
-            <header ref={headerRef} className="sticky top-0 z-40">
-                {/* headerBg */}
+            <header ref={headerRef} className="sticky top-0 z-40 w-full">
                 <div className="absolute inset-0 overflow-hidden rounded-b-lg">
-                    <div className="w-full aspect-square" style={bgStyle}>
-                        <div className="absolute inset-0" style={{ backdropFilter: `blur(64px)` }}></div>
+                    <div className="absolute inset-0 aspect-square">
+                        {hue ? (
+                            <div className="size-full" style={gradientBackgroundStyle}></div>
+                        ) : coverUrl ? (
+                            <Image
+                                src={coverUrl}
+                                alt="playlist cover image"
+                                fill={true}
+                                sizes="96px"
+                                style={backgroundStyle}
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-ui-800"></div>
+                        )}
                     </div>
                 </div>
                 <div className="relative flex items-center w-full py-3 px-4 z-10">
@@ -170,7 +185,7 @@ function PlaylistHeader({
                                 <ul className="list-disc list-inside">
                                     <li>The playlist will remain on Spotify but won&apos;t update here.</li>
                                     <li>All associated data will be permanently removed.</li>
-                                    <li>This action is irreversible</li>
+                                    <li>This action is irreversible.</li>
                                 </ul>
 
                                 <p>Are you sure you want to delete this playlist?</p>
@@ -180,31 +195,46 @@ function PlaylistHeader({
                 </div>
             </header>
             <div className="relative top-0 w-full bg-ui-850">
-                <div className="absolute size-full overflow-hidden" style={{ marginTop: `-${headerHeight}px` }}>
-                    <div className="w-full aspect-square bg-cover" style={bgStyle}>
-                        <div className="absolute inset-0" style={{ backdropFilter: `blur(64px)` }}></div>
+                <div className="absolute inset-0 overflow-hidden" style={{ marginTop: `-${headerHeight}px` }}>
+                    <div className="absolute inset-0 aspect-square">
+                        {hue ? (
+                            <div className="size-full" style={gradientBackgroundStyle}></div>
+                        ) : coverUrl ? (
+                            <Image
+                                src={coverUrl}
+                                alt="playlist cover image"
+                                fill={true}
+                                layout="fill"
+                                objectFit="cover"
+                                sizes="96px"
+                                style={backgroundStyle}
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-ui-800"></div>
+                        )}
                     </div>
                 </div>
                 <div className="flex flex-col justify-between w-full pt-3 pb-2 px-4 bg-cover gap-5">
                     <div className="flex items-center w-full gap-6">
-                        {/* Image */}
-                        <div className="size-36 rounded-lg overflow-hidden relative z-20">
+                        <div className="relative size-36 rounded-lg overflow-hidden bg-ui-600 z-20">
+                            {hue ? (
+                                <div className="size-full" style={gradientStyle}></div>
+                            ) : coverUrl ? (
+                                <Image src={coverUrl} alt="playlist cover image" fill={true} sizes="96px" />
+                            ) : (
+                                <div className="size-full bg-ui-800"></div>
+                            )}
                             {isLoading && (
-                                <div className="size-full bg-ui-700 flex-none p-8">
+                                <div className="absolute inset-0 bg-ui-700/20 flex-none p-8">
                                     <Lottie animationData={Loading}> </Lottie>
                                 </div>
                             )}
-                            <div
-                                className="w-full h-full bg-ui-700"
-                                style={{ backgroundImage: bgImage, backgroundSize: "cover" }}
-                                role="presentation"
-                            ></div>
 
                             <div
                                 className="absolute right-1 bottom-1 rounded-full flex items-center justify-center bg-ui-900 p-1"
                                 onPointerDown={() => setShowGradient(true)}
                             >
-                                <MdPalette size="0.8rem" />
+                                <MdPalette size="1rem" />
                             </div>
                         </div>
                         {/* Actions */}
@@ -236,7 +266,14 @@ function PlaylistHeader({
                     </div>
                 </div>
             </div>
-            {showNameModal && <NameModal name={name} onClose={() => setShowNameModal(false)} onChange={onChange} />}
+            {showNameModal && (
+                <NameModal
+                    name={name}
+                    onClose={() => setShowNameModal(false)}
+                    onChange={onChange}
+                    initialName={initialName}
+                />
+            )}
             {showGradient && <GradientModal onClose={() => setShowGradient(false)} onSave={onChange} />}
         </>
     );
