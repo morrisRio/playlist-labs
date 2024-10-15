@@ -146,3 +146,21 @@ input[type="range"].rule-slider::-moz-range-thumb {
         text-wrap: balance;
     }
 }
+
+main {
+    transition-property: opacity, filter, transform;
+    transition-duration: 1000ms;
+    transition-timing-function: ease-in-out;
+}
+
+.page-transition-right {
+    opacity: 0;
+    transform: translateX(16px);
+    filter: blur(1px);
+}
+
+.page-transition-left {
+    opacity: 0;
+    transform: translateX(-16px);
+    filter: blur(1px);
+}

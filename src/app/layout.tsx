@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import NextTopLoader from "nextjs-toploader";
+import { twUi500 } from "@/lib/utils";
 
 const ibmPlexSans = localFont({
     src: [
@@ -29,6 +31,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     return (
         <html lang="en">
             <body className={`${ibmPlexSans.variable} font-ibm antialiased relative overflow-x-hidden`}>
+                <NextTopLoader height={10} color={twUi500} crawlSpeed={100} initialPosition={0.4} showSpinner={false} />
                 <main className="min-h-screen h-screen">{children}</main>
             </body>
         </html>

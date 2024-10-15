@@ -1,6 +1,6 @@
 //get every playlist and update it if needed‚
 import { NextResponse, NextRequest } from "next/server";
-import { dbGetAccountByUserId, dbGetAllUsers } from "@/lib/db/dbActions";
+import { dbGetAccountByUserId, dbGetAllUsers, dbUpdatePlaylist } from "@/lib/db/dbActions";
 import { refreshAccessToken, updateAccountTokenInDb } from "@/lib/auth";
 import { setDebugMode, debugLog } from "@/lib/utils";
 import { regeneratePlaylist } from "@/lib/spotifyUtils";
@@ -64,7 +64,19 @@ export async function GET(req: NextRequest) {
                     // && playlist.lastUpdated.getDay() !== now.getDay()
                 ) {
                     debugLog("Updating Playlist: " + playlist.preferences.name);
-                    (await regeneratePlaylist(playlist, access_token, user.spotify_id)) && playlistCount++;
+                    const regenRes = await regeneratePlaylist(playlist, access_token, user.spotify_id);
+
+                    if (regenRes.error) {
+                        console.error("Error regenerating Playlist: ", regenRes.error);
+                        continue;
+                    }
+
+                    const { trackHistory: updatedTrackhistory } = regenRes.data;
+                    const dbSuccess = await dbUpdatePlaylist(user.spotify_id, {
+                        playlist_id,
+                        trackHistory: updatedTrackhistory,
+                    });
+                    debugLog("DB update success: ", dbSuccess);
                 } else {
                     debugLog("Skipping Playlist: " + playlist.preferences.name);
                 }

@@ -33,7 +33,7 @@ async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
             )}
             {playlistData && (
                 <ClientSessionProvider session={session}>
-                    <PlaylistCreator pageTitle="Edit Playlist" playlist={playlistData}></PlaylistCreator>)
+                    <PlaylistCreator pageTitle="Edit Playlist" playlist={playlistData}></PlaylistCreator>
                 </ClientSessionProvider>
             )}
         </div>

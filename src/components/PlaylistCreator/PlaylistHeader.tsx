@@ -1,9 +1,7 @@
 "use client";
 import { MdChevronLeft, MdModeEdit, MdPalette, MdOpenInNew, MdOutlineDelete, MdRefresh } from "react-icons/md";
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useMemo, useRef, useState } from "react";
 import { getCssHueGradient } from "@/lib/utils";
-
-import Link from "next/link";
 
 import NameModal from "@/components/PlaylistCreator/NameModal";
 import GradientModal from "@/components/GradientModal";
@@ -20,7 +18,7 @@ import Loading from "@/lib/lotties/loading.json";
 import { IconType } from "react-icons";
 
 import Image from "next/image";
-import { init } from "next/dist/compiled/webpack/webpack";
+import TransitionLink from "../TransitionLink";
 
 interface PlaylistHeaderProps {
     pageTitle: string;
@@ -90,8 +88,6 @@ function PlaylistHeader({
     const backgroundStyle = {
         filter: `saturate(0.7) brightness(0.45)`,
     };
-
-    console.log("loading", isLoading);
     return (
         <>
             <header ref={headerRef} className="sticky top-0 z-40 w-full">
@@ -113,9 +109,9 @@ function PlaylistHeader({
                     </div>
                 </div>
                 <div className="relative flex items-center w-full py-3 px-4 z-10">
-                    <Link href="/" replace={true}>
+                    <TransitionLink href="/" replace={true}>
                         <MdChevronLeft size="2rem"></MdChevronLeft>
-                    </Link>
+                    </TransitionLink>
                     <h3 className="flex-grow">{pageTitle}</h3>
                     <button
                         form="playlist-form"
@@ -154,7 +150,6 @@ function PlaylistHeader({
                             </button>
                         </ContextMenu>
                     )}
-
                     {showResetModal && (
                         <UniModal
                             title={(somethingToRestore ? "Restore" : "Reset") + "Settings"}
@@ -172,7 +167,6 @@ function PlaylistHeader({
                             )}
                         </UniModal>
                     )}
-
                     {showConfirmModal && (
                         <UniModal
                             title="Delete Playlist"

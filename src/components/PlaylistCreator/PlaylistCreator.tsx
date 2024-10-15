@@ -267,7 +267,7 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
     useEffect(() => {
         console.log("Use effect runs, playlist: ", playlist);
         if (playlist) {
-            setTimeout(() => mutate(`/api/spotify/playlist/cover/${playlist_id}`), 300);
+            setTimeout(() => mutate(`/api/spotify/playlist/cover/${playlist_id}`), 100);
             setPreferences(playlist.preferences);
             setSeeds(playlist.seeds);
             setRules(playlist.rules ? completeRules(playlist.rules) : emptyPlaylist.rules);

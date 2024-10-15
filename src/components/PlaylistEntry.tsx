@@ -2,6 +2,7 @@
 
 import { PlaylistData } from "@/types/spotify";
 import Link from "next/link";
+import TransitionLink from "@/components/TransitionLink";
 import SmartMarquee from "@/components/SmartMarquee";
 
 import { MdChevronRight } from "react-icons/md";
@@ -28,7 +29,7 @@ function PlaylistEntry({ playlist }: PlaylistProps) {
     } = useSwrTokenRefresh<string>(`/api/spotify/playlist/cover/${playlist_id}`);
 
     return (
-        <Link href={`/pages/edit-playlist/${playlist_id}`}>
+        <TransitionLink href={`/pages/edit-playlist/${playlist_id}`} enter>
             <div className="flex gap-4 items-center w-full bg-ui-900 border border-ui-700 rounded-lg">
                 {coverUrl ? (
                     <div className="size-24 bg-ui-800 rounded-l-lg relative overflow-hidden flex-none">
@@ -70,7 +71,7 @@ function PlaylistEntry({ playlist }: PlaylistProps) {
                     <MdChevronRight size="2rem"></MdChevronRight>
                 </div>
             </div>
-        </Link>
+        </TransitionLink>
     );
 }
 

@@ -13,7 +13,7 @@ interface RuleModalProps {
 }
 
 function RuleModal({ onAdd, onRemove, onClose, rules }: RuleModalProps) {
-    //possible rules imported from lib spotifyActions
+    //note: possible rules imported from lib spotifyActions
 
     useEffect(() => {
         document.body.style.overflow = "hidden";

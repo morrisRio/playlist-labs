@@ -69,7 +69,7 @@ export const authOptions: NextAuthOptions = {
         },
 
         async jwt({ token, account }: { token: JWT; account: Account | null; user: User }): Promise<JWT> {
-            setDebugMode(true);
+            setDebugMode(false);
             const startTime = new Date().getMilliseconds();
             debugLog(startTime, "JWT CALLBACK START =========================================");
 

@@ -105,7 +105,7 @@ export const regeneratePlaylist = async (
     if (!trackHistory) trackHistory = [];
     trackIdsToAdd = await getOnlyNewRecommendations(accessToken, preferences.amount, seeds, rules, trackHistory);
 
-    //double failsafe
+    //double failsafe if not enough new tracks are found
     if ("error" in trackIdsToAdd) {
         console.error("Failed to get only new Tracks", trackIdsToAdd.error);
         console.error("trying simple recommandations instead");
