@@ -149,18 +149,18 @@ input[type="range"].rule-slider::-moz-range-thumb {
 
 main {
     transition-property: opacity, filter, transform;
-    transition-duration: 1000ms;
+    transition-duration: 100ms;
     transition-timing-function: ease-in-out;
 }
 
 .page-transition-right {
     opacity: 0;
-    transform: translateX(16px);
+    transform: translateX(32px);
     filter: blur(1px);
 }
 
 .page-transition-left {
     opacity: 0;
-    transform: translateX(-16px);
+    transform: translateX(-32px);
     filter: blur(1px);
 }
