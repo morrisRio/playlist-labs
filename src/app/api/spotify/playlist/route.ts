@@ -24,7 +24,7 @@ import { MongoPlaylistData, PlaylistData, Preferences, Rule, Seed } from "@/type
 
 import { getToken } from "next-auth/jwt";
 import { createCanvas } from "@napi-rs/canvas";
-import { debug } from "console";
+
 //needs to be here because of the canvas dependency leading to bundler issues if not in api route
 const generateCoverImage = async (hue: number): Promise<string> => {
     debugLog("API: Generating Cover Image with Hue:", hue);
@@ -297,6 +297,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
                 playlist_id,
                 trackHistory: update.data.trackHistory,
             });
+
             if (!dbSuccess) {
                 console.error("Failed to save updated Playlist Data");
             }

@@ -27,7 +27,7 @@ export async function GET(req: NextRequest, { params }: { params: { type: string
             `https://api.spotify.com/v1/me/top/${type}/?time_range=${time_range}`,
             accessToken
         );
-        //@ts-ignore
+
         debugLog("received data: ", data.items?.length + " items");
         debugLog("received data: ", data.items);
         const dataSeeds: Seed[] = getSeedsFromItems(data.items);
