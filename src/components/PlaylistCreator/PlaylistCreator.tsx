@@ -26,9 +26,6 @@ interface PlaylistFormProps {
 function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
     const router = useRouter();
 
-    const fetcher = (url: string) => fetch(url).then((res) => res.json());
-    preload(`/api/spotify/top-items/tracks?time_range=short_term`, fetcher);
-
     const [showSubmitErrors, setShowSubmitErrors] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [submitErrors, setSubmitErrors] = useState<string[]>([]);
@@ -265,6 +262,8 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
     const { mutate } = useSWRConfig();
 
     useEffect(() => {
+        const fetcher = (url: string) => fetch(url).then((res) => res.json());
+        preload(`/api/spotify/top-items/tracks?time_range=short_term`, fetcher);
         console.log("Use effect runs, playlist: ", playlist);
         if (playlist) {
             setTimeout(() => mutate(`/api/spotify/playlist/cover/${playlist_id}`), 100);
