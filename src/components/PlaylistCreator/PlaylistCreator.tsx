@@ -11,7 +11,6 @@ import UniModal from "../Modals/UniModal";
 
 import { useSubmitCase } from "@/lib/hooks/useSubmitCase";
 import { completeRules } from "@/lib/spotifyUtils";
-import { getAppUrl } from "@/lib/utils";
 
 import { Seed, Rule, Preferences, RuleInput, PlaylistData } from "@/types/spotify";
 
@@ -25,10 +24,6 @@ interface PlaylistFormProps {
 
 function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
     const router = useRouter();
-
-    const [showSubmitErrors, setShowSubmitErrors] = useState(false);
-    const [submitting, setSubmitting] = useState(false);
-    const [submitErrors, setSubmitErrors] = useState<string[]>([]);
 
     //to differentiate between creating a new playlist and updating an existing one
     const playlist_id = playlist?.playlist_id ? playlist.playlist_id : false;
@@ -165,6 +160,27 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
     }, []);
 
     //TODO: feature: differentiate saving the settings and regenerating the playlist
+    const [showSubmitErrors, setShowSubmitErrors] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [submitErrors, setSubmitErrors] = useState<string[]>([]);
+
+    const {
+        submitMethod,
+        actionIcon,
+        actionName,
+        somethingToRestore,
+        sendId,
+        sendPrefs,
+        sendRules,
+        sendSeeds,
+        newSongSettings,
+    } = useSubmitCase({
+        initialState,
+        playlist_id,
+        preferences,
+        seeds,
+        rules,
+    });
 
     const finishSubmit = useCallback(async () => {
         //TODO: differentiate between saving the settings and regenerating the playlist
@@ -176,7 +192,7 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
             submitPayload.preferences = sendPrefs ? preferences : undefined;
             submitPayload.rules = sendRules ? rules : undefined;
             submitPayload.seeds = sendSeeds ? seeds : undefined;
-            submitPayload.newSongsSettings = newSongSettings;
+            submitPayload.newSongsSettings = newSongSettings ? true : undefined;
 
             //create a new playlist and populate it with the tracks
             await fetch("/api/spotify/playlist", {
@@ -239,25 +255,6 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
         setSeeds(emptyPlaylist.seeds);
         setRules(emptyPlaylist.rules);
     }, []);
-
-    //handle button title and action ______________________________________________________________
-    const {
-        submitMethod,
-        actionIcon,
-        actionName,
-        somethingToRestore,
-        sendId,
-        sendPrefs,
-        sendRules,
-        sendSeeds,
-        newSongSettings,
-    } = useSubmitCase({
-        initialState,
-        playlist_id,
-        preferences,
-        seeds,
-        rules,
-    });
 
     const { mutate } = useSWRConfig();
 

@@ -118,7 +118,7 @@ export interface RangeRule {
     name: string;
     type: "range";
     value: number;
-    range: number[] | string[];
+    range: (number | string)[];
     description: string;
 }
 
@@ -159,6 +159,15 @@ export interface PlaylistData {
     rules?: Rule[];
     trackHistory?: string[];
     coverUrl?: string;
+}
+
+export interface SubmitPlaylistData extends PlaylistData {
+    newSongsSettings?: boolean;
+}
+
+export interface SubmitRefreshData {
+    playlist_id: string;
+    newSongsSettings: false;
 }
 
 export interface MongoPlaylistData extends Document {

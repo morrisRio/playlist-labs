@@ -1,7 +1,6 @@
 "use client";
 import { ReactNode, useEffect, useRef } from "react";
 import Link, { LinkProps } from "next/link";
-import { usePathname } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 
 interface TransitionLinkProps extends LinkProps {
@@ -16,7 +15,6 @@ function sleep(ms: number) {
 
 export default function TransitionLink({ children, href, enter = false, ...props }: TransitionLinkProps) {
     const router = useRouter();
-    const pathname = usePathname();
 
     const navigateToRef = useRef<string | null>(null);
 
