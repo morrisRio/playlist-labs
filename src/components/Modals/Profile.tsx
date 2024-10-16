@@ -3,7 +3,7 @@
 import { MdLogout, MdOutlineDelete } from "react-icons/md";
 import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
-import UniModal from "@/components/UniModal";
+import UniModal from "@/components/Modals/UniModal";
 import ContextMenu from "./Context";
 import { dbDeleteUser } from "@/lib/db/dbActions";
 

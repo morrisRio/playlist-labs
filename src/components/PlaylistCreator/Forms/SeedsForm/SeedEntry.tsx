@@ -1,14 +1,12 @@
 "use client";
+import Image from "next/image";
+
+import SmartMarquee from "@/components/SmartMarquee";
+
+import { Seed } from "@/types/spotify";
 
 import { RiMusic2Fill } from "react-icons/ri";
 import { MdRemoveCircleOutline, MdAddCircleOutline } from "react-icons/md";
-import Marquee from "react-fast-marquee";
-import { Seed } from "@/types/spotify";
-
-import { useState, useRef, useLayoutEffect } from "react";
-
-import Image from "next/image";
-import SmartMarquee from "@/components/SmartMarquee";
 
 //using marquee. Docs:
 //https://www.react-fast-marquee.com/documentation

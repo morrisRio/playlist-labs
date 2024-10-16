@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { MdRemoveCircleOutline, MdAddCircleOutline } from "react-icons/md";
+
+import { SeedEntry } from "./SeedEntry";
+import SeedModal from "./SeedModal";
 
 import { Seed } from "@/types/spotify";
-import SeedModal from "./SeedModal";
-import { SeedEntry } from "./SeedEntry";
+
+import { MdAddCircleOutline } from "react-icons/md";
 
 interface SeedsProps {
     seeds: Seed[];

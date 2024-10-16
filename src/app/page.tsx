@@ -1,5 +1,5 @@
 import PlaylistEntry from "@/components/PlaylistEntry";
-import Profile from "@/components/Profile";
+import Profile from "@/components/Modals/Profile";
 import { MdAdd } from "react-icons/md";
 import { PlaylistData } from "@/types/spotify";
 

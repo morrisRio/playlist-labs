@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import UniModal from "@/components/UniModal";
+import UniModal from "@/components/Modals/UniModal";
 
 interface NameModalProps {
     name: string;

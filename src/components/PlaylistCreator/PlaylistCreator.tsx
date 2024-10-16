@@ -1,22 +1,22 @@
 "use client";
 import { useState, FormEvent, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { preload, useSWRConfig } from "swr";
 
 import PlaylistHeader from "./PlaylistHeader";
-import PreferencesForm from "./PreferencesForm";
-import Rules from "./RulesForm/Rules";
-import Seeds from "./SeedsForm/Seeds";
-import UniModal from "../UniModal";
+import PreferencesForm from "./Forms/PreferencesForm";
+import Rules from "@/components/PlaylistCreator/Forms/RulesForm/Rules";
+import Seeds from "./Forms/SeedsForm/Seeds";
+import UniModal from "../Modals/UniModal";
 
 import { useSubmitCase } from "@/lib/hooks/useSubmitCase";
-import { Seed, Rule, Preferences, RuleInput, PlaylistData } from "@/types/spotify";
 import { completeRules } from "@/lib/spotifyUtils";
+import { getAppUrl } from "@/lib/utils";
+
+import { Seed, Rule, Preferences, RuleInput, PlaylistData } from "@/types/spotify";
 
 import Lottie from "lottie-react";
 import Loading from "@/lib/lotties/loading.json";
-
-import { preload, useSWRConfig } from "swr";
-import { getAppUrl } from "@/lib/utils";
 
 interface PlaylistFormProps {
     pageTitle: string;

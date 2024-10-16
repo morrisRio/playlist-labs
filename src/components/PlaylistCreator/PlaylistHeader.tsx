@@ -1,24 +1,24 @@
 "use client";
-import { MdChevronLeft, MdModeEdit, MdPalette, MdOpenInNew, MdOutlineDelete, MdRefresh } from "react-icons/md";
-import { FormEvent, useMemo, useRef, useState } from "react";
-import { getCssHueGradient } from "@/lib/utils";
+import { FormEvent, useRef, useState } from "react";
+import Image from "next/image";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
-import NameModal from "@/components/PlaylistCreator/NameModal";
-import GradientModal from "@/components/GradientModal";
-import ContextMenu from "@/components/Context";
-import UniModal from "@/components/UniModal";
+import NameModal from "@/components/Modals/NameModal";
+import GradientModal from "@/components/Modals/GradientModal";
+import ContextMenu from "@/components/Modals/Context";
+import UniModal from "@/components/Modals/UniModal";
+import { getCssHueGradient } from "@/lib/utils";
+import { dbDeletePlaylist } from "@/lib/db/dbActions";
+
 import { useHeaderState } from "@/lib/hooks/useHeaderState";
 import useSwrTokenRefresh from "@/lib/hooks/useSwrTokenRefresh";
 
-import { dbDeletePlaylist } from "@/lib/db/dbActions";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-
 import Lottie from "lottie-react";
 import Loading from "@/lib/lotties/loading.json";
-import { IconType } from "react-icons";
-
-import Image from "next/image";
 import TransitionLink from "../TransitionLink";
+
+import { MdChevronLeft, MdModeEdit, MdPalette, MdOpenInNew, MdOutlineDelete, MdRefresh } from "react-icons/md";
+import { IconType } from "react-icons";
 
 interface PlaylistHeaderProps {
     pageTitle: string;

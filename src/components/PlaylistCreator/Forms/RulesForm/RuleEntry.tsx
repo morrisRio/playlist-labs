@@ -1,8 +1,11 @@
-import { MdRemoveCircleOutline, MdAddCircleOutline, MdInfoOutline } from "react-icons/md";
-import { Rule } from "@/types/spotify";
 import { useState } from "react";
+
 import { TwoAxisSlider } from "./TwoAxis";
-import UniModal from "../../UniModal";
+import UniModal from "@/components/Modals/UniModal";
+
+import { Rule } from "@/types/spotify";
+
+import { MdRemoveCircleOutline, MdAddCircleOutline, MdInfoOutline } from "react-icons/md";
 
 type RuleEntryProps = {
     rule: Rule;

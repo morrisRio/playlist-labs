@@ -1,10 +1,13 @@
-import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
-import { MdOutlineArrowBackIos, MdCheck } from "react-icons/md";
-import { SeedEntry } from "./SeedEntry";
-import { Seed } from "@/types/spotify";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import useSWR from "swr";
 import type { Key, SWRConfiguration, SWRResponse } from "swr";
+
 import MemoizedSearchBar from "./SearchBar";
+import { SeedEntry } from "./SeedEntry";
+
+import { Seed } from "@/types/spotify";
+
+import { MdOutlineArrowBackIos, MdCheck } from "react-icons/md";
 
 import Lottie from "lottie-react";
 import Loading from "@/lib/lotties/loading.json";

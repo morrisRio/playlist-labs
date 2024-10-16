@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import UniModal from "@/components/UniModal";
+import UniModal from "@/components/Modals/UniModal";
 import { getCssHueGradient } from "@/lib/utils";
 
 interface GradientModalProps {
