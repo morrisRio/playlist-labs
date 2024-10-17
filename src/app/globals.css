@@ -164,3 +164,8 @@ main {
     transform: translateX(-32px);
     filter: blur(1px);
 }
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-ui-700) var(--color-ui-900);
+}

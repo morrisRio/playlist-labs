@@ -17,7 +17,7 @@ import Lottie from "lottie-react";
 import Loading from "@/lib/lotties/loading.json";
 import TransitionLink from "../TransitionLink";
 
-import { MdChevronLeft, MdModeEdit, MdPalette, MdOpenInNew, MdOutlineDelete, MdRefresh } from "react-icons/md";
+import { MdModeEdit, MdPalette, MdOpenInNew, MdOutlineDelete, MdRefresh, MdOutlineArrowBackIos } from "react-icons/md";
 import { IconType } from "react-icons";
 
 interface PlaylistHeaderProps {
@@ -90,7 +90,7 @@ function PlaylistHeader({
     };
     return (
         <>
-            <header ref={headerRef} className="sticky top-0 z-40 w-full ">
+            <header ref={headerRef} className="sticky top-0 z-40 w-full">
                 {/* headerBg */}
                 <div className="absolute inset-0 overflow-hidden rounded-b-lg">
                     <div className="absolute inset-0 aspect-square w-[max(100vw,100vh)]">
@@ -110,9 +110,9 @@ function PlaylistHeader({
                     </div>
                 </div>
                 {/* controls */}
-                <div className="relative flex items-center w-full py-3 px-4 z-10 md:w-[40rem] lg:w-[50rem] md:max-2xl:mx-auto">
+                <div className="relative flex items-center w-full gap-4 py-3 px-4 z-10 sm:w-[40rem] lg:w-[50rem] sm:mx-auto">
                     <TransitionLink href="/" replace={true}>
-                        <MdChevronLeft size="2rem"></MdChevronLeft>
+                        <MdOutlineArrowBackIos />
                     </TransitionLink>
                     <h3 className="flex-grow">{pageTitle}</h3>
                     <button
@@ -213,7 +213,7 @@ function PlaylistHeader({
                     </div>
                 </div>
 
-                <div className="flex flex-col justify-between w-full pt-3 pb-2 px-4 bg-cover gap-5 md:w-[40rem] lg:w-[50rem] md:max-2xl:mx-auto relative md:px-12">
+                <div className="flex flex-col justify-between w-full pt-3 pb-2 px-4 bg-cover gap-5 sm:w-[40rem] lg:w-[50rem] sm:mx-auto relative sm:px-12">
                     <div className="flex items-center w-full gap-6">
                         <div className="relative size-36 rounded-lg overflow-hidden bg-ui-600 z-20">
                             {hue ? (
@@ -258,7 +258,7 @@ function PlaylistHeader({
                             </a>
                         </div>
                     </div>
-                    <div className="-mx-4 absolute bg-ui-950 border-t border-ui-700 h-[90px] w-full bottom-0 rounded-t-2xl md:-mx-12"></div>
+                    <div className="-mx-4 absolute bg-ui-950 border-t border-ui-700 h-[90px] w-full bottom-0 rounded-t-2xl sm:-mx-12"></div>
                     <div className="flex justify-between z-10">
                         <h2>{name}</h2>
                         <div className="text-themetext/65">

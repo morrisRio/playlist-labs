@@ -164,63 +164,71 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
     }, [searchResults, topItems, onAdd, onRemove, isAdded, error, showSearch, searchLoading, topLoading]);
 
     return (
-        <div className="bg-ui-950 fixed h-screen w-full top-0 left-0 z-50 flex flex-col">
-            <header className="border-b border-ui-700 flex flex-col gap-4 p-4 bg-ui-900">
-                <div className="flex items-center gap-4">
-                    <button onClick={onClose} type="button">
-                        <MdOutlineArrowBackIos />
-                    </button>
-                    <h3>Add Seed</h3>
-                    <h3 className="text-ui-600 font-normal text-right flex-grow self-end">{seeds?.length} /5 used</h3>
-                    <button onClick={onClose} type="button">
-                        <MdCheck size="1.7rem" />
-                    </button>
-                </div>
-                <MemoizedSearchBar setSearch={handleSetSearch} />
-                {!showSearch && (
-                    <div className="gap-4">
-                        <div className="flex justify-between">
-                            {selectOptions.seedTypes.map((type) => (
-                                <button
-                                    type="button"
-                                    name="selectedType"
-                                    value={type}
-                                    key={type}
-                                    onClick={changeFilter}
-                                >
-                                    <h5
-                                        className={`${
-                                            selectedTops.selectedType == type ? "text-white" : "text-ui-600"
-                                        }`}
+        <>
+            <div
+                className="bg-ui-800/30 fixed top-0 left-0 w-screen h-screen z-40 sm:backdrop-blur-[1px] sm:backdrop-brightness-75"
+                onClick={onClose}
+            ></div>
+            <div className="bg-ui-950 fixed h-screen overflow-hidden max-sm:w-full top-0 max-sm:left-0 z-50 flex flex-col sm:w-[42rem] lg:w-[52rem] sm:-mx-16 sm:my-14 sm:rounded-2xl  sm:max-h-[max(calc(100vh-8rem),30rem)] sm:border-ui-700 sm:border">
+                <div className="border-b border-ui-700 flex flex-col gap-4 p-4 bg-ui-900">
+                    <div className="flex items-center gap-4">
+                        <button onClick={onClose} type="button">
+                            <MdOutlineArrowBackIos />
+                        </button>
+                        <h3>Add Seed</h3>
+                        <h3 className="text-ui-600 font-normal text-right flex-grow self-end">
+                            {seeds?.length} /5 used
+                        </h3>
+                        <button onClick={onClose} type="button">
+                            <MdCheck size="1.7rem" />
+                        </button>
+                    </div>
+                    <MemoizedSearchBar setSearch={handleSetSearch} />
+                    {!showSearch && (
+                        <div className="gap-4">
+                            <div className="flex justify-between">
+                                {selectOptions.seedTypes.map((type) => (
+                                    <button
+                                        type="button"
+                                        name="selectedType"
+                                        value={type}
+                                        key={type}
+                                        onClick={changeFilter}
                                     >
-                                        Top {type[0].toUpperCase() + type.slice(1)}s
-                                    </h5>
-                                </button>
-                            ))}
-                            <select
-                                name="selectedRange"
-                                onChange={changeFilter}
-                                className="block mt-1 p-2 rounded-lg bg-ui-800 text-b6b6b6 focus:outline-none focus:ring focus:border-themetext text-xs text-ui-600"
-                            >
-                                {selectOptions.rangeTypes.map((duration) => (
-                                    <option key={duration[0]} value={duration[0]}>
-                                        {duration[1][0].toUpperCase() + duration[1].slice(1)}
-                                    </option>
+                                        <h5
+                                            className={`${
+                                                selectedTops.selectedType == type ? "text-white" : "text-ui-600"
+                                            }`}
+                                        >
+                                            Top {type[0].toUpperCase() + type.slice(1)}s
+                                        </h5>
+                                    </button>
                                 ))}
-                            </select>
+                                <select
+                                    name="selectedRange"
+                                    onChange={changeFilter}
+                                    className="block mt-1 p-2 rounded-lg bg-ui-800 text-b6b6b6 focus:outline-none focus:ring focus:border-themetext text-xs text-ui-600"
+                                >
+                                    {selectOptions.rangeTypes.map((duration) => (
+                                        <option key={duration[0]} value={duration[0]}>
+                                            {duration[1][0].toUpperCase() + duration[1].slice(1)}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                )}
-            </header>
-            <div className="relative flex flex-col gap-4 overflow-y-auto overflow-x-hidden p-4 size-full">
-                {memoizedSeeds}
-                {loading && (
-                    <div className="absolute z-50 inset-0 flex justify-center pt-16 size-full bg-ui-900/40">
-                        <Lottie animationData={Loading} className="size-20"></Lottie>
-                    </div>
-                )}
+                    )}
+                </div>
+                <div className="relative flex flex-col gap-4 overflow-y-auto overflow-x-hidden p-4 size-full">
+                    {memoizedSeeds}
+                    {loading && (
+                        <div className="absolute z-50 inset-0 flex justify-center pt-16 size-full bg-ui-900/40">
+                            <Lottie animationData={Loading} className="size-20"></Lottie>
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
+        </>
     );
 }
 
