@@ -1,4 +1,5 @@
 "use client";
+import { set } from "lodash";
 import {
     Children,
     ReactNode,
@@ -31,17 +32,17 @@ const addClassAndCloseToNode = (
 
     if (isValidElement(node)) {
         const existingClassName = node.props.className || "";
-        const existingOnPointerDown = node.props.onPointerDown || (() => {});
+        const existingOnPointerDown = node.props.onPointerDown || undefined;
 
         return cloneElement(node as ReactElement, {
             className: `${className} ${existingClassName}`.trim(),
             key,
-            onPointerDown: (event: React.PointerEvent) => {
-                setShowContextMenu(false);
-                if (existingOnPointerDown) {
+            ...(existingOnPointerDown && {
+                onPointerDown: (event: React.PointerEvent) => {
+                    setShowContextMenu(false);
                     existingOnPointerDown(event);
-                }
-            },
+                },
+            }),
         });
     }
 
@@ -97,8 +98,9 @@ function ContextMenu({ contextTitle, contextIcon, children, className = "" }: Co
     }, [handleScroll]);
 
     return (
-        <div className={`flex gap-3 items-center ${className}`} onPointerDown={() => handleToggle(!showContextMenu)}>
+        <div className={`flex gap-3 items-center ${className}`}>
             {showContextMenu && (
+                // dark background to close context menu
                 <div
                     className="fixed inset-0 w-full bg-ui-950/50 z-10"
                     onClick={() => handleToggle(false)}
@@ -112,7 +114,10 @@ function ContextMenu({ contextTitle, contextIcon, children, className = "" }: Co
                         role="menu"
                         aria-label={contextTitle}
                     >
-                        <div className="text-ui-600 text-sm flex gap-4 items-center justify-between -mt-3 -mr-3">
+                        <div
+                            className="text-ui-600 text-sm flex gap-4 items-center justify-between -mt-3 -mr-3"
+                            onPointerDown={() => handleToggle(!showContextMenu)}
+                        >
                             <span className="text-nowrap ml-2">{contextTitle}</span>
                             <div className="size-6 rounded-full m-2" aria-hidden="true"></div>
                         </div>
@@ -125,6 +130,7 @@ function ContextMenu({ contextTitle, contextIcon, children, className = "" }: Co
                     role="button"
                     aria-haspopup="menu"
                     aria-expanded={showContextMenu}
+                    onPointerDown={() => handleToggle(!showContextMenu)}
                 >
                     {contextIcon || <MdMoreVert size="1.5em" />}
                 </div>

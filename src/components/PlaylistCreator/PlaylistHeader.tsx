@@ -80,13 +80,15 @@ function PlaylistHeader({
     const gradientStyle = {
         background: gradientImage,
     };
+
+    const backgroundFilter: string = `saturate(0.7) brightness(0.25)`;
     const gradientBackgroundStyle = {
         background: gradientImage,
-        filter: `saturate(0.7) brightness(0.45)`,
+        filter: backgroundFilter,
     };
 
     const backgroundStyle = {
-        filter: `saturate(0.7) brightness(0.45)`,
+        filter: backgroundFilter,
     };
     return (
         <>
@@ -154,7 +156,7 @@ function PlaylistHeader({
                     )}
                     {showResetModal && (
                         <UniModal
-                            title={(somethingToRestore ? "Restore" : "Reset") + "Settings"}
+                            title={(somethingToRestore ? "Restore" : "Reset") + " Settings"}
                             action={() => {
                                 somethingToRestore ? resetSettings() : emptySettings();
                                 setShowResetModal(false);
@@ -250,7 +252,7 @@ function PlaylistHeader({
                             </button>
                             <a
                                 href={`https://open.spotify.com/playlist/${playlist_id}`}
-                                target="blank"
+                                target="_blank"
                                 className="text-ui-600 flex items-center gap-2"
                             >
                                 Open in Spotify
