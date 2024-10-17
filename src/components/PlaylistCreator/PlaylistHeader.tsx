@@ -90,9 +90,10 @@ function PlaylistHeader({
     };
     return (
         <>
-            <header ref={headerRef} className="sticky top-0 z-40 w-full">
+            <header ref={headerRef} className="sticky top-0 z-40 w-full ">
+                {/* headerBg */}
                 <div className="absolute inset-0 overflow-hidden rounded-b-lg">
-                    <div className="absolute inset-0 aspect-square">
+                    <div className="absolute inset-0 aspect-square w-[max(100vw,100vh)]">
                         {hue ? (
                             <div className="size-full" style={gradientBackgroundStyle}></div>
                         ) : coverUrl ? (
@@ -108,7 +109,8 @@ function PlaylistHeader({
                         )}
                     </div>
                 </div>
-                <div className="relative flex items-center w-full py-3 px-4 z-10">
+                {/* controls */}
+                <div className="relative flex items-center w-full py-3 px-4 z-10 md:w-[40rem] lg:w-[50rem] md:max-2xl:mx-auto">
                     <TransitionLink href="/" replace={true}>
                         <MdChevronLeft size="2rem"></MdChevronLeft>
                     </TransitionLink>
@@ -188,9 +190,11 @@ function PlaylistHeader({
                     )}
                 </div>
             </header>
-            <div className="relative top-0 w-full bg-ui-850">
-                <div className="absolute inset-0 overflow-hidden" style={{ marginTop: `-${headerHeight}px` }}>
-                    <div className="absolute inset-0 aspect-square">
+
+            <div className="relative top-0 w-full">
+                {/* bigBg */}
+                <div className="absolute overflow-hidden -z-30" style={{ marginTop: `-${headerHeight}px` }}>
+                    <div className="fixed inset-0 aspect-square w-[max(100vw,100vh)]">
                         {hue ? (
                             <div className="size-full" style={gradientBackgroundStyle}></div>
                         ) : coverUrl ? (
@@ -208,7 +212,8 @@ function PlaylistHeader({
                         )}
                     </div>
                 </div>
-                <div className="flex flex-col justify-between w-full pt-3 pb-2 px-4 bg-cover gap-5">
+
+                <div className="flex flex-col justify-between w-full pt-3 pb-2 px-4 bg-cover gap-5 md:w-[40rem] lg:w-[50rem] md:max-2xl:mx-auto relative md:px-12">
                     <div className="flex items-center w-full gap-6">
                         <div className="relative size-36 rounded-lg overflow-hidden bg-ui-600 z-20">
                             {hue ? (
@@ -231,7 +236,7 @@ function PlaylistHeader({
                                 <MdPalette size="1rem" />
                             </div>
                         </div>
-                        {/* Actions */}
+                        {/* controls */}
                         <div className="flex flex-col items-center justify-between gap-1 z-30 -mt-5">
                             <button
                                 type="submit"
@@ -253,10 +258,12 @@ function PlaylistHeader({
                             </a>
                         </div>
                     </div>
-                    <div className="-mx-4 absolute bg-ui-950 border-t border-ui-700 h-[90px] w-full bottom-0 rounded-t-2xl"></div>
+                    <div className="-mx-4 absolute bg-ui-950 border-t border-ui-700 h-[90px] w-full bottom-0 rounded-t-2xl md:-mx-12"></div>
                     <div className="flex justify-between z-10">
                         <h2>{name}</h2>
-                        <MdModeEdit size="1.5em" onClick={() => setShowNameModal(true)} />
+                        <div className="text-themetext/65">
+                            <MdModeEdit size="1.2em" onClick={() => setShowNameModal(true)} />
+                        </div>
                     </div>
                 </div>
             </div>

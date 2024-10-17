@@ -26,7 +26,7 @@ export default async function Home() {
     else playlistData = data;
 
     return (
-        <div className="min-h-full w-full p-4 flex flex-col gap-5">
+        <div className="min-h-full w-full p-4 flex flex-col gap-5 md:w-[40rem] lg:w-[50rem] md:max-2xl:mx-auto">
             <ClientSessionProvider session={session}>
                 <div className="flex justify-between gap-2 mt-8 items-center">
                     <Logo className="w-4 h-4 -mb-1"></Logo>

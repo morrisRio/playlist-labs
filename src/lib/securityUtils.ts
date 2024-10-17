@@ -354,21 +354,3 @@ export function vsPlaylistRefreshData(data: unknown): validationResponse<SubmitR
         sanitizedData,
     };
 }
-// Usage in your API route
-// export async function POST(req: NextRequest): Promise<NextResponse> {
-//     try {
-//         const rawData = await req.json();
-//         const validation = validateAndSanitizePlaylistData(rawData);
-
-//         if (!validation.valid) {
-//             return NextResponse.json({ errors: validation.errors }, { status: 400 });
-//         }
-
-//         // Use the sanitized data for further processing
-//         const { preferences, seeds, rules } = validation.sanitizedData!;
-
-//         // Process your sanitized data...
-//     } catch (error) {
-//         return NextResponse.json({ error: "Invalid request data" }, { status: 400 });
-//     }
-// }

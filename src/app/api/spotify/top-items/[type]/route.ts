@@ -13,6 +13,7 @@ export async function GET(req: NextRequest, { params }: { params: { type: string
         const time_range = req.nextUrl.searchParams.get("time_range");
 
         debugLog("GETTING TOP ITEMS: ", type, time_range);
+
         //add the token to the request for the api call
         const token = await getToken({ req });
         if (!token) {

@@ -97,7 +97,7 @@ function ContextMenu({ contextTitle, contextIcon, children, className = "" }: Co
     }, [handleScroll]);
 
     return (
-        <div className={`flex gap-3 items-center ${className}`} onPointerDown={() => handleToggle(true)}>
+        <div className={`flex gap-3 items-center ${className}`} onPointerDown={() => handleToggle(!showContextMenu)}>
             {showContextMenu && (
                 <div
                     className="fixed inset-0 w-full bg-ui-950/50 z-10"
@@ -108,7 +108,7 @@ function ContextMenu({ contextTitle, contextIcon, children, className = "" }: Co
             <div className="size-6 z-20 relative">
                 {showContextMenu && (
                     <div
-                        className="absolute -right-2 -top-2 gap-2 bg-ui-900 border border-ui-700 rounded-lg p-3 "
+                        className="absolute -right-2 -top-2 gap-2 bg-ui-900 border border-ui-700 rounded-lg p-3"
                         role="menu"
                         aria-label={contextTitle}
                     >
