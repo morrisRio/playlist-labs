@@ -14,16 +14,16 @@ interface RulesProps {
 
 function Rules({ rules, onAdd, onRemove, onChange }: RulesProps) {
     const [showModal, setShowModal] = useState(false);
-    const [scrollPosition, setScrollPosition] = useState(0);
+    // const [scrollPosition, setScrollPosition] = useState(0);
 
     const openModal = () => {
-        setScrollPosition(window.scrollY);
-        window.scrollTo(0, 0);
+        // setScrollPosition(window.scrollY);
+        // window.scrollTo(0, 0);
         setShowModal(true);
     };
 
     const closeModal = () => {
-        window.scrollTo(0, scrollPosition);
+        // window.scrollTo(0, scrollPosition);
         setShowModal(false);
     };
 

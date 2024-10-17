@@ -15,7 +15,7 @@ interface SeedsProps {
 
 export default function Seeds({ seeds, onRemove, onAdd }: SeedsProps) {
     const [showModal, setShowModal] = useState(false);
-    const [scrollPosition, setScrollPosition] = useState(0);
+    // const [scrollPosition, setScrollPosition] = useState(0);
 
     const openModal = () => {
         // setScrollPosition(window.scrollY);

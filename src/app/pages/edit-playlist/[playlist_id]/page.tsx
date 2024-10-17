@@ -20,7 +20,7 @@ async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
     else playlistData = data;
 
     return (
-        <div className="min-h-full min-w-full">
+        <div className="min-h-full min-w-full sm:pb-16">
             {error && (
                 <div className="h-screen flex flex-col justify-center items-center gap-5">
                     <p>Something went wrong. We&apos;re Sorry.</p>

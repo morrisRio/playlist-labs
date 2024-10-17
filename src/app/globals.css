@@ -166,6 +166,6 @@ main {
 }
 
 * {
-    scrollbar-width: thin;
+    scrollbar-width: auto;
     scrollbar-color: var(--color-ui-700) var(--color-ui-900);
 }

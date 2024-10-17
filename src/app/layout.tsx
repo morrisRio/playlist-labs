@@ -31,7 +31,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     return (
         <html lang="en">
             <body className={`${ibmPlexSans.variable} font-ibm antialiased relative overflow-x-hidden`}>
-                <NextTopLoader height={2} color={twUi500} crawlSpeed={0} initialPosition={0.1} showSpinner={false} />
+                <NextTopLoader height={2} color={twUi500} crawlSpeed={50} initialPosition={0.1} showSpinner={false} />
                 <main className="min-h-screen h-screen">{children}</main>
             </body>
         </html>
