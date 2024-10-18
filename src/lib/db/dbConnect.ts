@@ -23,6 +23,7 @@ if (!cached) {
     cached = global.mongoose = { conn: null, promise: null };
 }
 
+//TODO: PRODUCTION: dont cache connection
 export const connectMongoDB = async () => {
     if (cached.conn) {
         return cached.conn;

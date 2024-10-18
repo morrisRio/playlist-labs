@@ -297,7 +297,7 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
             ></PlaylistHeader>
             <form
                 id="playlist-form"
-                className="bg-ui-950 w-full min-h-full flex flex-col gap-6 justify-center text-white  sm:w-[40rem] lg:w-[50rem] sm:mx-auto sm:px-8 sm:rounded-b-2xl"
+                className="bg-ui-950 w-full h-fit flex flex-col gap-6 justify-center text-white  sm:w-[40rem] lg:w-[50rem] sm:mx-auto sm:px-8 sm:rounded-b-2xl"
                 onSubmit={handleSubmit}
             >
                 {showSubmitErrors && (

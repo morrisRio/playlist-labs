@@ -69,11 +69,9 @@ function PlaylistHeader({
         router.refresh();
     };
 
-    const {
-        data: coverUrl,
-        error,
-        isLoading,
-    } = useSwrTokenRefresh<string>(playlist_id ? `/api/spotify/playlist/cover/${playlist_id}` : null);
+    const { data: coverUrl, isLoading } = useSwrTokenRefresh<string>(
+        playlist_id ? `/api/spotify/playlist/cover/${playlist_id}` : null
+    );
 
     const gradientImage = hue !== undefined ? getCssHueGradient(hue) : undefined;
 
@@ -216,7 +214,7 @@ function PlaylistHeader({
                 </div>
 
                 <div className="flex flex-col justify-between w-full pt-3 pb-2 px-4 bg-cover gap-5 sm:w-[40rem] lg:w-[50rem] sm:mx-auto relative sm:px-12">
-                    <div className="flex items-center w-full gap-6">
+                    <div className="flex items-center w-full gap-6 sm:justify-between">
                         <div className="relative size-36 rounded-lg overflow-hidden bg-ui-600 z-20">
                             {hue ? (
                                 <div className="size-full" style={gradientStyle}></div>

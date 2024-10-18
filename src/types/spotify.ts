@@ -80,7 +80,7 @@ export interface Track {
 }
 
 export interface Seed {
-    spotify: string;
+    spotify?: string;
     type: string;
     id: string;
     title: string;

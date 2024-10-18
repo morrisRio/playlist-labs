@@ -193,8 +193,9 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
         //get the data from the request
         const rawData = await req.json();
-
+        debugLog("API: data received", rawData);
         const newSongSettings = sanitizeBoolean(rawData.newSongsSettings);
+        debugLog("API: newSongSettings", newSongSettings);
 
         let playlist_id: string;
         let preferences: Preferences | undefined;

@@ -1,4 +1,5 @@
 import { Preferences, Rule, Seed, SubmitPlaylistData, SubmitRefreshData } from "@/types/spotify";
+import { debugLog } from "./utils";
 
 // Utility functions for sanitization
 
@@ -113,6 +114,7 @@ export function sanitizeAndValidatePreferences(obj: unknown): {
     data?: Preferences;
     error?: string;
 } {
+    debugLog("sanizing preferences");
     if (typeof obj !== "object" || obj === null) {
         return { valid: false, error: "Invalid preferences object" };
     }
@@ -147,6 +149,7 @@ function sanitizeAndValidateSeed(obj: unknown): {
     data?: Seed;
     error?: string;
 } {
+    debugLog("sanizing seed:", obj);
     if (typeof obj !== "object" || obj === null) {
         return { valid: false, error: "Invalid seed object" };
     }
@@ -159,7 +162,7 @@ function sanitizeAndValidateSeed(obj: unknown): {
 
     // Sanitize and construct valid seed object
     const sanitizedSeed: Seed = {
-        spotify: sanitizeString(seed.spotify, "url"),
+        ...(seed.spotify && { spotify: sanitizeString(seed.spotify, "url") }),
         type: sanitizeString(seed.type, "text"),
         id: sanitizeString(seed.id, "id"),
         title: sanitizeString(seed.title, "displayText"),
@@ -178,6 +181,7 @@ function sanitizeAndValidateRule(obj: unknown): {
     data?: Rule;
     error?: string;
 } {
+    debugLog("sanizing rule:", obj);
     if (typeof obj !== "object" || obj === null) {
         return { valid: false, error: "Invalid rule object" };
     }
@@ -313,6 +317,7 @@ export function vsPlaylistData(data: unknown): validationResponse<SubmitPlaylist
     }
 
     if (errors.length > 0) {
+        console.error("Validation errors:", errors);
         return { valid: false, errors };
     }
 
