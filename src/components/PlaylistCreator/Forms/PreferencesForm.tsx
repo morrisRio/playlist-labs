@@ -15,8 +15,8 @@ interface Preferences {
 }
 
 export default function PreferencesForm({ preferences, onChange }: PreferencesProps) {
-    const inputStyle =
-        "flex-grow p-2 px-3 rounded-lg border border-ui-700 bg-ui-850 text-ui-500 focus:outline-none focus:ring focus:border-themetext text-sm appearance-none";
+    const selectStyle =
+        "flex-grow p-2 px-3 rounded-lg bg-ui-800 text-ui-500 focus:outline-none focus:ring focus:border-themetext text-sm appearance-none";
     return (
         <div className="flex flex-col gap-4 rounded-xl p-4">
             <label htmlFor="frequency" className="flex flex-col justify-between text-base text-ui-500">
@@ -24,7 +24,7 @@ export default function PreferencesForm({ preferences, onChange }: PreferencesPr
                 <div className="flex w-full justify-between gap-2 items-center mt-4">
                     <div className="flex-grow flex relative items-center">
                         <select
-                            className={inputStyle}
+                            className={selectStyle}
                             name="frequency"
                             value={preferences.frequency}
                             onChange={onChange}
@@ -55,7 +55,7 @@ export default function PreferencesForm({ preferences, onChange }: PreferencesPr
                                     <p className="text-base text-ui-600">on</p>
                                     <div className="flex-grow flex relative items-center">
                                         <select
-                                            className={inputStyle}
+                                            className={selectStyle}
                                             name="on"
                                             value={preferences.on}
                                             onChange={onChange}
@@ -80,7 +80,7 @@ export default function PreferencesForm({ preferences, onChange }: PreferencesPr
                                     <p className="text-base text-ui-600">at the</p>
                                     <div className="flex-grow flex relative items-center">
                                         <select
-                                            className={inputStyle}
+                                            className={selectStyle}
                                             name="on"
                                             value={preferences.on}
                                             onChange={onChange}
@@ -114,7 +114,7 @@ export default function PreferencesForm({ preferences, onChange }: PreferencesPr
                     Number of Tracks
                     <input
                         type="number"
-                        className="text-sm hide-arrows p-2 rounded-lg border border-ui-700 bg-ui-850 max-w-12  text-ui-500"
+                        className="text-sm hide-arrows p-2 rounded-lg bg-ui-800 max-w-12  text-ui-500"
                         name="amount"
                         value={preferences.amount}
                         min="5"

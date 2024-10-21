@@ -159,7 +159,6 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
         return errors;
     }, []);
 
-    //TODO: feature: differentiate saving the settings and regenerating the playlist
     const [showSubmitErrors, setShowSubmitErrors] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [submitErrors, setSubmitErrors] = useState<string[]>([]);
@@ -183,9 +182,6 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
     });
 
     const finishSubmit = useCallback(async () => {
-        //TODO: differentiate between saving the settings and regenerating the playlist
-        //only get difference between the current state and the initial state
-        //if difference.seeds || difference.rules => PUT else PATCH
         const finishSubmit = async () => {
             let submitPayload: any = {};
             submitPayload.playlist_id = sendId && playlist_id ? playlist_id : undefined;
@@ -219,7 +215,19 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
                 });
         };
         finishSubmit();
-    }, [preferences, seeds, rules, playlist_id, router]);
+    }, [
+        preferences,
+        seeds,
+        rules,
+        playlist_id,
+        router,
+        newSongSettings,
+        sendId,
+        sendPrefs,
+        sendRules,
+        sendSeeds,
+        submitMethod,
+    ]);
 
     const handleSubmit = useCallback(
         (e: FormEvent<HTMLFormElement>) => {
@@ -243,7 +251,7 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
         setPreferences(initialState.preferences);
         setSeeds(initialState.seeds);
         setRules(initialState.rules);
-    }, []);
+    }, [initialState.preferences, initialState.rules, initialState.seeds]);
 
     const emptySettings = useCallback(() => {
         setPreferences({
@@ -254,7 +262,15 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
         });
         setSeeds(emptyPlaylist.seeds);
         setRules(emptyPlaylist.rules);
-    }, []);
+    }, [
+        emptyPlaylist.preferences.amount,
+        emptyPlaylist.preferences.frequency,
+        emptyPlaylist.preferences.hue,
+        emptyPlaylist.rules,
+        emptyPlaylist.seeds,
+        playlist_id,
+        preferences.name,
+    ]);
 
     const { mutate } = useSWRConfig();
 
@@ -268,7 +284,7 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
             setSeeds(playlist.seeds);
             setRules(playlist.rules ? completeRules(playlist.rules) : emptyPlaylist.rules);
         }
-    }, [playlist]);
+    }, [playlist, emptyPlaylist.rules, playlist_id, mutate]);
 
     return (
         <>

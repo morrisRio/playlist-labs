@@ -2,9 +2,6 @@
 import { BsSpotify } from "react-icons/bs";
 import { signIn } from "next-auth/react";
 import Logo from "../../../../../public/logo-small.svg";
-import SpotifyFull from "../../../../../public/spotify-full.svg";
-
-//TODO: PRODUCTION https://github.com/nextauthjs/next-auth/discussions/4394#discussioncomment-3859770
 
 function Login() {
     const handleLogin = () => {
