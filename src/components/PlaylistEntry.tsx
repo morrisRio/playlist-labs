@@ -30,23 +30,24 @@ function PlaylistEntry({ playlist }: PlaylistProps) {
     return (
         <TransitionLink href={`/pages/edit-playlist/${playlist_id}`} enter>
             <div className="flex gap-4 items-center w-full bg-ui-900 border border-ui-700 rounded-lg">
-                {coverUrl ? (
-                    <div className="size-24 bg-ui-800 rounded-l-lg relative overflow-hidden flex-none">
+                <div className="size-24 bg-ui-800 rounded-l-lg relative overflow-hidden flex-none">
+                    {coverUrl ? (
                         <Image src={coverUrl} alt="playlist cover image" fill={true} sizes="96px" />
-                    </div>
-                ) : isLoading ? (
-                    <div className="size-24 bg-ui-850 rounded-l-lg flex-none p-5">
-                        <Lottie animationData={Loading}> </Lottie>
-                    </div>
-                ) : error ? (
-                    <div className="size-24 bg-ui-800 rounded-l-lg flex-none p-5">
-                        <p className="text-ui-700">
+                    ) : error ? (
+                        <p className="text-ui-700 p-4">
                             <Logo></Logo>
                         </p>
-                    </div>
-                ) : (
-                    <div className="size-24 bg-ui-800 rounded-l-lg"></div>
-                )}
+                    ) : (
+                        <div className="size-24 bg-ui-800/30 rounded-l-lg flex-none p-5">
+                            <Lottie animationData={Loading}> </Lottie>
+                        </div>
+                    )}
+                    {isLoading && (
+                        <div className="absolute inset-0 size-24  bg-ui-850/30 rounded-l-lg flex-none p-5">
+                            <Lottie animationData={Loading}> </Lottie>
+                        </div>
+                    )}
+                </div>
                 <div className="flex flex-col overflow-hidden flex-grow">
                     <SmartMarquee divider={true}>
                         <h4 className="font-semibold mb-0 text-nowrap text-base text-themetext-nerfed">{name}</h4>

@@ -1,4 +1,5 @@
 import { twUi700, twUi500 } from "@/lib/utils";
+
 <MdKeyboardArrowDown />;
 import { MdInfoOutline, MdKeyboardArrowDown } from "react-icons/md";
 
@@ -17,6 +18,7 @@ interface Preferences {
 export default function PreferencesForm({ preferences, onChange }: PreferencesProps) {
     const selectStyle =
         "flex-grow p-2 px-3 rounded-lg bg-ui-800 text-ui-500 focus:outline-none focus:ring focus:border-themetext text-sm appearance-none";
+
     return (
         <div className="flex flex-col gap-4 rounded-xl p-4">
             <label htmlFor="frequency" className="flex flex-col justify-between text-base text-ui-500">

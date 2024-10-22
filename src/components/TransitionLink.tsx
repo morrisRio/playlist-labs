@@ -2,15 +2,12 @@
 import { ReactNode, useEffect, useRef } from "react";
 import Link, { LinkProps } from "next/link";
 import { useRouter } from "nextjs-toploader/app";
+import { sleep } from "@/lib/utils";
 
 interface TransitionLinkProps extends LinkProps {
     children: ReactNode;
     href: string;
     enter?: boolean;
-}
-
-function sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export default function TransitionLink({ children, href, enter = false, ...props }: TransitionLinkProps) {
@@ -62,7 +59,7 @@ export default function TransitionLink({ children, href, enter = false, ...props
 
             if (navigateToRef.current === href) animateBack();
         };
-    }, []);
+    }, [enter, href]);
 
     return (
         <>
@@ -72,7 +69,7 @@ export default function TransitionLink({ children, href, enter = false, ...props
                 onClick={(e) => {
                     handleTransition(e);
                 }}
-                className=""
+                className="py-2 px-4 -mx-4 -my-2"
             >
                 {children}
             </Link>

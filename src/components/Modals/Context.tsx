@@ -107,7 +107,7 @@ function ContextMenu({ contextTitle, contextIcon, children, className = "" }: Co
                     role="presentation"
                 ></div>
             )}
-            <div className="size-6 z-20 relative">
+            <div className="min-size-6 z-20 relative flex items-center">
                 {showContextMenu && (
                     <div
                         className="absolute -right-2 -top-2 gap-2 bg-ui-900 border border-ui-700 rounded-lg p-3"
@@ -126,7 +126,7 @@ function ContextMenu({ contextTitle, contextIcon, children, className = "" }: Co
                     </div>
                 )}
                 <div
-                    className="relative size-6 flex items-center justify-center"
+                    className="relative p-3 -m-3 flex items-center justify-center"
                     role="button"
                     aria-haspopup="menu"
                     aria-expanded={showContextMenu}

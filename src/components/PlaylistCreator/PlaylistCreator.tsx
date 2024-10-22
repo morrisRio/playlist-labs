@@ -1,5 +1,5 @@
 "use client";
-import { useState, FormEvent, useCallback, useEffect } from "react";
+import { useState, FormEvent, useCallback, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { preload, useSWRConfig } from "swr";
 
@@ -10,7 +10,7 @@ import Seeds from "./Forms/SeedsForm/Seeds";
 import UniModal from "../Modals/UniModal";
 
 import { useSubmitCase } from "@/lib/hooks/useSubmitCase";
-import { completeRules } from "@/lib/spotifyUtils";
+import { completeRules, emptyPlaylist } from "@/lib/spotifyUtils";
 
 import { Seed, Rule, Preferences, RuleInput, PlaylistData } from "@/types/spotify";
 
@@ -28,18 +28,6 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
     //to differentiate between creating a new playlist and updating an existing one
     const playlist_id = playlist?.playlist_id ? playlist.playlist_id : false;
 
-    const emptyPlaylist = {
-        preferences: {
-            name: "Playlist Name",
-            frequency: "weekly",
-            amount: 20,
-            hue: Math.floor(Math.random() * 360),
-            on: 4,
-        } as Preferences,
-        seeds: [] as Seed[],
-        rules: [] as Rule[],
-    };
-
     const initialState = {
         preferences: playlist?.preferences ? playlist.preferences : emptyPlaylist.preferences,
         seeds: playlist?.seeds ? playlist.seeds : emptyPlaylist.seeds,
@@ -51,6 +39,7 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
     const [preferences, setPreferences] = useState<Preferences>(initialState.preferences);
 
     const handlePrefChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+        console.log("handlePrefChange");
         const { name, value } = e.target;
         let valueParsed: string | number = value;
         if (name === "amount" || name === "on") valueParsed = parseInt(value);
@@ -124,7 +113,7 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
 
     const addRule = useCallback((rule: any) => {
         setRules((prevState) => {
-            return [...prevState, rule];
+            return [rule, ...prevState];
         });
     }, []);
 
@@ -262,15 +251,7 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
         });
         setSeeds(emptyPlaylist.seeds);
         setRules(emptyPlaylist.rules);
-    }, [
-        emptyPlaylist.preferences.amount,
-        emptyPlaylist.preferences.frequency,
-        emptyPlaylist.preferences.hue,
-        emptyPlaylist.rules,
-        emptyPlaylist.seeds,
-        playlist_id,
-        preferences.name,
-    ]);
+    }, [playlist_id, preferences.name]);
 
     const { mutate } = useSWRConfig();
 
@@ -284,7 +265,11 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
             setSeeds(playlist.seeds);
             setRules(playlist.rules ? completeRules(playlist.rules) : emptyPlaylist.rules);
         }
-    }, [playlist, emptyPlaylist.rules, playlist_id, mutate]);
+    }, [playlist, mutate, playlist_id]);
+
+    useEffect(() => {
+        console.log("state changed");
+    }, [playlist_id]);
 
     return (
         <>

@@ -302,7 +302,8 @@ const getRuleQuery = (rules: Rule[]): string => {
             if (Array.isArray(rule.value)) {
                 return `target_valence=${1 - rule.value[1] / 100}&target_energy=${rule.value[0] / 100}`;
             } else if (rule.type === "range" && typeof rule.value === "number") {
-                if (rule.name === "Tempo") return `target_${rule.name.toLowerCase()}=${rule.value}`;
+                if (rule.name === "Tempo" || rule.name === "Popularity")
+                    return `target_${rule.name.toLowerCase()}=${rule.value}`;
                 return `target_${rule.name.toLowerCase()}=${rule.value / 100}`;
             } else if (rule.type === "boolean" && typeof rule.value === "boolean") {
                 return `target_${rule.name.toLowerCase()}=${rule.value}`;
@@ -595,4 +596,16 @@ const fillSeeds = (seeds: Seed[], newSeeds: Seed[]): Seed[] => {
     const seedsNeeded = Math.min(maxLength - seeds.length, newSeeds.length);
     // Combine the original seeds with the needed amount of new seeds
     return [...seeds, ...newSeeds.slice(0, seedsNeeded)];
+};
+
+export const emptyPlaylist = {
+    preferences: {
+        name: "Playlist Name",
+        frequency: "weekly",
+        amount: 20,
+        hue: Math.floor(Math.random() * 360),
+        on: 4,
+    } as Preferences,
+    seeds: [] as Seed[],
+    rules: [] as Rule[],
 };

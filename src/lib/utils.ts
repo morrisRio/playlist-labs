@@ -2,6 +2,10 @@ import { Canvas } from "@napi-rs/canvas";
 import resolveConfig from "tailwindcss/resolveConfig";
 import tailwindConfig from "../../tailwind.config";
 
+export function sleep(ms: number): Promise<unknown> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 let debugMode = false;
 
 export const setDebugMode = (mode: boolean) => {

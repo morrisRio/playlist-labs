@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import UniModal from "@/components/Modals/UniModal";
 
 interface NameModalProps {
@@ -24,6 +24,21 @@ function NameModal({ name, onClose, onChange, initialName }: NameModalProps) {
         onClose();
     };
 
+    //TODO: fix autofocus
+    // const [feedback, setFeedback] = useState(false);
+
+    // useEffect(() => {
+    //     setTimeout(setFocus, 1000);
+    // }, []);
+
+    //this doesnt work because of browser being cautious of automated actions, would need to be triggered by userEvent.
+
+    //need input ref before clicking on shownamemodal
+    // const setFocus = () => {
+    //     inputElement.current?.focus();
+    //     setFeedback(true);
+    // };
+
     return (
         <UniModal
             position="top"
@@ -44,6 +59,10 @@ function NameModal({ name, onClose, onChange, initialName }: NameModalProps) {
                 placeholder="Playlist Name"
                 className="p-3 px-6 w-full bg-ui-850 focus:outline-none placeholder-ui-600 text-lg text-ui-400 -mb-3 border border-ui-700 border-x-0 rounded-none"
             />
+            {/* <button className="mt-10 p-4" onClick={setFocus}>
+                focus
+            </button> */}
+            {/* {feedback && <p className="text-red-500">Name cannot be empty</p>} */}
         </UniModal>
     );
 }

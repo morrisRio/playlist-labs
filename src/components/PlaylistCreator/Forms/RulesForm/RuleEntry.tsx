@@ -6,6 +6,7 @@ import UniModal from "@/components/Modals/UniModal";
 import { Rule } from "@/types/spotify";
 
 import { MdRemoveCircleOutline, MdAddCircleOutline, MdInfoOutline } from "react-icons/md";
+import { twUi500, twUi700 } from "@/lib/utils";
 
 type RuleEntryProps = {
     rule: Rule;
@@ -38,6 +39,9 @@ export function RuleEntry({
         setShowInfo(false);
     };
 
+    const ruleMax = rule.name === "Tempo" && typeof rule.range[1] === "number" ? rule.range[1] : 100;
+    const ruleMin = rule.name === "Tempo" && typeof rule.range[0] === "number" ? rule.range[0] : 0;
+
     return (
         //it was the backdrop blur that was causing the issue
         <div className={`flex flex-col ${ruleCard} overflow-hidden`}>
@@ -58,7 +62,7 @@ export function RuleEntry({
                         <>
                             <input
                                 type="number"
-                                className="text-sm hide-arrows p-2 rounded-lg border border-ui-700 bg-ui-850 max-w-12  text-ui-500"
+                                className="text-sm hide-arrows p-2 rounded-lg border border-ui-700 bg-ui-850 max-w-12 text-ui-500"
                                 name="amount"
                                 value={rule.value}
                                 min="40"
@@ -89,12 +93,16 @@ export function RuleEntry({
                             <div className="w-full relative">
                                 <input
                                     className="rule-slider"
+                                    // style={{
+                                    //     backgroundColor: twUi700,
+                                    //     background: `linear-gradient(90deg, ${twUi500} ${
+                                    //         ((rule.value + 1) / ruleMax) * 100
+                                    //     }%, ${twUi700} ${((rule.value + 1) / ruleMax) * 100}%)`,
+                                    // }}
                                     type="range"
                                     name={rule.name}
-                                    min={rule.name === "Tempo" && typeof rule.range[0] === "number" ? rule.range[0] : 0}
-                                    max={
-                                        rule.name === "Tempo" && typeof rule.range[1] === "number" ? rule.range[1] : 100
-                                    }
+                                    min={ruleMin}
+                                    max={ruleMax}
                                     value={rule.value}
                                     onChange={onChange}
                                 />
