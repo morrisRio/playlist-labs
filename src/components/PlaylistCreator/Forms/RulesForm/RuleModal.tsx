@@ -27,7 +27,7 @@ function RuleModal({ onAdd, onRemove, onClose, rules }: RuleModalProps) {
     return (
         <>
             <div
-                className="bg-ui-800/30 fixed top-0 left-0 w-screen h-screen z-40 sm:backdrop-blur-[1px] sm:backdrop-brightness-75"
+                className="bg-ui-800/30 fixed top-0 left-0 w-screen h-screen z-50 sm:backdrop-blur-[1px] sm:backdrop-brightness-75"
                 onClick={onClose}
             ></div>
             <div

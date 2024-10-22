@@ -166,7 +166,7 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
     return (
         <>
             <div
-                className="bg-ui-800/30 fixed top-0 left-0 w-screen h-screen z-40 sm:backdrop-blur-[1px] sm:backdrop-brightness-75"
+                className="bg-ui-800/30 fixed top-0 left-0 w-screen h-screen z-50 sm:backdrop-blur-[1px] sm:backdrop-brightness-75"
                 onClick={onClose}
             ></div>
             <div className="bg-ui-950 fixed h-screen overflow-hidden max-sm:w-full top-0 max-sm:left-0 z-50 flex flex-col sm:w-[42rem] lg:w-[52rem] sm:-mx-16 sm:my-14 sm:rounded-2xl  sm:max-h-[max(calc(100vh-8rem),30rem)] sm:border-ui-700 sm:border">

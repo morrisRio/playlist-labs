@@ -36,7 +36,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             >
                 <NextTopLoader height={2} color={twUi500} crawlSpeed={50} initialPosition={0.1} showSpinner={false} />
                 <main className="min-h-[calc(100vh-96px)] flex flex-col">{children}</main>
-                <div className="absolute text-ui-500 w-full z-50 bottom-8">
+                <div className="absolute text-ui-500 w-full z-40 bottom-8">
                     <div className="w-64 mx-auto flex gap-2 items-center">
                         <h5 className="text-nowrap">Powered by</h5>
                         <div className="text-white w-full">
