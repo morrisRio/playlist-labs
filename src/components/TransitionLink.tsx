@@ -69,7 +69,6 @@ export default function TransitionLink({ children, href, enter = false, ...props
                 onClick={(e) => {
                     handleTransition(e);
                 }}
-                className="py-2 px-4 -mx-4 -my-2"
             >
                 {children}
             </Link>
