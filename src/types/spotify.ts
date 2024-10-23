@@ -1,6 +1,7 @@
 import { DefaultSession } from "next-auth";
 import { Document } from "mongoose";
 
+//Auth types ================================================================
 interface AuthUser {
     name: string;
     email: string;
@@ -17,7 +18,7 @@ export interface AuthSession extends Omit<DefaultSession, "user"> {
     user: AuthUser;
 }
 
-//Spotify API return Types================================================================
+//Spotify API return Types ================================================================
 
 export type ErrorRes = {
     error: {
@@ -77,6 +78,17 @@ export interface Track {
     track_number: number;
     type: string;
     uri: string;
+}
+
+//playlistLab Types ================================================================
+
+export interface PlaylistData {
+    playlist_id?: string;
+    preferences: Preferences;
+    seeds: Seed[];
+    rules?: Rule[];
+    trackHistory?: PlaylistVersion[] | string[];
+    coverUrl?: string;
 }
 
 export interface Seed {
@@ -142,25 +154,7 @@ export interface AxisRuleInput extends EventTarget {
     type: "axis";
 }
 
-//Mongo Types================================================================
-
-export type PlaylistUpdate = {
-    playlist_id: string;
-    preferences?: Preferences;
-    seeds?: Seed[];
-    rules?: Rule[];
-    trackHistory?: string[];
-};
-
-export interface PlaylistData {
-    playlist_id?: string;
-    preferences: Preferences;
-    seeds: Seed[];
-    rules?: Rule[];
-    trackHistory?: string[];
-    coverUrl?: string;
-}
-
+//Submit Data Types for API calls ===========================================
 export interface SubmitPlaylistData extends PlaylistData {
     newSongsSettings?: boolean;
 }
@@ -170,12 +164,24 @@ export interface SubmitRefreshData {
     newSongsSettings: false;
 }
 
+//Mongo Types ================================================================
+
+//on new writes we adjust trackHistory to be an array of PlaylistVersions
+//TODO: utility function to convert old trackHistory to new format
+export type PlaylistUpdate = {
+    playlist_id: string;
+    preferences?: Preferences;
+    seeds?: Seed[];
+    rules?: Rule[];
+    trackHistory?: PlaylistVersion[];
+};
+
 export interface MongoPlaylistData extends Document {
     playlist_id: string;
     preferences: Preferences;
     seeds: Seed[];
     rules?: Rule[];
-    trackHistory: string[];
+    trackHistory: PlaylistVersion[] | string[];
     lastUpdated: Date;
 }
 
@@ -190,4 +196,10 @@ export interface MongoAccount extends Document {
     access_token: string;
     refresh_token: string;
     token_expires: number;
+}
+
+//preparing db for feature: versioning
+export interface PlaylistVersion {
+    added_at: Date;
+    tracks: string[];
 }

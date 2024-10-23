@@ -19,7 +19,7 @@ export const regeneratePlaylist = async (
     userId: string,
     newSettings?: boolean
 ): Promise<regenerateRes> => {
-    let { playlist_id, preferences, seeds, rules, trackHistory } = playlistData;
+    let { playlist_id, preferences, seeds, rules, playlist_versions } = playlistData;
 
     if (!preferences || !seeds || !playlist_id) {
         console.error("Missing data for playlist regeneration");

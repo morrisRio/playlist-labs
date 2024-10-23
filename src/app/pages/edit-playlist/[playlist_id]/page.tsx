@@ -1,6 +1,6 @@
 import { auth } from "@/lib/serverUtils";
 import { PlaylistData } from "@/types/spotify";
-import PlaylistCreator from "@/components/PlaylistCreator/PlaylistCreator";
+import PlaylistEditor from "@/components/PlaylistCreator/PlaylistEditor";
 import { dbGetOnePlaylistData } from "@/lib/db/dbActions";
 import { redirect } from "next/navigation";
 import ClientSessionProvider from "@/components/ClientSessionProvider";
@@ -33,7 +33,7 @@ async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
             )}
             {playlistData && (
                 <ClientSessionProvider session={session}>
-                    <PlaylistCreator pageTitle="Edit Playlist" playlist={playlistData}></PlaylistCreator>
+                    <PlaylistEditor pageTitle="Edit Playlist" playlist={playlistData}></PlaylistEditor>
                 </ClientSessionProvider>
             )}
         </div>

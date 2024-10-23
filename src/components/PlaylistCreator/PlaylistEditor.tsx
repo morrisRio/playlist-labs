@@ -1,8 +1,9 @@
 "use client";
-import { useState, FormEvent, useCallback, useEffect, use } from "react";
+import { useState, FormEvent, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { preload, useSWRConfig } from "swr";
 
+import TrackHistory from "./TrackHistory";
 import PlaylistHeader from "./PlaylistHeader";
 import PreferencesForm from "./Forms/PreferencesForm";
 import Rules from "@/components/PlaylistCreator/Forms/RulesForm/Rules";
@@ -17,14 +18,15 @@ import { Seed, Rule, Preferences, RuleInput, PlaylistData } from "@/types/spotif
 import Lottie from "lottie-react";
 import Loading from "@/lib/lotties/loading.json";
 
-interface PlaylistFormProps {
+interface PlaylistEditorProps {
     pageTitle: string;
     playlist?: PlaylistData;
 }
 
-function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
+function PlaylistEditor({ playlist, pageTitle }: PlaylistEditorProps) {
     const router = useRouter();
 
+    if (playlist) console.log(playlist);
     //to differentiate between creating a new playlist and updating an existing one
     const playlist_id = playlist?.playlist_id ? playlist.playlist_id : false;
 
@@ -267,9 +269,7 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
         }
     }, [playlist, mutate, playlist_id]);
 
-    useEffect(() => {
-        console.log("state changed");
-    }, [playlist_id]);
+    const [showHistory, setShowHistory] = useState(true);
 
     return (
         <>
@@ -296,31 +296,48 @@ function PlaylistForm({ playlist, pageTitle }: PlaylistFormProps) {
                 emptySettings={emptySettings}
                 router={router}
             ></PlaylistHeader>
-            <form
-                id="playlist-form"
-                className="bg-ui-950 w-full h-fit flex flex-col gap-6 justify-center text-white  sm:w-[40rem] lg:w-[50rem] sm:mx-auto sm:px-8 sm:rounded-b-2xl"
-                onSubmit={handleSubmit}
+            <button
+                className="text-white h-16"
+                onClick={(e) => {
+                    e.preventDefault();
+                    setShowHistory(!showHistory);
+                }}
             >
-                {showSubmitErrors && (
-                    <UniModal
-                        title="We ran into some issues"
-                        onClose={() => setShowSubmitErrors(false)}
-                        closeTitle="Got it"
-                    >
-                        {submitErrors.map((error, i) => (
-                            <p key={i}>{error}</p>
-                        ))}
-                    </UniModal>
-                )}
+                History
+            </button>
+            {/* TODO: remove this for push, only preparing feature */}
+            {showHistory && playlist?.trackHistory && (
+                <>
+                    <TrackHistory trackHistory={playlist.trackHistory}></TrackHistory>
+                </>
+            )}
+            {!showHistory && (
+                <form
+                    id="playlist-form"
+                    className="bg-ui-950 w-full h-fit flex flex-col gap-6 justify-center text-white  sm:w-[40rem] lg:w-[50rem] sm:mx-auto sm:px-8 sm:rounded-b-2xl"
+                    onSubmit={handleSubmit}
+                >
+                    {showSubmitErrors && (
+                        <UniModal
+                            title="We ran into some issues"
+                            onClose={() => setShowSubmitErrors(false)}
+                            closeTitle="Got it"
+                        >
+                            {submitErrors.map((error, i) => (
+                                <p key={i}>{error}</p>
+                            ))}
+                        </UniModal>
+                    )}
 
-                <PreferencesForm preferences={preferences} onChange={handlePrefChange} />
-                <hr className="border-ui-700"></hr>
-                <Seeds seeds={seeds} onRemove={removeSeed} onAdd={addSeed} />
-                <hr className="border-ui-700"></hr>
-                <Rules rules={rules} onAdd={addRule} onRemove={removeRule} onChange={handleRuleChange}></Rules>
-            </form>
+                    <PreferencesForm preferences={preferences} onChange={handlePrefChange} />
+                    <hr className="border-ui-700"></hr>
+                    <Seeds seeds={seeds} onRemove={removeSeed} onAdd={addSeed} />
+                    <hr className="border-ui-700"></hr>
+                    <Rules rules={rules} onAdd={addRule} onRemove={removeRule} onChange={handleRuleChange}></Rules>
+                </form>
+            )}
         </>
     );
 }
 
-export default PlaylistForm;
+export default PlaylistEditor;
