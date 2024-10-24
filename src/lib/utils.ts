@@ -38,11 +38,8 @@ export const getAppUrl = () => {
 };
 
 export const getCssHueGradient = (hue: number) => {
-    return `radial-gradient(circle at 30% 30%, hsl(${
-        (hue - 100) % 360
-    } 95% 47% / 30%), hsl(${hue} 94% 47% / 10%)), linear-gradient(-20deg, hsl(${hue} 89% 47%), hsl(${
-        (hue - 100) % 360
-    } 89% 47%)) `;
+    return `radial-gradient(circle at 30% 30%, hsl(${hue} 95% 47% / 30%), hsl(${(hue - 100) % 360} 95% 47% / 10%)), 
+    linear-gradient(-20deg, hsl(${(hue - 100) % 360} 89% 47%), hsl(${hue} 89% 47%)) `;
 };
 
 export const createCanvasGradient = (canvas: Canvas, hue: number) => {
@@ -57,16 +54,16 @@ export const createCanvasGradient = (canvas: Canvas, hue: number) => {
 
     // Draw linear gradient
     const linearGradient = ctx.createLinearGradient(0.364 * width, 0, width, height);
-    linearGradient.addColorStop(0, `hsl(${(hue - 100) % 360}, 89%, 47%)`);
-    linearGradient.addColorStop(1, `hsl(${hue}, 89%, 47%)`);
+    linearGradient.addColorStop(0, `hsl(${hue}, 89%, 47%)`);
+    linearGradient.addColorStop(1, `hsl(${(hue - 100) % 360}, 89%, 47%)`);
 
     ctx.fillStyle = linearGradient;
     ctx.fillRect(0, 0, width, height);
 
     // Draw radial gradient
     const radialGradient = ctx.createRadialGradient(0.3 * width, 0.3 * height, 0, 0.3 * width, 0.3 * height, width);
-    radialGradient.addColorStop(0, `hsl(${(hue - 100) % 360}, 95%, 47%, 0.3)`);
-    radialGradient.addColorStop(1, `hsl(${hue}, 95%, 47%, 0.1)`);
+    radialGradient.addColorStop(0, `hsl(${hue}, 95%, 47%, 0.3)`);
+    radialGradient.addColorStop(1, `hsl(${(hue - 10) % 360}, 95%, 47%, 0.1)`);
     ctx.fillStyle = radialGradient;
     ctx.fillRect(0, 0, width, height);
 };
