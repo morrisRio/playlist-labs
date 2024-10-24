@@ -26,7 +26,6 @@ interface PlaylistEditorProps {
 function PlaylistEditor({ playlist, pageTitle }: PlaylistEditorProps) {
     const router = useRouter();
 
-    if (playlist) console.log(playlist);
     //to differentiate between creating a new playlist and updating an existing one
     const playlist_id = playlist?.playlist_id ? playlist.playlist_id : false;
 
@@ -41,7 +40,6 @@ function PlaylistEditor({ playlist, pageTitle }: PlaylistEditorProps) {
     const [preferences, setPreferences] = useState<Preferences>(initialState.preferences);
 
     const handlePrefChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
-        console.log("handlePrefChange");
         const { name, value } = e.target;
         let valueParsed: string | number = value;
         if (name === "amount" || name === "on") valueParsed = parseInt(value);
@@ -221,7 +219,7 @@ function PlaylistEditor({ playlist, pageTitle }: PlaylistEditorProps) {
     ]);
 
     const handleSubmit = useCallback(
-        (e: FormEvent<HTMLFormElement>) => {
+        (e: React.PointerEvent<HTMLButtonElement>) => {
             e.preventDefault();
             e.stopPropagation();
 
@@ -260,7 +258,6 @@ function PlaylistEditor({ playlist, pageTitle }: PlaylistEditorProps) {
     useEffect(() => {
         const fetcher = (url: string) => fetch(url).then((res) => res.json());
         preload(`/api/spotify/top-items/tracks?time_range=short_term`, fetcher);
-        console.log("Use effect runs, playlist: ", playlist);
         if (playlist) {
             setTimeout(() => mutate(`/api/spotify/playlist/cover/${playlist_id}`), 100);
             setPreferences(playlist.preferences);
@@ -294,10 +291,10 @@ function PlaylistEditor({ playlist, pageTitle }: PlaylistEditorProps) {
                 emptySettings={emptySettings}
                 router={router}
             ></PlaylistHeader>
-            <form
+            <section
                 id="playlist-form"
                 className="bg-ui-950 w-full h-fit flex flex-col gap-6 justify-center text-white  sm:w-[40rem] lg:w-[50rem] sm:mx-auto sm:px-8 sm:rounded-b-2xl"
-                onSubmit={handleSubmit}
+                // onSubmit={handleSubmit}
             >
                 {showSubmitErrors && (
                     <UniModal
@@ -316,7 +313,7 @@ function PlaylistEditor({ playlist, pageTitle }: PlaylistEditorProps) {
                 <Seeds seeds={seeds} onRemove={removeSeed} onAdd={addSeed} />
                 <hr className="border-ui-700"></hr>
                 <Rules rules={rules} onAdd={addRule} onRemove={removeRule} onChange={handleRuleChange}></Rules>
-            </form>
+            </section>
         </>
     );
 }

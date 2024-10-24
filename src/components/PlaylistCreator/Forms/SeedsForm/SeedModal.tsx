@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, use } from "react";
 import useSWR from "swr";
 import type { Key, SWRConfiguration, SWRResponse } from "swr";
 
@@ -11,6 +11,8 @@ import { MdOutlineArrowBackIos, MdCheck } from "react-icons/md";
 
 import Lottie from "lottie-react";
 import Loading from "@/lib/lotties/loading.json";
+
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
 
 interface SeedModalProps {
     onAdd: (seed: Seed) => void;
@@ -155,13 +157,15 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
                     onRemove={onRemove}
                     key={seed.id}
                     added={isAdded(seed.id)}
-                    isAboveTheFold={index < 12}
+                    isAboveTheFold={index < 16}
                 />
             ));
         } catch {
             return false;
         }
     }, [searchResults, topItems, onAdd, onRemove, isAdded, error, showSearch, searchLoading, topLoading]);
+
+    useEscapeKey(onClose);
 
     return (
         <>

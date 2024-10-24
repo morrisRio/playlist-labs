@@ -60,7 +60,13 @@ export function SeedEntry({
                 </div>
             ) : thumbnail && typeof thumbnail === "string" ? (
                 <div className={`${imgClass} flex-none relative overflow-hidden`}>
-                    <Image src={thumbnail} alt={title} fill loading={isAboveTheFold && card ? undefined : "lazy"} />
+                    <Image
+                        src={thumbnail}
+                        alt={title}
+                        fill
+                        loading={isAboveTheFold && card ? undefined : "lazy"}
+                        unoptimized
+                    />
                 </div>
             ) : (
                 <div className={`${imgClass} flex-none bg-zinc-800`}></div>

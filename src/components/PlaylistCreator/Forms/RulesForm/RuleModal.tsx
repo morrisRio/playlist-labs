@@ -7,6 +7,8 @@ import { Rule } from "@/types/spotify";
 
 import { MdOutlineArrowBackIos } from "react-icons/md";
 
+import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
+
 interface RuleModalProps {
     onAdd: (rule: Rule) => void;
     onRemove: (id: string) => void;
@@ -23,6 +25,8 @@ function RuleModal({ onAdd, onRemove, onClose, rules }: RuleModalProps) {
             document.body.style.overflow = "auto";
         };
     }, []);
+
+    useEscapeKey(onClose);
 
     return (
         <>

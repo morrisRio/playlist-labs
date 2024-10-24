@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import UniModal from "@/components/Modals/UniModal";
+import { useInputKeyboard } from "@/lib/hooks/useInputKeyboard";
 
 interface NameModalProps {
     name: string;
     initialName: string;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onClose: () => void;
+    triggerTimestamp?: number;
 }
 
-function NameModal({ name, onClose, onChange, initialName }: NameModalProps) {
+function NameModal({ name, onClose, onChange, initialName, triggerTimestamp }: NameModalProps) {
     const inputElement = useRef<HTMLInputElement>(null);
     const [newName, setNewName] = useState(name);
 
@@ -24,20 +26,24 @@ function NameModal({ name, onClose, onChange, initialName }: NameModalProps) {
         onClose();
     };
 
-    //TODO: fix autofocus
-    // const [feedback, setFeedback] = useState(false);
+    useEffect(() => {
+        if (triggerTimestamp && inputElement.current) {
+            setFocus();
+            setTimeout(() => {
+                setFocus();
+            }, 50);
+        }
+    }, [triggerTimestamp]);
 
-    // useEffect(() => {
-    //     setTimeout(setFocus, 1000);
-    // }, []);
+    const setFocus = () => {
+        inputElement.current?.focus();
+    };
 
-    //this doesnt work because of browser being cautious of automated actions, would need to be triggered by userEvent.
-
-    //need input ref before clicking on shownamemodal
-    // const setFocus = () => {
-    //     inputElement.current?.focus();
-    //     setFeedback(true);
-    // };
+    useInputKeyboard({
+        inputRef: inputElement,
+        onEnter: saveName,
+        onEscape: onClose,
+    });
 
     return (
         <UniModal
@@ -59,10 +65,6 @@ function NameModal({ name, onClose, onChange, initialName }: NameModalProps) {
                 placeholder="Playlist Name"
                 className="p-3 px-6 w-full bg-ui-850 focus:outline-none placeholder-ui-600 text-lg text-ui-400 -mb-3 border border-ui-700 border-x-0 rounded-none"
             />
-            {/* <button className="mt-10 p-4" onClick={setFocus}>
-                focus
-            </button> */}
-            {/* {feedback && <p className="text-red-500">Name cannot be empty</p>} */}
         </UniModal>
     );
 }

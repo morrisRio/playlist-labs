@@ -2,6 +2,8 @@ import { useCallback, useMemo, useRef, useState, memo } from "react";
 
 import { MdClose, MdOutlineSearch } from "react-icons/md";
 
+import { useInputKeyboard } from "@/lib/hooks/useInputKeyboard";
+
 const debounce = (func: (arg0: string) => void, delay: number) => {
     let timeoutId: NodeJS.Timeout;
     return (val: string) => {
@@ -10,8 +12,16 @@ const debounce = (func: (arg0: string) => void, delay: number) => {
     };
 };
 
-function SearchBar({ setSearch }: { setSearch: (value: string) => void }) {
-    const inputRef = useRef(null);
+function SearchBar({
+    setSearch,
+    onEscape,
+    onEnter,
+}: {
+    setSearch: (value: string) => void;
+    onEscape?: () => void;
+    onEnter?: () => void;
+}) {
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const [query, setQuery] = useState("");
 
@@ -24,6 +34,17 @@ function SearchBar({ setSearch }: { setSearch: (value: string) => void }) {
         },
         [debouncedSetSearch]
     );
+
+    useInputKeyboard({
+        inputRef: inputRef,
+        onEnter: () => {
+            inputRef.current?.blur();
+        },
+        onEscape: () => {
+            inputRef.current?.blur();
+            if (onEscape) onEscape();
+        },
+    });
 
     return (
         <div className="relative -mx-4">

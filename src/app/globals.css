@@ -5,7 +5,7 @@
 @layer base {
     h1 {
         @apply text-3xl;
-        @apply font-semibold;
+        @apply font-medium;
         @apply text-themetext-nerfed;
     }
     h2 {
@@ -15,7 +15,7 @@
     }
     h3 {
         @apply text-xl;
-        @apply font-semibold;
+        @apply font-medium;
         @apply text-themetext-nerfed;
     }
     h4 {
@@ -117,24 +117,6 @@ input[type="range"].rule-slider {
 }
 
 /* chrome, safari */
-/* input[type="range"].rule-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    border: unset !important;
-    height: 100px;
-    width: 32px;
-    background-color: transparent !important;
-    background-image: linear-gradient(var(--color-themetext), var(--color-themetext));
-    background-size: 4px 100%; /* Visual width 
-    background-repeat: no-repeat;
-    background-position: center;
-    cursor: pointer;
-    /* background-color: var(--color-themetext); 
-    /* box-shadow: unset !important; 
-    box-shadow: -2000px 0 20px 2000px var(--color-ui-500);
-    cursor: pointer;
-    position: relative;
-} */
 input[type="range"].rule-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;

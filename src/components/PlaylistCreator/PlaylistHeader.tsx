@@ -27,7 +27,7 @@ interface PlaylistHeaderProps {
     name: string;
     initialName: string;
     hue: number | undefined;
-    action: (e: FormEvent<HTMLFormElement>) => void;
+    action: (e: React.PointerEvent<HTMLButtonElement>) => void;
     actionName: String;
     actionIcon: IconType;
     submitting: boolean;
@@ -47,6 +47,7 @@ const PlaylistHeader = memo(
         name,
         initialName,
         hue,
+        action,
         actionName,
         actionIcon: ActionIcon,
         submitting,
@@ -95,6 +96,14 @@ const PlaylistHeader = memo(
         );
 
         const actioNameShort = actionName.split(" ")[0];
+
+        const triggerTimestamp = useRef<number>();
+
+        const handleOpenNameModal = () => {
+            triggerTimestamp.current = Date.now();
+            setShowNameModal(true);
+        };
+
         return (
             <>
                 <header ref={headerRef} className="sticky top-0 z-40 w-full">
@@ -110,6 +119,8 @@ const PlaylistHeader = memo(
                                     fill={true}
                                     sizes="96px"
                                     style={styles.background}
+                                    unoptimized
+                                    priority
                                 />
                             ) : (
                                 <div className="w-full h-full bg-ui-800"></div>
@@ -125,8 +136,7 @@ const PlaylistHeader = memo(
                         </TransitionLink>
                         <h3 className="flex-grow">{pageTitle}</h3>
                         <button
-                            form="playlist-form"
-                            type="submit"
+                            onPointerDown={(e) => action(e)}
                             className={`flex items-center gap-2 text-lg text-themetext rounded-lg p-1 px-2 transition-opacity duration-200 mx-2 ${
                                 collapsed ? "opacity-100" : "invisible opacity-0"
                             }`}
@@ -213,10 +223,11 @@ const PlaylistHeader = memo(
                                     src={coverUrl}
                                     alt="playlist cover image"
                                     fill={true}
-                                    layout="fill"
-                                    objectFit="cover"
+                                    className="object-fill"
                                     sizes="96px"
                                     style={styles.background}
+                                    unoptimized
+                                    priority
                                 />
                             ) : (
                                 <div className="w-full h-full bg-ui-800"></div>
@@ -230,7 +241,14 @@ const PlaylistHeader = memo(
                                 {hue ? (
                                     <div className="size-full" style={styles.gradient}></div>
                                 ) : coverUrl ? (
-                                    <Image src={coverUrl} alt="playlist cover image" fill={true} sizes="96px" />
+                                    <Image
+                                        src={coverUrl}
+                                        alt="playlist cover image"
+                                        fill={true}
+                                        sizes="96px"
+                                        unoptimized
+                                        priority
+                                    />
                                 ) : (
                                     <div className="size-full bg-ui-800"></div>
                                 )}
@@ -250,8 +268,7 @@ const PlaylistHeader = memo(
                             {/* controls */}
                             <div className="flex flex-col items-center justify-between gap-1 z-30 -mt-5">
                                 <button
-                                    type="submit"
-                                    form="playlist-form"
+                                    onPointerDown={(e) => action(e)}
                                     className={`flex items-center gap-2 p-2 px-4 min-w-32 border border-themetext-nerfed text-themetext text-lg rounded-lg text-center`}
                                     disabled={submitting}
                                     ref={actionButtonRef}
@@ -275,7 +292,7 @@ const PlaylistHeader = memo(
                         <div className="flex justify-between z-10">
                             <h2>{name}</h2>
                             <div className="text-themetext/65">
-                                <MdModeEdit size="1.2em" onClick={() => setShowNameModal(true)} />
+                                <MdModeEdit size="1.2em" onPointerDown={() => handleOpenNameModal()} />
                             </div>
                         </div>
                     </div>
@@ -286,6 +303,7 @@ const PlaylistHeader = memo(
                         onClose={() => setShowNameModal(false)}
                         onChange={onChange}
                         initialName={initialName}
+                        triggerTimestamp={triggerTimestamp.current}
                     />
                 )}
                 {showGradient && <GradientModal onClose={() => setShowGradient(false)} onSave={onChange} />}

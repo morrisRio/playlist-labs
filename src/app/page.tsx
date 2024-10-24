@@ -49,8 +49,12 @@ export default async function Home() {
                 <h4 className="text-themetext-nerfed">Your Playlists</h4>
                 {playlistData &&
                     playlistData.length > 0 &&
-                    playlistData.map((playlist) => (
-                        <PlaylistEntry playlist={playlist} key={playlist.playlist_id?.toString()} />
+                    playlistData.map((playlist, index) => (
+                        <PlaylistEntry
+                            playlist={playlist}
+                            key={playlist.playlist_id?.toString()}
+                            isAboveTheFold={index < 10}
+                        />
                     ))}
                 {!playlistData ||
                     (playlistData.length === 0 && (

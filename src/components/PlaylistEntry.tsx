@@ -13,11 +13,12 @@ import Logo from "../../public/logo.svg";
 
 import useSwrTokenRefresh from "@/lib/hooks/useSwrTokenRefresh";
 
-interface PlaylistProps {
+interface PlaylistEntryProps {
     playlist: PlaylistData;
+    isAboveTheFold?: boolean;
 }
 
-function PlaylistEntry({ playlist }: PlaylistProps) {
+function PlaylistEntry({ playlist, isAboveTheFold }: PlaylistEntryProps) {
     const { playlist_id, seeds } = playlist;
     const { name, frequency, amount } = playlist.preferences;
 
@@ -32,7 +33,14 @@ function PlaylistEntry({ playlist }: PlaylistProps) {
             <div className="flex gap-4 items-center w-full bg-ui-900 border border-ui-700 rounded-lg">
                 <div className="size-24 bg-ui-800 rounded-l-lg relative overflow-hidden flex-none">
                     {coverUrl ? (
-                        <Image src={coverUrl} alt="playlist cover image" fill={true} sizes="96px" />
+                        <Image
+                            src={coverUrl}
+                            alt="playlist cover image"
+                            fill={true}
+                            sizes="96px"
+                            unoptimized
+                            priority={isAboveTheFold}
+                        />
                     ) : error ? (
                         <p className="text-ui-700 p-4">
                             <Logo></Logo>
@@ -50,7 +58,7 @@ function PlaylistEntry({ playlist }: PlaylistProps) {
                 </div>
                 <div className="flex flex-col overflow-hidden flex-grow">
                     <SmartMarquee divider={true}>
-                        <h4 className="font-semibold mb-0 text-nowrap text-base text-themetext-nerfed">{name}</h4>
+                        <h4 className="font-medium mb-0 text-nowrap text-base text-themetext-nerfed">{name}</h4>
                     </SmartMarquee>
                     <p className="text-ui-600 text-sm">
                         {" "}
@@ -67,7 +75,7 @@ function PlaylistEntry({ playlist }: PlaylistProps) {
                         ))}
                     </SmartMarquee>
                 </div>
-                <div className="text-ui-500">
+                <div className="text-ui-650">
                     <MdChevronRight size="1.5rem"></MdChevronRight>
                 </div>
             </div>

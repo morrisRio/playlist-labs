@@ -13,6 +13,11 @@ const ibmPlexSans = localFont({
             style: "normal",
         },
         {
+            path: "./fonts/IBMPlexSans-Medium.woff2",
+            weight: "500",
+            style: "normal",
+        },
+        {
             path: "./fonts/IBMPlexSans-Bold.woff2",
             weight: "700",
             style: "normal",
