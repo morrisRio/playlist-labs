@@ -26,7 +26,7 @@ export default async function Home() {
     else playlistData = data;
 
     return (
-        <div className="h-full w-full p-4 flex flex-col gap-5 sm:w-[40rem] lg:w-[50rem] sm:mx-auto">
+        <div className="h-full w-full p-4 flex flex-grow flex-col gap-5 sm:w-[40rem] lg:w-[50rem] sm:mx-auto">
             <ClientSessionProvider session={session}>
                 <div className="flex justify-between gap-2 mt-8 items-center">
                     <Logo className="w-4 h-4 -mb-1"></Logo>
@@ -54,8 +54,8 @@ export default async function Home() {
                     ))}
                 {!playlistData ||
                     (playlistData.length === 0 && (
-                        <div className="size-full flex-grow flex items-center justify-evenly bg-ui-850 text-ui-600 rounded-lg border border-ui-800 mb-16">
-                            <p className="text-center mb-16">
+                        <div className="size-full flex-grow flex flex-col items-center bg-ui-850 text-ui-600 rounded-lg border border-ui-800">
+                            <p className="text-center mt-16">
                                 You don&apos;t have any playlists yet. <br /> Create one now!
                             </p>
                         </div>

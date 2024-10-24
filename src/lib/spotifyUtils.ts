@@ -1,25 +1,46 @@
 import formatter from "numbuffix";
-import { Seed, Rule, Preferences, Track, Artist, MongoPlaylistData, PlaylistData } from "@/types/spotify";
+import {
+    Seed,
+    Rule,
+    Preferences,
+    Track,
+    Artist,
+    MongoPlaylistData,
+    PlaylistData,
+    PlaylistVersion,
+} from "@/types/spotify";
 import { allRules } from "@/lib/spotifyConstants";
 import { spotifyGet, spotifyPost, spotifyPut } from "@/lib/serverUtils";
 import { ErrorRes } from "@/types/spotify";
 import { debugLog, setDebugMode } from "@/lib/utils";
-import { dbGetOneUserPlaylist, dbUpdatePlaylist } from "./db/dbActions";
-import { revalidateTag } from "next/cache";
 
 interface RegenError extends ErrorRes {
     data: null;
 }
 
-export type regenerateRes = { data: PlaylistData; error: null } | RegenError;
+export type regenerateRes = { data: { newTrackHistory: PlaylistVersion[] }; error: null } | RegenError;
 
+/**
+ * Regenerates a Spotify playlist based on the provided data and settings.
+ *
+ * @param playlistData - The data of the playlist to regenerate, which can be of type `MongoPlaylistData` or `PlaylistData`.
+ * @param accessToken - The access token for Spotify API authentication.
+ * @param newDescription - Optional boolean indicating whether to change the description of the playlist.
+ * @returns A promise that resolves to an object containing either the new track history or an error.
+ *
+ * @remarks
+ * - The function checks if the playlist exists and follows it if it doesn't.
+ * - It flushes the playlist before adding new tracks.
+ * - If `newDescription` is true, it updates the playlist details with new settings.
+ * - It fetches new track recommendations and adds them to the playlist.
+ * - If fetching new tracks fails, it falls back to simple recommendations.
+ */
 export const regeneratePlaylist = async (
     playlistData: MongoPlaylistData | PlaylistData,
     accessToken: string,
-    userId: string,
-    newSettings?: boolean
+    newDescription?: boolean
 ): Promise<regenerateRes> => {
-    let { playlist_id, preferences, seeds, rules, playlist_versions } = playlistData;
+    let { playlist_id, preferences, seeds, rules, trackHistory } = playlistData;
 
     if (!preferences || !seeds || !playlist_id) {
         console.error("Missing data for playlist regeneration");
@@ -60,9 +81,9 @@ export const regeneratePlaylist = async (
     }
 
     let trackIdsToAdd: string[] | ErrorRes = [];
-    //TODO: fidelity: could: add a toogle in preferences to allow old tracks
-    //FOR NOW: always get new tracks
-    if (newSettings) {
+    //TODO: FIDELITY: could: add a toogle in preferences to allow old tracks
+    //for now: always get new tracks
+    if (newDescription) {
         //update the description with new settings
         const preferencesBody = {
             name: preferences.name,
@@ -86,6 +107,7 @@ export const regeneratePlaylist = async (
     //if the settings are still the same and we want to aknowldge the history we need the db entry
     //if we dont have the db entry we need to get it
     // let trackHistory: string[];
+    ////new settings are currently new description
     // if (!newSettings && playlistData.trackHistory !== undefined) {
     //     const dbUserPlaylistData = await dbGetOneUserPlaylist(userId, playlist_id);
     //     if (dbUserPlaylistData.error || !dbUserPlaylistData.data || dbUserPlaylistData.data.playlists.length === 0) {
@@ -103,13 +125,23 @@ export const regeneratePlaylist = async (
     // }
 
     if (!trackHistory) trackHistory = [];
-    trackIdsToAdd = await getOnlyNewRecommendations(accessToken, preferences.amount, seeds, rules, trackHistory);
 
-    //double failsafe if not enough new tracks are found
+    //TODO: remove after full migration
+    const formattedTrackHistory = convertIdArraytoPlaylistVersion(trackHistory, preferences.amount);
+
+    trackIdsToAdd = await getOnlyNewRecommendations(
+        accessToken,
+        preferences.amount,
+        seeds,
+        rules,
+        formattedTrackHistory
+    );
+
     if ("error" in trackIdsToAdd) {
         console.error("Failed to get only new Tracks", trackIdsToAdd.error);
         console.error("trying simple recommandations instead");
 
+        //double failsafe if not enough new tracks are found
         const recommandationIds = await getRecommendations(accessToken, preferences.amount, seeds, rules);
 
         if ("error" in recommandationIds) {
@@ -140,22 +172,10 @@ export const regeneratePlaylist = async (
         return { data: null, error: { message: "Failed to add Recommendations" + message, status } };
     }
 
-    //TODO: fidelity: save all tracks to history with date and settingshash, so versions can be shown in frontend
-    // const dbSuccess = await dbUpdatePlaylist(userId, {
-    //     playlist_id,
-    //     preferences,
-    //     seeds,
-    //     rules,
-    //     trackHistory: [...trackHistory, ...trackIdsToAdd],
-    // });
+    formattedTrackHistory.push({ tracks: trackIdsToAdd, added_at: new Date() });
 
-    // if (!dbSuccess) {
-    //     console.error("Failed to save updated Playlist Data");
-    // }
-
-    if (newSettings) revalidateTag("playlists");
     return {
-        data: { playlist_id, preferences, seeds, rules, trackHistory: [...trackHistory, ...trackIdsToAdd] },
+        data: { newTrackHistory: formattedTrackHistory },
         error: null,
     };
 };
@@ -215,68 +235,6 @@ export const getThumbnail = (item: Artist | Track): string => {
         thumbnail = item.album.images[1] && item.album.images[1].url ? item.album.images[1].url : "";
     }
     return thumbnail;
-};
-
-/**
- * Fetches track recommendations from the Spotify API based on provided preferences, seeds, and rules.
- *
- * @param {string} accessToken - The access token for authenticating with the Spotify API.
- * @param {Preferences} preferences - The user's preferences, including the number of recommendations to fetch.
- * @param {Seed[]} seeds - An array of Seed objects used to generate recommendations.
- * @param {Rule[]} [rules] - Optional rules to refine the recommendations.
- * @returns {Promise<string[]>} - A promise that resolves to an array of Spotify track ids.
- *
- * This function constructs the query string for the API call from the seeds and rules, makes the API request,
- * and processes the response to extract and return an array of Spotify track URIs.
- */
-export const getRecommendations = async (
-    accessToken: string,
-    amount: number,
-    seeds: Seed[],
-    rules?: Rule[]
-): Promise<string[] | ErrorRes> => {
-    try {
-        debugLog(" - getting recommendations");
-        //create the query string for the api call from the seeds and rules
-        const limitQuery = "limit=" + amount;
-        const seedQuery = "&" + getSeedQuery(seeds);
-        const ruleQuery = rules ? "&" + getRuleQuery(rules) : "";
-
-        const validateTrackRes = (data: any) => {
-            if (!data || !data.tracks || !Array.isArray(data.tracks) || data.tracks.length === 0) {
-                return { valid: false, message: "Could not get recommandations", status: 500 };
-            }
-            return { valid: true };
-        };
-
-        interface TracksResponse {
-            tracks: Track[];
-            seeds: Seed[];
-        }
-
-        type TrackRes = TracksResponse | ErrorRes;
-
-        const trackRes: TrackRes = await spotifyGet(
-            `https://api.spotify.com/v1/recommendations?${limitQuery}${seedQuery}${ruleQuery}`,
-            accessToken,
-            validateTrackRes
-        );
-
-        if ("error" in trackRes) {
-            const { message, status } = trackRes.error;
-            debugLog("API - error", message);
-            return { error: { message, status } };
-        }
-
-        // //create the tracksquery
-        const tracksToAdd = trackRes.tracks.map((track) => track.id);
-
-        return tracksToAdd;
-    } catch (e) {
-        console.error("API: Failed to get recommendations", e);
-        if (typeof e === "string") return { error: { message: e, status: 500 } };
-        return { error: { message: "Failed to get recommendations", status: 500 } };
-    }
 };
 
 export const trackIdsToQuery = (tracks: string[]): string[] => {
@@ -469,22 +427,143 @@ export const createPlaylistDescription = (preferences: Preferences, seeds: Seed[
     }
 };
 
+export const convertIdArraytoPlaylistVersion = (
+    trackHistory: string[] | PlaylistVersion[],
+    lengthOfVersion: number
+): PlaylistVersion[] => {
+    // return as is, if already in the correct format
+    if (trackHistory.filter((track) => typeof track === "string").length === 0) {
+        return trackHistory as PlaylistVersion[];
+    }
+
+    //0: should be the oldest version
+    let rightFormatEntries: PlaylistVersion[] = [];
+
+    let wrongFormatEntries: string[] = [];
+
+    trackHistory.forEach((entry) => {
+        if (typeof entry === "string") {
+            wrongFormatEntries.push(entry);
+        } else if (
+            entry.added_at &&
+            typeof entry.added_at.getDate === "function" &&
+            entry.tracks &&
+            Array.isArray(entry.tracks)
+        ) {
+            //add it to the back of the array as it gets read from the front
+            rightFormatEntries.push(entry as PlaylistVersion);
+        } else {
+            console.error("Entry in trackHistory is in wrong format", entry);
+        }
+    });
+
+    let playlistVersions: PlaylistVersion[] = [];
+    for (let versionStart = 0; versionStart <= wrongFormatEntries.length; versionStart += lengthOfVersion) {
+        const version = trackHistory.slice(versionStart, versionStart + lengthOfVersion) as string[];
+        if (version.length === 0) break;
+        // add it to the front of the array
+        playlistVersions = [{ tracks: version, added_at: undefined }, ...playlistVersions];
+    }
+    //add the correct ones to the back
+    rightFormatEntries.forEach((newEntry) => playlistVersions.push(newEntry));
+    return playlistVersions;
+};
+
+/**
+ * Fetches track recommendations from the Spotify API based on provided preferences, seeds, and rules.
+ *
+ * @param {string} accessToken - The access token for authenticating with the Spotify API.
+ * @param {Preferences} preferences - The user's preferences, including the number of recommendations to fetch.
+ * @param {Seed[]} seeds - An array of Seed objects used to generate recommendations.
+ * @param {Rule[]} [rules] - Optional rules to refine the recommendations.
+ * @returns {Promise<string[]>} - A promise that resolves to an array of Spotify track ids.
+ *
+ * This function constructs the query string for the API call from the seeds and rules, makes the API request,
+ * and processes the response to extract and return an array of Spotify track URIs.
+ */
+export const getRecommendations = async (
+    accessToken: string,
+    amount: number,
+    seeds: Seed[],
+    rules?: Rule[]
+): Promise<string[] | ErrorRes> => {
+    try {
+        debugLog(" - getting recommendations");
+        //create the query string for the api call from the seeds and rules
+        const limitQuery = "limit=" + amount;
+        const seedQuery = "&" + getSeedQuery(seeds);
+        const ruleQuery = rules ? "&" + getRuleQuery(rules) : "";
+
+        const validateTrackRes = (data: any) => {
+            if (!data || !data.tracks || !Array.isArray(data.tracks) || data.tracks.length === 0) {
+                return { valid: false, message: "Could not get recommandations", status: 500 };
+            }
+            return { valid: true };
+        };
+
+        interface TracksResponse {
+            tracks: Track[];
+            seeds: Seed[];
+        }
+
+        type TrackRes = TracksResponse | ErrorRes;
+
+        const trackRes: TrackRes = await spotifyGet(
+            `https://api.spotify.com/v1/recommendations?${limitQuery}${seedQuery}${ruleQuery}`,
+            accessToken,
+            validateTrackRes
+        );
+
+        if ("error" in trackRes) {
+            const { message, status } = trackRes.error;
+            debugLog("API - error", message);
+            return { error: { message, status } };
+        }
+
+        // //create the tracksquery
+        const tracksToAdd = trackRes.tracks.map((track) => track.id);
+
+        return tracksToAdd;
+    } catch (e) {
+        console.error("API: Failed to get recommendations", e);
+        if (typeof e === "string") return { error: { message: e, status: 500 } };
+        return { error: { message: "Failed to get recommendations", status: 500 } };
+    }
+};
+
+/**
+ * Fetches new track recommendations ensuring they are not present in the track history.
+ * If the desired amount of new tracks is not met, it will attempt to fetch more recommendations
+ * up to 10 times, adjusting the seed tracks if necessary.
+ *
+ * @param {string} accessToken - The access token for Spotify API.
+ * @param {number} amount - The number of new recommendations desired.
+ * @param {Seed[]} seeds - The initial seed tracks for generating recommendations.
+ * @param {Rule[] | undefined} rules - Optional rules to apply to the recommendations.
+ * @param {PlaylistVersion[]} trackHistory - The history of previously recommended tracks.
+ * @returns {Promise<string[] | ErrorRes>} - A promise that resolves to an array of new track IDs or an error response.
+ *
+ * @throws {Error} - Throws an error if fetching recommendations fails.
+ */
 export const getOnlyNewRecommendations = async (
     accessToken: string,
     amount: number,
     seeds: Seed[],
     rules: Rule[] | undefined,
-    trackHistory: string[]
+    trackHistory: PlaylistVersion[]
 ): Promise<string[] | ErrorRes> => {
     try {
         debugLog("Ensuring new tracks");
-
         const recommandationIds = await getRecommendations(accessToken, 50, seeds, rules);
         if ("error" in recommandationIds) {
             throw new Error(recommandationIds.error.message);
         }
 
-        let newTracks = recommandationIds.filter((track) => !trackHistory.includes(track));
+        //ensure the trackHistory is in the correct format
+
+        const trackHistoryIds = trackHistory.map((version) => version.tracks).reduce((acc, val) => acc.concat(val), []);
+
+        let newTracks = recommandationIds.filter((track) => !trackHistoryIds.includes(track));
         let loops = 0;
 
         // Loop to fetch new recommendations if needed
@@ -495,39 +574,39 @@ export const getOnlyNewRecommendations = async (
                 const newRecs = await getRecommendations(accessToken, 50, seeds, rules);
                 if ("error" in newRecs) {
                     console.error("Error getting Recommendations in loop:", newRecs.error.message);
-                    newTracks = [...newTracks, ...getRandomTrackIds(trackHistory, amount - newTracks.length)];
+                    newTracks = [...newTracks, ...getRandomTrackIds(trackHistoryIds, amount - newTracks.length)];
                     break;
                 }
-                newTracks = filterNewTracks(newRecs, trackHistory, newTracks);
+                newTracks = filterNewTracks(newRecs, trackHistoryIds, newTracks);
             } else if (loops < 6) {
                 debugLog(`Loop ${loops + 1}:  ${newTracks.length} tracks -> Fetching with one random Seed`);
                 // Get 50 new recommendations with one random added seed from trackHistory
-                const randomSeed = seedFromId(getRandomTrackIds(trackHistory, 1)[0]);
+                const randomSeed = seedFromId(getRandomTrackIds(trackHistoryIds, 1)[0]);
                 const updatedSeeds = fillSeeds(seeds, [randomSeed]);
                 const newRecs = await getRecommendations(accessToken, 50, updatedSeeds, rules);
                 if ("error" in newRecs) {
                     console.error("Error getting Recommendations in loop:", newRecs.error.message);
-                    newTracks = [...newTracks, ...getRandomTrackIds(trackHistory, amount - newTracks.length)];
+                    newTracks = [...newTracks, ...getRandomTrackIds(trackHistoryIds, amount - newTracks.length)];
                     break;
                 }
-                newTracks = filterNewTracks(newRecs, trackHistory, newTracks);
+                newTracks = filterNewTracks(newRecs, trackHistoryIds, newTracks);
             } else if (loops < 10) {
                 debugLog(`Loop ${loops + 1}: ${newTracks.length} tracks -> Fetching with two random Seeds`);
                 // Get 50 new recommendations with two random seeds from trackHistory
-                const randomSeeds = getRandomTrackIds(trackHistory, 2).map((trackId) => seedFromId(trackId));
+                const randomSeeds = getRandomTrackIds(trackHistoryIds, 2).map((trackId) => seedFromId(trackId));
                 const updatedSeeds = fillSeeds(seeds, randomSeeds);
                 debugLog("new seeds: ", randomSeeds);
                 const newRecs = await getRecommendations(accessToken, 50, updatedSeeds, rules);
                 if ("error" in newRecs) {
                     console.error("Error getting Recommendations in loop:", newRecs.error.message);
-                    newTracks = [...newTracks, ...getRandomTrackIds(trackHistory, amount - newTracks.length)];
+                    newTracks = [...newTracks, ...getRandomTrackIds(trackHistoryIds, amount - newTracks.length)];
                     break;
                 }
-                newTracks = filterNewTracks(newRecs, trackHistory, newTracks);
+                newTracks = filterNewTracks(newRecs, trackHistoryIds, newTracks);
             } else {
                 debugLog(`Loop ${loops + 1}: ${newTracks.length} tracks -> giving up, fill with random from history`);
                 // Fill the missing amount with random seeds from the trackHistory after 10 loops
-                const randomSeeds = getRandomTrackIds(trackHistory, amount - newTracks.length);
+                const randomSeeds = getRandomTrackIds(trackHistoryIds, amount - newTracks.length);
                 newTracks = [...newTracks, ...randomSeeds];
                 break;
             }
@@ -536,7 +615,6 @@ export const getOnlyNewRecommendations = async (
         const tracksToAdd = newTracks.slice(0, amount);
         debugLog("Final new tracks", tracksToAdd.length);
         return tracksToAdd;
-        //TODO: last resort to vary rules
     } catch (e) {
         console.error("API: Failed to get recommendations", e);
         if (typeof e === "string") return { error: { message: e, status: 500 } };
@@ -560,11 +638,6 @@ const getRandomTrackIds = (trackHistory: string[], count: number): string[] => {
 
     return Array.from(randomIndices).map((index) => trackHistory[index]);
 };
-
-// // Vary the rules for generating recommendations
-// const varyRules = (rules: Rule[]): Rule[] => {
-//     // Implementation for varying the rules to get different recommendations
-// };
 
 // Filter out tracks already in the history and add only new tracks
 const filterNewTracks = (recommendations: string[], trackHistory: string[], currentTracks: string[]): string[] => {

@@ -61,36 +61,43 @@ export async function dbRegisterUser(
     await connectMongoDB();
     if (!userId) return false;
 
-    if ((await UserModel.exists({ spotify_id: userId })) && (await AccountModel.exists({ spotify_id: userId }))) {
+    const userExists = await UserModel.exists({ spotify_id: userId });
+    const accountExists = await AccountModel.exists({ spotify_id: userId });
+
+    if (userExists && accountExists) {
         debugLog("User already exists");
         return true;
     }
 
     let accountSuccess = false;
     let userSuccess = false;
-    try {
-        const userDoc = await UserModel.create({
-            name: name ? name : userId,
-            spotify_id: userId,
-            playlists: [],
-        });
-        debugLog("User created successfully", userDoc);
-        userSuccess = true;
-    } catch (error: any) {
-        console.error("Error creating User:", error.message);
+    if (!userExists) {
+        try {
+            const userDoc = await UserModel.create({
+                name: name ? name : userId,
+                spotify_id: userId,
+                playlists: [],
+            });
+            debugLog("User created successfully", userDoc);
+            userSuccess = true;
+        } catch (error: any) {
+            console.error("Error creating User:", error.message);
+        }
     }
 
-    try {
-        const accountDoc = await AccountModel.create({
-            spotify_id: userId,
-            access_token: accessToken,
-            refresh_token: refreshToken,
-            token_expires: expiresAt,
-        });
-        debugLog("Account created successfully", accountDoc);
-        accountSuccess = true;
-    } catch (error: any) {
-        console.error("Error creating Account:", error.message);
+    if (!accountExists) {
+        try {
+            const accountDoc = await AccountModel.create({
+                spotify_id: userId,
+                access_token: accessToken,
+                refresh_token: refreshToken,
+                token_expires: expiresAt,
+            });
+            debugLog("Account created successfully", accountDoc);
+            accountSuccess = true;
+        } catch (error: any) {
+            console.error("Error creating Account:", error.message);
+        }
     }
 
     return userSuccess || accountSuccess;

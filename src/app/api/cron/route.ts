@@ -54,45 +54,31 @@ export async function GET(req: NextRequest) {
                 }
             }
             for (const playlist of user.playlists) {
-                const { playlist_id, preferences, seeds, rules } = playlist;
                 debugLog("Playlist: " + playlist.preferences.name);
-                //TODO: could: find elegant way to check fetchCount
                 if (
                     playlist.preferences.frequency === "daily" ||
                     (playlist.preferences.frequency === "weekly" && playlist.preferences.on === now.getDay()) ||
-                    (playlist.preferences.frequency === "monthly" && playlist.preferences.on === now.getDate())
-                    // && playlist.lastUpdated.getDay() !== now.getDay()
+                    (playlist.preferences.frequency === "monthly" &&
+                        playlist.preferences.on === now.getDate() &&
+                        playlist.lastUpdated.getDay() !== now.getDay())
                 ) {
                     debugLog("Updating Playlist: " + playlist.preferences.name);
-                    const regenRes = await regeneratePlaylist(playlist, access_token, user.spotify_id);
+                    const regenRes = await regeneratePlaylist(playlist, access_token, false);
 
                     if (regenRes.error) {
                         console.error("Error regenerating Playlist: ", regenRes.error);
                         continue;
                     }
 
-                    const { trackHistory: updatedTrackhistory } = regenRes.data;
+                    const { newTrackHistory: updatedTrackhistory } = regenRes.data;
                     const dbSuccess = await dbUpdatePlaylist(user.spotify_id, {
-                        playlist_id,
+                        playlist_id: playlist.playlist_id,
                         trackHistory: updatedTrackhistory,
                     });
                     debugLog("DB update success: ", dbSuccess);
                 } else {
                     debugLog("Skipping Playlist: " + playlist.preferences.name);
                 }
-                // if (
-                //     playlist.preferences.frequency === "never" ||
-                //     (playlist.preferences.frequency === "daily" && playlist.lastUpdated.getDay() === now.getDay()) ||
-                //     (playlist.preferences.frequency === "weekly" && playlist.preferences.on !== now.getDay()) ||
-                //     (playlist.preferences.frequency === "monthly" && playlist.preferences.on !== now.getDate())
-                // ) {
-                //     debugLog("Skipping Playlist: " + playlist.preferences.name);
-                //     continue;
-                // }
-                //could be by returning the count from the function by default
-                //this could also help for flagging the playlist in db that trackHistory is making it hard to update
-                //-> begin using additional seeds earlier to reduce fetchCount
-                // (await regeneratePlaylist(playlist, access_token, user.spotify_id)) && playlistCount++;
             }
         }
 

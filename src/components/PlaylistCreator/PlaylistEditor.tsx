@@ -269,8 +269,6 @@ function PlaylistEditor({ playlist, pageTitle }: PlaylistEditorProps) {
         }
     }, [playlist, mutate, playlist_id]);
 
-    const [showHistory, setShowHistory] = useState(true);
-
     return (
         <>
             {submitting && (
@@ -296,46 +294,29 @@ function PlaylistEditor({ playlist, pageTitle }: PlaylistEditorProps) {
                 emptySettings={emptySettings}
                 router={router}
             ></PlaylistHeader>
-            <button
-                className="text-white h-16"
-                onClick={(e) => {
-                    e.preventDefault();
-                    setShowHistory(!showHistory);
-                }}
+            <form
+                id="playlist-form"
+                className="bg-ui-950 w-full h-fit flex flex-col gap-6 justify-center text-white  sm:w-[40rem] lg:w-[50rem] sm:mx-auto sm:px-8 sm:rounded-b-2xl"
+                onSubmit={handleSubmit}
             >
-                History
-            </button>
-            {/* TODO: remove this for push, only preparing feature */}
-            {showHistory && playlist?.trackHistory && (
-                <>
-                    <TrackHistory trackHistory={playlist.trackHistory}></TrackHistory>
-                </>
-            )}
-            {!showHistory && (
-                <form
-                    id="playlist-form"
-                    className="bg-ui-950 w-full h-fit flex flex-col gap-6 justify-center text-white  sm:w-[40rem] lg:w-[50rem] sm:mx-auto sm:px-8 sm:rounded-b-2xl"
-                    onSubmit={handleSubmit}
-                >
-                    {showSubmitErrors && (
-                        <UniModal
-                            title="We ran into some issues"
-                            onClose={() => setShowSubmitErrors(false)}
-                            closeTitle="Got it"
-                        >
-                            {submitErrors.map((error, i) => (
-                                <p key={i}>{error}</p>
-                            ))}
-                        </UniModal>
-                    )}
+                {showSubmitErrors && (
+                    <UniModal
+                        title="We ran into some issues"
+                        onClose={() => setShowSubmitErrors(false)}
+                        closeTitle="Got it"
+                    >
+                        {submitErrors.map((error, i) => (
+                            <p key={i}>{error}</p>
+                        ))}
+                    </UniModal>
+                )}
 
-                    <PreferencesForm preferences={preferences} onChange={handlePrefChange} />
-                    <hr className="border-ui-700"></hr>
-                    <Seeds seeds={seeds} onRemove={removeSeed} onAdd={addSeed} />
-                    <hr className="border-ui-700"></hr>
-                    <Rules rules={rules} onAdd={addRule} onRemove={removeRule} onChange={handleRuleChange}></Rules>
-                </form>
-            )}
+                <PreferencesForm preferences={preferences} onChange={handlePrefChange} />
+                <hr className="border-ui-700"></hr>
+                <Seeds seeds={seeds} onRemove={removeSeed} onAdd={addSeed} />
+                <hr className="border-ui-700"></hr>
+                <Rules rules={rules} onAdd={addRule} onRemove={removeRule} onChange={handleRuleChange}></Rules>
+            </form>
         </>
     );
 }

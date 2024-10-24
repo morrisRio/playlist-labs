@@ -200,6 +200,6 @@ export interface MongoAccount extends Document {
 
 //preparing db for feature: versioning
 export interface PlaylistVersion {
-    added_at: Date;
+    added_at?: Date;
     tracks: string[];
 }

@@ -127,6 +127,7 @@ export const authOptions: NextAuthOptions = {
                 return token;
             } else {
                 console.error("JWT: no account in db found");
+
                 if (token.accessTokenExpires && Date.now() / 1000 >= token.accessTokenExpires) {
                     //access token has expired, try to update it
                     debugLog("JWT: old token EXPIRED ", token.accessToken.slice(0, 10) + "...");
@@ -134,6 +135,7 @@ export const authOptions: NextAuthOptions = {
                     debugLog("JWT: new token", refreshToken.accessToken.slice(0, 10) + "...");
                     token = refreshToken;
                 }
+
                 const newAccount = await dbRegisterUser(
                     token.userId,
                     token.name,

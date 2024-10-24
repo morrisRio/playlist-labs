@@ -158,7 +158,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             preferences,
             seeds,
             rules,
-            trackHistory: recommandationIds,
+            trackHistory: [{ tracks: recommandationIds, added_at: new Date() }],
         });
 
         if (!dbSuccess) {
@@ -237,7 +237,8 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
         }
 
         //get the playlist data from the database, for refresh everything is need from the db
-        //for new settings only the track history is needed, TODO: COULD be optimized to only get the track history in this case
+        //for new settings only the track history is needed,
+        //TODO: COULD be optimized to only get the track history in this case
         const dbUserPlaylistData = await dbGetOneUserPlaylist(userId, playlist_id);
 
         if (dbUserPlaylistData.error || !dbUserPlaylistData.data || dbUserPlaylistData.data.playlists.length === 0) {
@@ -247,10 +248,9 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
         const dbPlaylistData = dbUserPlaylistData.data.playlists[0] as MongoPlaylistData;
 
         //get new recommendations and add them to the playlist
-        let update: regenerateRes;
         if (newSongSettings && preferences && seeds) {
             //settings changed, regenerate and save settings while ignoring the old tracks
-            update = await regeneratePlaylist(
+            const update = await regeneratePlaylist(
                 {
                     playlist_id,
                     preferences,
@@ -259,8 +259,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
                     trackHistory: dbPlaylistData.trackHistory,
                 } as PlaylistData,
                 accessToken,
-                userId,
-                newSongSettings
+                true
             );
 
             if (update.error) {
@@ -271,21 +270,21 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
             //TODO: fidelity: save all tracks to history with date and settingshash, so versions can be shown in frontend
             const dbSuccess = await dbUpdatePlaylist(userId, {
                 playlist_id,
-                preferences: update.data.preferences,
-                seeds: update.data.seeds,
-                rules: update.data.rules,
-                trackHistory: update.data.trackHistory,
+                preferences,
+                seeds,
+                rules,
+                trackHistory: update.data.newTrackHistory,
             });
             if (!dbSuccess) {
                 console.error("Failed to save updated Playlist Data");
+                return NextResponse.json({ message: "Failed to save updated Playlist Data" }, { status: 500 });
             }
         } else if (!newSongSettings) {
             // only run another generation with setting from db
-            update = await regeneratePlaylist(
+            const update = await regeneratePlaylist(
                 dbUserPlaylistData.data.playlists[0] as MongoPlaylistData,
                 accessToken,
-                userId,
-                newSongSettings
+                false
             );
 
             if (update.error) {
@@ -296,12 +295,14 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
             //TODO: fidelity: save all tracks to history with date and settingshash, so versions can be shown in frontend
             const dbSuccess = await dbUpdatePlaylist(userId, {
                 playlist_id,
-                trackHistory: update.data.trackHistory,
+                trackHistory: update.data.newTrackHistory,
             });
 
             if (!dbSuccess) {
                 console.error("Failed to save updated Playlist Data");
             }
+
+            revalidateTag("playlists");
         } else {
             return NextResponse.json(
                 { message: "To regenerate a Playlist with new Settings, you must provide those new settings" },

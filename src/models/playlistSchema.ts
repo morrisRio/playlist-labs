@@ -133,7 +133,26 @@ export const playlistSchema = new Schema<Playlist>({
     ],
     trackHistory: [
         {
-            type: String,
+            type: mongoose.Schema.Types.Mixed,
+            validate: {
+                validator: function (h: any) {
+                    // Custom validation function to check the type of value
+                    if (
+                        Array.isArray(h) &&
+                        h.every((version) => version.tracks?.every((track: unknown) => typeof track === "string")) &&
+                        h.every((version) => version.added_at.getDate)
+                    ) {
+                        // check if the array is an array of PlaylistVersion objects
+                        return true;
+                    } else if (typeof h === "string") {
+                        return true;
+                    } else {
+                        // Invalid value
+                        return false;
+                    }
+                },
+                message: "Rule value must be a string, a number, or an Array of two numbers",
+            },
             required: true,
         },
     ],
