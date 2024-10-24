@@ -87,7 +87,7 @@ export interface PlaylistData {
     preferences: Preferences;
     seeds: Seed[];
     rules?: Rule[];
-    trackHistory?: PlaylistVersion[] | string[];
+    trackHistory?: PlaylistVersion[];
     coverUrl?: string;
 }
 
@@ -165,9 +165,6 @@ export interface SubmitRefreshData {
 }
 
 //Mongo Types ================================================================
-
-//on new writes we adjust trackHistory to be an array of PlaylistVersions
-//TODO: utility function to convert old trackHistory to new format
 export type PlaylistUpdate = {
     playlist_id: string;
     preferences?: Preferences;
@@ -181,7 +178,7 @@ export interface MongoPlaylistData extends Document {
     preferences: Preferences;
     seeds: Seed[];
     rules?: Rule[];
-    trackHistory: PlaylistVersion[] | string[];
+    trackHistory: PlaylistVersion[];
     lastUpdated: Date;
 }
 

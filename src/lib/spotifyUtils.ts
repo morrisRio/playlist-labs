@@ -126,16 +126,7 @@ export const regeneratePlaylist = async (
 
     if (!trackHistory) trackHistory = [];
 
-    //TODO: remove after full migration
-    const formattedTrackHistory = convertIdArraytoPlaylistVersion(trackHistory, preferences.amount);
-
-    trackIdsToAdd = await getOnlyNewRecommendations(
-        accessToken,
-        preferences.amount,
-        seeds,
-        rules,
-        formattedTrackHistory
-    );
+    trackIdsToAdd = await getOnlyNewRecommendations(accessToken, preferences.amount, seeds, rules, trackHistory);
 
     if ("error" in trackIdsToAdd) {
         console.error("Failed to get only new Tracks", trackIdsToAdd.error);
@@ -172,10 +163,10 @@ export const regeneratePlaylist = async (
         return { data: null, error: { message: "Failed to add Recommendations" + message, status } };
     }
 
-    formattedTrackHistory.push({ tracks: trackIdsToAdd, added_at: new Date() });
+    trackHistory.push({ tracks: trackIdsToAdd, added_at: new Date() });
 
     return {
-        data: { newTrackHistory: formattedTrackHistory },
+        data: { newTrackHistory: trackHistory },
         error: null,
     };
 };
@@ -427,48 +418,6 @@ export const createPlaylistDescription = (preferences: Preferences, seeds: Seed[
     }
 };
 
-export const convertIdArraytoPlaylistVersion = (
-    trackHistory: string[] | PlaylistVersion[],
-    lengthOfVersion: number
-): PlaylistVersion[] => {
-    // return as is, if already in the correct format
-    if (trackHistory.filter((track) => typeof track === "string").length === 0) {
-        return trackHistory as PlaylistVersion[];
-    }
-
-    //0: should be the oldest version
-    let rightFormatEntries: PlaylistVersion[] = [];
-
-    let wrongFormatEntries: string[] = [];
-
-    trackHistory.forEach((entry) => {
-        if (typeof entry === "string") {
-            wrongFormatEntries.push(entry);
-        } else if (
-            entry.added_at &&
-            typeof entry.added_at.getDate === "function" &&
-            entry.tracks &&
-            Array.isArray(entry.tracks)
-        ) {
-            //add it to the back of the array as it gets read from the front
-            rightFormatEntries.push(entry as PlaylistVersion);
-        } else {
-            console.error("Entry in trackHistory is in wrong format", entry);
-        }
-    });
-
-    let playlistVersions: PlaylistVersion[] = [];
-    for (let versionStart = 0; versionStart <= wrongFormatEntries.length; versionStart += lengthOfVersion) {
-        const version = trackHistory.slice(versionStart, versionStart + lengthOfVersion) as string[];
-        if (version.length === 0) break;
-        // add it to the front of the array
-        playlistVersions = [{ tracks: version, added_at: undefined }, ...playlistVersions];
-    }
-    //add the correct ones to the back
-    rightFormatEntries.forEach((newEntry) => playlistVersions.push(newEntry));
-    return playlistVersions;
-};
-
 /**
  * Fetches track recommendations from the Spotify API based on provided preferences, seeds, and rules.
  *
@@ -559,14 +508,13 @@ export const getOnlyNewRecommendations = async (
             throw new Error(recommandationIds.error.message);
         }
 
-        //ensure the trackHistory is in the correct format
-
+        //get all strings in an array from the versions in trackHistory
         const trackHistoryIds = trackHistory.map((version) => version.tracks).reduce((acc, val) => acc.concat(val), []);
 
         let newTracks = recommandationIds.filter((track) => !trackHistoryIds.includes(track));
-        let loops = 0;
 
         // Loop to fetch new recommendations if needed
+        let loops = 0;
         while (newTracks.length < amount) {
             if (loops < 3) {
                 // Get 50 new recommendations
@@ -682,3 +630,49 @@ export const emptyPlaylist = {
     seeds: [] as Seed[],
     rules: [] as Rule[],
 };
+
+//TODO: MIGRATION: remove after full migration
+//i will leave this here for now. Migration is fully done but i want to keep this as it was kinda fun to write
+//so much trhill refactoring a live database, felt like a surgeon
+//i should maybe go get a life lol
+// export const convertIdArraytoPlaylistVersion = (
+//     trackHistory: string[] | PlaylistVersion[],
+//     lengthOfVersion: number
+// ): PlaylistVersion[] => {
+//     // return as is, if already in the correct format
+//     if (trackHistory.filter((track) => typeof track === "string").length === 0) {
+//         return trackHistory as PlaylistVersion[];
+//     }
+
+//     //0: should be the oldest version
+//     let rightFormatEntries: PlaylistVersion[] = [];
+
+//     let wrongFormatEntries: string[] = [];
+
+//     trackHistory.forEach((entry) => {
+//         if (typeof entry === "string") {
+//             wrongFormatEntries.push(entry);
+//         } else if (
+//             entry.added_at &&
+//             typeof entry.added_at.getDate === "function" &&
+//             entry.tracks &&
+//             Array.isArray(entry.tracks)
+//         ) {
+//             //add it to the back of the array as it gets read from the front
+//             rightFormatEntries.push(entry as PlaylistVersion);
+//         } else {
+//             console.error("Entry in trackHistory is in wrong format", entry);
+//         }
+//     });
+
+//     let playlistVersions: PlaylistVersion[] = [];
+//     for (let versionStart = 0; versionStart <= wrongFormatEntries.length; versionStart += lengthOfVersion) {
+//         const version = trackHistory.slice(versionStart, versionStart + lengthOfVersion) as string[];
+//         if (version.length === 0) break;
+//         // add it to the front of the array
+//         playlistVersions = [{ tracks: version, added_at: undefined }, ...playlistVersions];
+//     }
+//     //add the correct ones to the back
+//     rightFormatEntries.forEach((newEntry) => playlistVersions.push(newEntry));
+//     return playlistVersions;
+// };
