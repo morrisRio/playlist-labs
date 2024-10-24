@@ -236,20 +236,11 @@ export async function dbCreatePlaylist(userId: string, playlistData: PlaylistDat
  *
  * @param {string} userId - The Spotify ID of the user.
  * @param {PlaylistData} playlistData - The updated data of the playlist.
- * @param {string[]} newTracks - Optional: An array of new track IDs to add to the trackHistory.
  * @returns {Promise<boolean>} - Returns true if the playlist was successfully updated, false otherwise.
  */
-export async function dbUpdatePlaylist(
-    userId: string,
-    playlistData: PlaylistUpdate,
-    newTracks?: string[]
-): Promise<DbRes<boolean>> {
+export async function dbUpdatePlaylist(userId: string, playlistData: PlaylistUpdate): Promise<DbRes<boolean>> {
     await connectMongoDB();
     try {
-        // let updateOperation: any ={
-        //     $set: { "playlists.$": { ...playlistData.preferences, lastUpdated: Date.now() } },
-        // };
-
         const updateOperation: any = {};
         const setOperation: any = {};
 
@@ -271,15 +262,6 @@ export async function dbUpdatePlaylist(
         updateOperation.$set = setOperation;
 
         debugLog("Update Operation:", updateOperation);
-
-        // // If newTracks are provided, add them to the trackHistory
-        // if (newTracks && newTracks.length > 0) {
-        //     updateOperation.$push = {
-        //         "playlists.$.trackHistory": {
-        //             $each: newTracks,
-        //         },
-        //     };
-        // }
 
         const result = await UserModel.updateOne(
             {

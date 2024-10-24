@@ -25,13 +25,9 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ message: "failed getting userdata" }, { status: 500 });
         }
         const users = usersFromDb.data;
-        let playlistCount = 0;
-        let fetchCount = 0;
-        let userCount = 0;
 
         for (const user of users) {
             debugLog("User: " + user.name);
-            userCount++;
             const accountFromDB = await dbGetAccountByUserId(user.spotify_id);
             if (accountFromDB.error || accountFromDB.data === null) {
                 console.error("No account found for user " + user.spotify_id);
@@ -81,8 +77,6 @@ export async function GET(req: NextRequest) {
                 }
             }
         }
-
-        debugLog(`updated ${playlistCount} Playlist for ${userCount} Users with ${fetchCount} fetches`);
         return NextResponse.json({ success: true }, { status: 200 });
     } catch (error: any) {
         console.error("CRON: error in GET request", error);
