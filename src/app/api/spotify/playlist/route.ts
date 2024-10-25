@@ -71,7 +71,7 @@ const updatePlaylistCover = async (hue: number, idToWriteTo: string, accessToken
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
-        setDebugMode(true);
+        setDebugMode(false);
         const rawData = await req.json();
 
         const validation = vsPlaylistData(rawData);
@@ -188,7 +188,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 //TODO: check if playlist exists in spotify (could be deleted by user) -> if there is no playlist id mathing the one in db call post
 export async function PUT(req: NextRequest): Promise<NextResponse> {
     try {
-        setDebugMode(true);
+        setDebugMode(false);
         debugLog("API: PLAYLIST PUT - updating playlist ================================================");
 
         //get the access token from the request
@@ -328,7 +328,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
 export async function PATCH(req: NextRequest): Promise<NextResponse> {
     try {
-        setDebugMode(true);
+        setDebugMode(false);
 
         debugLog("API: PLAYLIST PATCH - updating playlist");
 

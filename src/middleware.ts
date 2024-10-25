@@ -5,7 +5,7 @@ import { debugLog, setDebugMode } from "./lib/utils";
 import { getAppUrl } from "@/lib/utils";
 
 export async function middleware(req: NextRequest) {
-    setDebugMode(true);
+    setDebugMode(false);
 
     debugLog("=============================================== MIDDLEWARE ACTIVE");
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });

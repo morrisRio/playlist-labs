@@ -7,7 +7,7 @@ import { regeneratePlaylist } from "@/lib/spotifyUtils";
 
 export async function GET(req: NextRequest) {
     try {
-        setDebugMode(true);
+        setDebugMode(false);
         debugLog("CRON: GET request received", req);
         if (req.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
             console.error(

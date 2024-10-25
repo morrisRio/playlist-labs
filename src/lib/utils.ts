@@ -89,6 +89,7 @@ interface ExtractedColor {
 
 //helper for finding the most distinct colors from the ones returned by extract-colors
 export const getDistinctColors = (colors: ExtractedColor[]): [string, string] => {
+    console.log("colors in get distinct colors: ", colors);
     // Sort all colors by vibrancy (saturation * lightness)
     const sortedColors = [...colors].sort((a, b) => {
         const vibrancyA = a.saturation * a.lightness;
