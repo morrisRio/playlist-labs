@@ -1,5 +1,5 @@
 "use client";
-import { FormEvent, memo, useCallback, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
@@ -7,7 +7,6 @@ import NameModal from "@/components/Modals/NameModal";
 import GradientModal from "@/components/Modals/GradientModal";
 import ContextMenu from "@/components/Modals/Context";
 import UniModal from "@/components/Modals/UniModal";
-import { getCssHueGradient } from "@/lib/utils";
 import { dbDeletePlaylist } from "@/lib/db/dbActions";
 
 import { useHeaderState } from "@/lib/hooks/useHeaderState";
@@ -19,6 +18,8 @@ import TransitionLink from "../TransitionLink";
 
 import { MdModeEdit, MdPalette, MdOpenInNew, MdOutlineDelete, MdRefresh, MdOutlineArrowBackIos } from "react-icons/md";
 import { IconType } from "react-icons";
+
+import usePlaylistBackground from "@/lib/hooks/usePlaylistBackground";
 
 interface PlaylistHeaderProps {
     pageTitle: string;
@@ -77,25 +78,9 @@ const PlaylistHeader = memo(
             playlist_id ? `/api/spotify/playlist/cover/${playlist_id}` : null
         );
 
-        const gradientImage = useMemo(() => (hue !== undefined ? getCssHueGradient(hue) : undefined), [hue]);
+        const styles = usePlaylistBackground({ hue, backgroundFilter, coverUrl });
 
-        const styles = useMemo(
-            () => ({
-                gradient: {
-                    background: gradientImage,
-                },
-                gradientBackground: {
-                    background: gradientImage,
-                    filter: backgroundFilter,
-                },
-                background: {
-                    filter: backgroundFilter,
-                },
-            }),
-            [gradientImage]
-        );
-
-        const actioNameShort = actionName.split(" ")[0];
+        const actionNameShort = useMemo(() => actionName.split(" ")[0], [actionName]);
 
         const triggerTimestamp = useRef<number>();
 
@@ -103,25 +88,14 @@ const PlaylistHeader = memo(
             triggerTimestamp.current = Date.now();
             setShowNameModal(true);
         };
-
         return (
             <>
-                <header ref={headerRef} className="sticky top-0 z-40 w-full">
+                <header ref={headerRef} className="sticky top-0 z-40 w-full bg-[#202020]">
                     {/* headerBg */}
                     <div className="absolute inset-0 overflow-hidden rounded-b-lg">
                         <div className="absolute inset-0 aspect-square w-[max(100vw,100vh)]">
-                            {hue ? (
+                            {styles.gradientBackground ? (
                                 <div className="size-full" style={styles.gradientBackground}></div>
-                            ) : coverUrl ? (
-                                <Image
-                                    src={coverUrl}
-                                    alt="playlist cover image"
-                                    fill={true}
-                                    sizes="96px"
-                                    style={styles.background}
-                                    unoptimized
-                                    priority
-                                />
                             ) : (
                                 <div className="w-full h-full bg-ui-800"></div>
                             )}
@@ -142,7 +116,7 @@ const PlaylistHeader = memo(
                             }`}
                         >
                             <ActionIcon />
-                            {actioNameShort}
+                            {actionNameShort}
                         </button>
                         {playlist_id ? (
                             <ContextMenu contextTitle={"Playlist Options"}>
@@ -216,19 +190,8 @@ const PlaylistHeader = memo(
                     {/* bigBg */}
                     <div className="absolute overflow-hidden -z-30" style={{ marginTop: `-${headerHeight}px` }}>
                         <div className="fixed inset-0 aspect-square w-[max(100vw,100vh)]">
-                            {hue ? (
+                            {styles.gradientBackground ? (
                                 <div className="size-full" style={styles.gradientBackground}></div>
-                            ) : coverUrl ? (
-                                <Image
-                                    src={coverUrl}
-                                    alt="playlist cover image"
-                                    fill={true}
-                                    className="object-fill"
-                                    sizes="96px"
-                                    style={styles.background}
-                                    unoptimized
-                                    priority
-                                />
                             ) : (
                                 <div className="w-full h-full bg-ui-800"></div>
                             )}

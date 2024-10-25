@@ -28,12 +28,11 @@ export default function TransitionLink({ children, href, enter = false, ...props
         await sleep(100);
 
         //navigate to the new page
-        console.log("router pushing");
         router.push(href);
     };
 
     useEffect(() => {
-        //use effect runs after the navigation is done
+        //runs after the navigation is done
         return () => {
             async function animateBack() {
                 const main = document.querySelector("main");
@@ -50,7 +49,6 @@ export default function TransitionLink({ children, href, enter = false, ...props
                 }
                 await sleep(5);
 
-                console.log(href + " reseting transition property to 1000ms");
                 main.style.transitionProperty = "opacity, filter, transform";
 
                 if (enter) main?.classList.remove("page-transition-right");

@@ -7,7 +7,7 @@ import { SeedEntry } from "./SeedEntry";
 
 import { Seed } from "@/types/spotify";
 
-import { MdOutlineArrowBackIos, MdCheck } from "react-icons/md";
+import { MdOutlineArrowBackIos, MdCheck, MdKeyboardArrowDown } from "react-icons/md";
 
 import Lottie from "lottie-react";
 import Loading from "@/lib/lotties/loading.json";
@@ -167,6 +167,9 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
 
     useEscapeKey(onClose);
 
+    const selectStyle =
+        "p-2 px-3 rounded-lg bg-ui-800 text-ui-500 focus:outline-none focus:ring focus:border-themetext text-sm appearance-none pr-6";
+
     return (
         <>
             <div
@@ -208,17 +211,18 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
                                         </h5>
                                     </button>
                                 ))}
-                                <select
-                                    name="selectedRange"
-                                    onChange={changeFilter}
-                                    className="block mt-1 p-2 rounded-lg bg-ui-800 text-b6b6b6 focus:outline-none focus:ring focus:border-themetext text-xs text-ui-600"
-                                >
-                                    {selectOptions.rangeTypes.map((duration) => (
-                                        <option key={duration[0]} value={duration[0]}>
-                                            {duration[1][0].toUpperCase() + duration[1].slice(1)}
-                                        </option>
-                                    ))}
-                                </select>
+                                <label htmlFor="selectRange" className="flex relative items-center">
+                                    <select name="selectedRange" onChange={changeFilter} className={selectStyle}>
+                                        {selectOptions.rangeTypes.map((duration) => (
+                                            <option key={duration[0]} value={duration[0]}>
+                                                {duration[1][0].toUpperCase() + duration[1].slice(1)}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <div className="absolute right-1 pointer-events-none">
+                                        <MdKeyboardArrowDown></MdKeyboardArrowDown>
+                                    </div>
+                                </label>
                             </div>
                         </div>
                     )}

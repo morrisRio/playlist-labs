@@ -6,7 +6,9 @@ import SmartMarquee from "@/components/SmartMarquee";
 import { Seed } from "@/types/spotify";
 
 import { RiMusic2Fill } from "react-icons/ri";
-import { MdRemoveCircleOutline, MdAddCircleOutline } from "react-icons/md";
+import { MdRemoveCircleOutline, MdAddCircleOutline, MdOpenInNew } from "react-icons/md";
+
+import SpotifyLogo from "../../../../../public/spotify.svg";
 
 //using marquee. Docs:
 //https://www.react-fast-marquee.com/documentation
@@ -46,6 +48,8 @@ export function SeedEntry({
     }
 
     const imgClass = `${imgSize} ${imgRound}`;
+
+    const linkToSpotify = `https://open.spotify.com/${type}/${seedObj.id}`;
 
     return (
         <div className={`flex gap-4 items-center justify-between ${seedCard}`}>
@@ -88,6 +92,12 @@ export function SeedEntry({
                     </>
                 )}
             </div>
+            {seedObj.type !== "genre" && (
+                <a href={linkToSpotify} target="_blank" className="h-[21px] flex gap-1 items-center text-themetext/65">
+                    {!card && <SpotifyLogo className="size-5 text-white"></SpotifyLogo>}
+                    <MdOpenInNew></MdOpenInNew>
+                </a>
+            )}
             {added && (
                 <button className="justify-end mr-4" onClick={() => onRemove(seedObj.id)} type="button">
                     <MdRemoveCircleOutline size="1.5rem" className="text-themetext/65" />

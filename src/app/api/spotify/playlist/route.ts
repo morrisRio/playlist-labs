@@ -23,13 +23,21 @@ import {
 import { MongoPlaylistData, PlaylistData, Preferences, Rule, Seed } from "@/types/spotify";
 
 import { getToken } from "next-auth/jwt";
-import { createCanvas } from "@napi-rs/canvas";
+import { createCanvas, loadImage } from "@napi-rs/canvas";
 
-//needs to be here because of the canvas dependency leading to bundler issues if not in api route
+import { resolve } from "path";
+
+//needs to be here because of the canvas dependency leading to bundler issues if not in api route, for the same reason we load the image here
 const generateCoverImage = async (hue: number): Promise<string> => {
     debugLog("API: Generating Cover Image with Hue:", hue);
     const canvas = createCanvas(640, 640);
-    createCanvasGradient(canvas, hue);
+
+    const dirRelativeToPublicFolder = ".";
+    const dir = resolve("./public", dirRelativeToPublicFolder);
+    const pathToLogo = dir + "/logo-small-v2.svg";
+    const logo = await loadImage(pathToLogo);
+
+    createCanvasGradient(canvas, hue, logo);
     const buffer = canvas.toDataURL("image/jpeg");
     const base64JpegData = buffer.replace(/^data:image\/\w+;base64,/, "");
     return base64JpegData;
