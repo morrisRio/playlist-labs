@@ -279,7 +279,8 @@ const PlaylistHeader = memo(
             prevProps.hue === nextProps.hue &&
             prevProps.actionName === nextProps.actionName &&
             prevProps.submitting === nextProps.submitting &&
-            prevProps.somethingToRestore === nextProps.somethingToRestore
+            prevProps.somethingToRestore === nextProps.somethingToRestore &&
+            prevProps.action === nextProps.action
         );
     }
 );

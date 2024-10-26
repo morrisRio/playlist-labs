@@ -43,6 +43,7 @@ function PlaylistEditor({ playlist, pageTitle }: PlaylistEditorProps) {
         const { name, value } = e.target;
         let valueParsed: string | number = value;
         if (name === "amount" || name === "on") valueParsed = parseInt(value);
+
         if (name === "frequency") {
             let resettedOn = 0;
             if (value === "weekly") resettedOn = 4;
@@ -50,10 +51,10 @@ function PlaylistEditor({ playlist, pageTitle }: PlaylistEditorProps) {
 
             setPreferences((prevState) => ({ ...prevState, on: resettedOn }));
         }
-        setPreferences((prevState) => ({
-            ...prevState,
-            [name]: valueParsed,
-        }));
+        setPreferences((prevState) => {
+            const newPrefs = { ...prevState, [name]: valueParsed };
+            return { ...newPrefs };
+        });
     };
 
     //Seeds ______________________________________________________________________________________________
@@ -179,6 +180,7 @@ function PlaylistEditor({ playlist, pageTitle }: PlaylistEditorProps) {
             submitPayload.seeds = sendSeeds ? seeds : undefined;
             submitPayload.newSongsSettings = newSongSettings ? true : undefined;
 
+            console.log("submit payload", submitPayload);
             //create a new playlist and populate it with the tracks
             await fetch("/api/spotify/playlist", {
                 method: submitMethod,

@@ -39,8 +39,8 @@ function RuleModal({ onAdd, onRemove, onClose, rules }: RuleModalProps) {
         top-0 max-sm:left-0 z-50 flex flex-col sm:w-[42rem] lg:w-[52rem] sm:-mx-16 
         sm:my-14 sm:rounded-2xl sm:max-h-[calc(100vh-3.5rem*2)] sm:border-ui-700 sm:border"
             >
-                <header className="flex items-center gap-2">
-                    <button onClick={onClose} type="button">
+                <header className="flex items-center gap-4">
+                    <button onClick={onClose} type="button" className="p-3 -m-3">
                         <MdOutlineArrowBackIos />
                     </button>
                     <h3>Add Rule</h3>

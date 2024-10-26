@@ -35,41 +35,39 @@ export const useSubmitCase = ({
 }: SubmitCaseProps): SubmitCase => {
     const hasChanged = useCallback((a: any, b: any) => JSON.stringify(a) !== JSON.stringify(b), []);
 
-    const settingsToBeSaved = useMemo(
-        () =>
-            hasChanged(
-                {
-                    name: preferences.name,
-                    hue: preferences.hue,
-                    frequency: preferences.frequency,
-                    on: preferences.on,
-                },
-                {
-                    name: initialState.preferences.name,
-                    hue: initialState.preferences.hue,
-                    frequency: initialState.preferences.frequency,
-                    on: initialState.preferences.on,
-                }
-            ),
-        [preferences, initialState.preferences]
-    );
+    const settingsToBeSaved = useMemo(() => {
+        console.log("settingsToBeSaved triggered");
+        return hasChanged(
+            {
+                name: preferences.name,
+                hue: preferences.hue,
+                frequency: preferences.frequency,
+                on: preferences.on,
+            },
+            {
+                name: initialState.preferences.name,
+                hue: initialState.preferences.hue,
+                frequency: initialState.preferences.frequency,
+                on: initialState.preferences.on,
+            }
+        );
+    }, [preferences, initialState.preferences]);
 
-    const settingsToBeApplied = useMemo(
-        () =>
-            hasChanged(
-                {
-                    amount: preferences.amount,
-                    seeds: seeds,
-                    rules: rules,
-                },
-                {
-                    amount: initialState.preferences.amount,
-                    seeds: initialState.seeds,
-                    rules: initialState.rules,
-                }
-            ),
-        [preferences, initialState.preferences, seeds, rules]
-    );
+    const settingsToBeApplied = useMemo(() => {
+        console.log("settingsToBeApplied triggered");
+        return hasChanged(
+            {
+                amount: preferences.amount,
+                seeds: seeds,
+                rules: rules,
+            },
+            {
+                amount: initialState.preferences.amount,
+                seeds: initialState.seeds,
+                rules: initialState.rules,
+            }
+        );
+    }, [preferences, initialState.preferences, seeds, rules]);
 
     const submitCases = {
         regenerate: {
@@ -127,10 +125,14 @@ export const useSubmitCase = ({
     };
 
     let submitCase;
+
     if (!playlist_id) submitCase = submitCases.createNew;
-    else if (settingsToBeApplied) submitCase = submitCases.applyChanges;
-    else if (settingsToBeSaved) submitCase = submitCases.saveChanges;
-    else submitCase = submitCases.regenerate;
+
+    if (settingsToBeSaved) submitCase = submitCases.saveChanges;
+
+    if (settingsToBeApplied) submitCase = submitCases.applyChanges;
+
+    if ((!settingsToBeApplied && !settingsToBeSaved) || submitCase === undefined) submitCase = submitCases.regenerate;
 
     return submitCase;
 };
