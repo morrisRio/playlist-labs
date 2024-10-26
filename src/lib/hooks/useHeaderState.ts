@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback, RefObject } from "react";
+import { useState, useEffect, useCallback, RefObject, useRef } from "react";
 
 interface HeaderState {
     headerHeight: number;
     collapsed: boolean;
     handleScroll: () => void;
+    triggerProgress: number;
 }
 
 export const useHeaderState = (
@@ -22,12 +23,25 @@ export const useHeaderState = (
 
     useEffect(() => {
         if (actionButtonRef.current) {
-            setTriggerPoint(actionButtonRef.current.clientHeight + window.scrollY);
+            setTriggerPoint(window.scrollY + actionButtonRef.current.getBoundingClientRect().top);
         }
     }, [actionButtonRef]);
 
+    const [triggerProgress, setTriggerProgress] = useState(0);
+    const fullTrigger = useRef<boolean>(false);
+
     const handleScroll = useCallback(() => {
         const currentScrollY = window.scrollY;
+
+        //make sure the triggerState is only updated when the trigger progress changes
+        if (window.scrollY / triggerPoint <= 1) {
+            setTriggerProgress(Math.min(1, window.scrollY / triggerPoint));
+            fullTrigger.current = false;
+        } else if (window.scrollY / triggerPoint > 1 && !fullTrigger.current) {
+            //only set it to 1 once
+            setTriggerProgress(1);
+            fullTrigger.current = true;
+        }
 
         if (collapsed && currentScrollY < triggerPoint) {
             setCollapsed(false);
@@ -48,5 +62,6 @@ export const useHeaderState = (
         headerHeight,
         collapsed,
         handleScroll,
+        triggerProgress,
     };
 };

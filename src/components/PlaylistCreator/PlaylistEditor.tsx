@@ -293,8 +293,7 @@ function PlaylistEditor({ playlist, pageTitle }: PlaylistEditorProps) {
             ></PlaylistHeader>
             <section
                 id="playlist-form"
-                className="bg-ui-950 w-full h-fit flex flex-col gap-6 justify-center text-white  sm:w-[40rem] lg:w-[50rem] sm:mx-auto sm:px-8 sm:rounded-b-2xl"
-                // onSubmit={handleSubmit}
+                className="bg-ui-950 w-full h-fit flex flex-col gap-6 justify-center text-white rounded-b-2xl sm:w-[40rem] lg:w-[50rem] sm:mx-auto sm:px-8"
             >
                 {showSubmitErrors && (
                     <UniModal
@@ -309,9 +308,9 @@ function PlaylistEditor({ playlist, pageTitle }: PlaylistEditorProps) {
                 )}
 
                 <PreferencesForm preferences={preferences} onChange={handlePrefChange} />
-                <hr className="border-ui-700"></hr>
+                <hr className="border-ui-700 sm:-mx-8"></hr>
                 <Seeds seeds={seeds} onRemove={removeSeed} onAdd={addSeed} />
-                <hr className="border-ui-700"></hr>
+                <hr className="border-ui-700 sm:-mx-8"></hr>
                 <Rules rules={rules} onAdd={addRule} onRemove={removeRule} onChange={handleRuleChange}></Rules>
             </section>
         </>

@@ -56,7 +56,7 @@ function SearchBar({
                 placeholder="Search"
                 className="w-full px-5 py-3 bg-ui-850 focus:outline-none placeholder-ui-600 text-lg  border-y border-ui-700 rounded-none"
             />
-            <div className="absolute inset-y-0 right-0 flex items-center p-2 text-themetext/65">
+            <div className="absolute inset-y-0 right-0 flex items-center p-4 text-themetext/60">
                 {query.length > 0 ? (
                     <MdClose
                         onClick={() => {
@@ -68,7 +68,7 @@ function SearchBar({
                     ></MdClose>
                 ) : (
                     <MdOutlineSearch
-                        size="2em"
+                        size="24px"
                         onClick={() => {
                             if (inputRef.current !== null)
                                 //@ts-ignore

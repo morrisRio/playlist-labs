@@ -38,8 +38,6 @@ interface PlaylistHeaderProps {
     somethingToRestore: boolean;
 }
 
-const backgroundFilter = "saturate(0.7) brightness(0.25)";
-
 const PlaylistHeader = memo(
     function PlaylistHeader({
         pageTitle,
@@ -63,10 +61,6 @@ const PlaylistHeader = memo(
         const [showConfirmModal, setShowConfirmModal] = useState(false);
         const [showResetModal, setShowResetModal] = useState(false);
 
-        const headerRef = useRef<HTMLDivElement>(null);
-        const actionButtonRef = useRef<HTMLButtonElement>(null);
-        const { headerHeight, collapsed } = useHeaderState(headerRef, actionButtonRef);
-
         const deletePlaylist = useCallback(async () => {
             if (!playlist_id) return;
             await dbDeletePlaylist(playlist_id);
@@ -78,7 +72,11 @@ const PlaylistHeader = memo(
             playlist_id ? `/api/spotify/playlist/cover/${playlist_id}` : null
         );
 
-        const styles = usePlaylistBackground({ hue, backgroundFilter, coverUrl });
+        const headerRef = useRef<HTMLDivElement>(null);
+        const actionButtonRef = useRef<HTMLButtonElement>(null);
+        const { headerHeight, collapsed, triggerProgress } = useHeaderState(headerRef, actionButtonRef);
+
+        const styles = usePlaylistBackground({ hue, triggerProgress, coverUrl });
 
         const actionNameShort = useMemo(() => actionName.split(" ")[0], [actionName]);
 
@@ -90,12 +88,12 @@ const PlaylistHeader = memo(
         };
         return (
             <>
-                <header ref={headerRef} className="sticky top-0 z-40 w-full bg-[#202020]">
+                <header ref={headerRef} className="sticky top-0 z-40 w-full bg-[#202020] rounded-b-lg overflow-hidden">
                     {/* headerBg */}
-                    <div className="absolute inset-0 overflow-hidden rounded-b-lg">
+                    <div className="absolute inset-0">
                         <div className="absolute inset-0 aspect-square w-[max(100vw,100vh)]">
                             {styles.gradientBackground ? (
-                                <div className="size-full" style={styles.gradientBackground}></div>
+                                <div className="size-full" style={styles.gradientHeaderBackground}></div>
                             ) : (
                                 <div className="w-full h-full bg-ui-800"></div>
                             )}

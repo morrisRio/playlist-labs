@@ -121,7 +121,9 @@ input[type="range"].rule-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     border: unset !important;
-    height: 100px;
+    height: 64px;
+    margin-top: -4px;
+    border-radius: 4px !important;
     width: 20px;
     background-color: var(--color-themetext) !important;
     background-image: linear-gradient(
@@ -146,7 +148,9 @@ input[type="range"].rule-slider::-moz-range-thumb {
     -webkit-appearance: none;
     appearance: none;
     border: unset !important;
-    height: 100px;
+    height: 64px;
+    margin-top: -4px;
+    border-radius: 4px !important;
     width: 20px;
     background-color: var(--color-themetext) !important;
     background-image: linear-gradient(

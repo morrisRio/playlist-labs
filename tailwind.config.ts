@@ -13,8 +13,8 @@ const config: Config = {
             },
             colors: {
                 ui: {
-                    950: "#000000", //bg
-                    900: "#090909", //bg-card
+                    950: "#010101", //bg
+                    900: "#000000", //bg-card
                     850: "#0f0f0f", //input-bg
                     800: "#1F1F1F", //bg-rule input
                     700: "#333333", //border

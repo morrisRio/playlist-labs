@@ -168,7 +168,7 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
     useEscapeKey(onClose);
 
     const selectStyle =
-        "p-2 px-3 rounded-lg bg-ui-800 text-ui-500 focus:outline-none focus:ring focus:border-themetext text-sm appearance-none pr-6";
+        "p-2 px-3 rounded-lg bg-ui-850 border border-ui-700 text-ui-500 focus:outline-none focus:ring focus:border-themetext text-sm appearance-none pr-6";
 
     return (
         <>
@@ -179,7 +179,7 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
             <div className="bg-ui-950 fixed h-screen overflow-hidden max-sm:w-full top-0 max-sm:left-0 z-50 flex flex-col sm:w-[42rem] lg:w-[52rem] sm:-mx-16 sm:my-14 sm:rounded-2xl  sm:max-h-[max(calc(100vh-8rem),30rem)] sm:border-ui-700 sm:border">
                 <div className="border-b border-ui-700 flex flex-col gap-4 p-4 bg-ui-900">
                     <div className="flex items-center gap-4">
-                        <button onClick={onClose} type="button">
+                        <button onClick={onClose} type="button" className="p-3 -m-3">
                             <MdOutlineArrowBackIos />
                         </button>
                         <h3>Add Seed</h3>
@@ -187,7 +187,7 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
                             {seeds?.length} /5 used
                         </h3>
                         <button onClick={onClose} type="button">
-                            <MdCheck size="1.7rem" />
+                            <MdCheck size="24px" />
                         </button>
                     </div>
                     <MemoizedSearchBar setSearch={handleSetSearch} />

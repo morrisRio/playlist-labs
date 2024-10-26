@@ -6,7 +6,6 @@ import UniModal from "@/components/Modals/UniModal";
 import { Rule } from "@/types/spotify";
 
 import { MdRemoveCircleOutline, MdAddCircleOutline, MdInfoOutline } from "react-icons/md";
-import { twUi500, twUi700 } from "@/lib/utils";
 
 type RuleEntryProps = {
     rule: Rule;
@@ -27,7 +26,7 @@ export function RuleEntry({
 }: RuleEntryProps): JSX.Element {
     const [showInfo, setShowInfo] = useState(false);
 
-    const ruleCard = control ? "bg-ui-900" : "mb-4 bg-zinc-700/40";
+    const ruleCard = control ? "bg-ui-900 rounded-lg overflow-hidden" : "mb-4 bg-zinc-700/40 rounded-lg ";
     const fontSize = "text-base";
     const nameConatiner = control ? "border border-b-0 rounded-t-lg" : "border rounded-lg";
 
@@ -43,8 +42,7 @@ export function RuleEntry({
     const ruleMin = rule.name === "Tempo" && typeof rule.range[0] === "number" ? rule.range[0] : 0;
 
     return (
-        //it was the backdrop blur that was causing the issue
-        <div className={`flex flex-col ${ruleCard} overflow-hidden`}>
+        <div className={`flex flex-col ${ruleCard}`}>
             {showInfo && (
                 <UniModal title={`Control the ${rule.name}`} onClose={closeModal} closeTitle="Got it" position="center">
                     <p>{rule.description}</p>
@@ -87,18 +85,12 @@ export function RuleEntry({
             </div>
             {/* Controls ___________________________________________________________________ */}
             {control && onChange && (
-                <div>
+                <div className="rounded-b-lg overflow-hidden">
                     {{
                         range: rule.type === "range" && (
-                            <div className="w-full relative">
+                            <div className="w-full relative h-16 ">
                                 <input
-                                    className="rule-slider"
-                                    // style={{
-                                    //     backgroundColor: twUi700,
-                                    //     background: `linear-gradient(90deg, ${twUi500} ${
-                                    //         ((rule.value + 1) / ruleMax) * 100
-                                    //     }%, ${twUi700} ${((rule.value + 1) / ruleMax) * 100}%)`,
-                                    // }}
+                                    className="rule-slider "
                                     type="range"
                                     name={rule.name}
                                     min={ruleMin}

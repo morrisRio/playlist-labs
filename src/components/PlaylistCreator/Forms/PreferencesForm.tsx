@@ -17,7 +17,7 @@ interface Preferences {
 
 export default function PreferencesForm({ preferences, onChange }: PreferencesProps) {
     const selectStyle =
-        "flex-grow p-2 px-3 rounded-lg bg-ui-800 text-ui-500 focus:outline-none focus:ring focus:border-themetext text-sm appearance-none";
+        "flex-grow p-2 px-3 rounded-lg bg-ui-850 border border-ui-700 text-ui-400 focus:outline-none focus:ring focus:border-themetext text-sm appearance-none";
 
     return (
         <div className="flex flex-col gap-4 rounded-xl p-4">
@@ -116,7 +116,7 @@ export default function PreferencesForm({ preferences, onChange }: PreferencesPr
                     Number of Tracks
                     <input
                         type="number"
-                        className="text-sm hide-arrows p-2 rounded-lg bg-ui-800 max-w-12  text-ui-500"
+                        className="text-sm hide-arrows p-2 rounded-lg max-w-12  text-ui-400 bg-ui-850 border border-ui-700"
                         name="amount"
                         value={preferences.amount}
                         min="5"
