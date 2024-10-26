@@ -88,10 +88,10 @@ const PlaylistHeader = memo(
         };
         return (
             <>
-                <header ref={headerRef} className="sticky top-0 z-40 w-full bg-[#202020] rounded-b-lg overflow-hidden">
+                <header ref={headerRef} className="sticky top-0 z-40 w-full bg-[#202020] rounded-b-lg ">
                     {/* headerBg */}
-                    <div className="absolute inset-0">
-                        <div className="absolute inset-0 aspect-square w-[max(100vw,100vh)]">
+                    <div className="absolute inset-0 rounded-b-lg overflow-hidden">
+                        <div className="absolute inset-0 aspect-square w-[max(100vw,100vh)] ">
                             {styles.gradientBackground ? (
                                 <div className="size-full" style={styles.gradientHeaderBackground}></div>
                             ) : (
