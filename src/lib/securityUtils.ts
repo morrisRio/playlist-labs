@@ -98,7 +98,7 @@ export function sanitizeString(input: string, context: SanitizeContext = "text")
     }
 }
 
-function sanitizeNumber(input: number): number {
+export function sanitizeNumber(input: number): number {
     // Ensure it's a finite number within reasonable bounds
     if (!Number.isFinite(input)) return 0;
     return Math.min(Math.max(input, -1000000), 1000000);

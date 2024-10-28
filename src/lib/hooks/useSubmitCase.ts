@@ -51,7 +51,7 @@ export const useSubmitCase = ({
                 on: initialState.preferences.on,
             }
         );
-    }, [preferences, initialState.preferences]);
+    }, [preferences, initialState.preferences, hasChanged]);
 
     const settingsToBeApplied = useMemo(() => {
         console.log("settingsToBeApplied triggered");
@@ -67,7 +67,7 @@ export const useSubmitCase = ({
                 rules: initialState.rules,
             }
         );
-    }, [preferences, initialState.preferences, seeds, rules]);
+    }, [preferences, initialState.preferences, seeds, rules, hasChanged, initialState.seeds, initialState.rules]);
 
     const submitCases = {
         regenerate: {
@@ -126,13 +126,13 @@ export const useSubmitCase = ({
 
     let submitCase;
 
-    if (!playlist_id) submitCase = submitCases.createNew;
-
     if (settingsToBeSaved) submitCase = submitCases.saveChanges;
 
     if (settingsToBeApplied) submitCase = submitCases.applyChanges;
 
     if ((!settingsToBeApplied && !settingsToBeSaved) || submitCase === undefined) submitCase = submitCases.regenerate;
+
+    if (!playlist_id) submitCase = submitCases.createNew;
 
     return submitCase;
 };

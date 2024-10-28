@@ -69,17 +69,6 @@ export const regeneratePlaylist = async (
         }
     }
 
-    //flush the playlist
-    debugLog(" - flushing the playlist");
-    const flushRes = await spotifyPut(`https://api.spotify.com/v1/playlists/${playlist_id}/tracks`, accessToken, {
-        uris: [],
-    });
-
-    if (flushRes.error) {
-        const { message, status } = flushRes.error;
-        console.error("Problem flushing Playlist.\n" + message, status);
-    }
-
     let trackIdsToAdd: string[] | ErrorRes = [];
     //TODO: FIDELITY: could: add a toogle in preferences to allow old tracks
     //for now: always get new tracks
@@ -149,6 +138,17 @@ export const regeneratePlaylist = async (
     const addBody = {
         uris: recommandationQuery,
     };
+
+    //flush the playlist
+    debugLog(" - flushing the playlist");
+    const flushRes = await spotifyPut(`https://api.spotify.com/v1/playlists/${playlist_id}/tracks`, accessToken, {
+        uris: [],
+    });
+
+    if (flushRes.error) {
+        const { message, status } = flushRes.error;
+        console.error("Problem flushing Playlist.\n" + message, status);
+    }
 
     const addRes = await spotifyPost(
         `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,

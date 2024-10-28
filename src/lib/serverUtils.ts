@@ -225,30 +225,3 @@ export const fetchFromSpotify = async (
 
     return data;
 };
-
-export const testFunction = async () => {
-    "use server";
-    console.log("Test started");
-    console.log("appUrl", getAppUrl());
-    const res = await fetch(`${getAppUrl()}/api/cron`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.CRON_SECRET}`,
-        },
-    })
-        .then(async (res) => {
-            if (!res.ok) {
-                console.log("Failed to fetch", res);
-                throw new Error("Failed to fetch");
-            }
-            const response = await res.json();
-            return response;
-        })
-        .catch((err) => {
-            console.error(err);
-            return { data: "error", message: "smthn went wrong" };
-        });
-
-    if ("data" in res) console.log("Test ended", res.data);
-};

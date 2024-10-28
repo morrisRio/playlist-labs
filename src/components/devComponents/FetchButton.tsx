@@ -1,6 +1,6 @@
 "use client";
 
-import { testFunction } from "@/lib/serverUtils";
+import { testFunction } from "@/lib/utils";
 
 function FetchButton() {
     return (

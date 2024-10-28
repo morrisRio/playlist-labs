@@ -150,3 +150,34 @@ export const twUi900 = fullConfig.theme.colors.ui[900] || "transparent";
 export const twUi700 = fullConfig.theme.colors.ui[700] || "grey";
 //@ts-expect-error
 export const twUi500 = fullConfig.theme.colors.ui[500] || "lightgrey";
+
+export const testFunction = async () => {
+    "use client";
+    console.log("Test started");
+    const body = {
+        playlist_id: "48lsq0Hp9QFzgZ46QqETJ3",
+        version_index: 1,
+    };
+    const res = await fetch(`/api/spotify/playlist/restore-version`, {
+        method: "Post",
+        body: JSON.stringify(body),
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.CRON_SECRET}`,
+        },
+    })
+        .then(async (res) => {
+            if (!res.ok) {
+                console.log("Failed to fetch", res);
+                throw new Error("Failed to fetch");
+            }
+            const response = await res.json();
+            return response;
+        })
+        .catch((err) => {
+            console.error(err);
+            return { data: "error", message: "test went wrong" };
+        });
+
+    console.log("Test ended", res);
+};
