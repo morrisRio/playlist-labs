@@ -31,14 +31,14 @@ function Login() {
                         for you, by you.
                     </p>
                     <button
-                        className="p-3 px-4 bg-themetext/90 text-ui-950 rounded-full flex gap-3 items-center  self-start max-md:self-end   mt-10"
+                        className="p-3 px-4 bg-themetext/90 text-ui-950 rounded-full flex gap-3 items-center  self-start max-md:self-end mt-10 z-50 cursor-pointer"
                         onClick={handleLogin}
                     >
                         <BsSpotify size="1.2rem" />
                         Log in with Spotify
                     </button>
                 </div>
-                <div className="-m-16 flex-grow mb-0 max-md:order-1 md:max-w-[50vw] relative">
+                <div className="-m-16 flex-grow mb-0 max-md:order-1 md:max-w-[50vw] relative pointer-events-none">
                     <Image src={mockup} alt="mockup" unoptimized />
                 </div>
             </div>
