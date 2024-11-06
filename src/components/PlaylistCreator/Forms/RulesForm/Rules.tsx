@@ -33,7 +33,7 @@ function Rules({ rules, onAdd, onRemove, onChange }: RulesProps) {
             <div className="flex mb-6 justify-between">
                 <h3>Tuning</h3>
                 <button
-                    className="p-1 px-2 rounded-lg flex items-center justify-center gap-2 text-themetext border border-ui-700 bg-ui-850 text-base"
+                    className="p-1 px-2 rounded-lg flex items-center justify-center gap-2 text-themetext border border-ui-700 bg-ui-900 text-base"
                     onClick={openModal}
                     type="button"
                 >
