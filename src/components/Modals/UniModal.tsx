@@ -50,7 +50,7 @@ function UniModal({
                 className={`w-full max-w-96 md:m-auto h-fit px-6 py-5 bg-ui-900 border border-ui-700 rounded-xl z-50`}
                 onPointerDown={(e) => e.stopPropagation()}
             >
-                <h4 className="text-themetext mb-5 w-full">{title}</h4>
+                <h4 className="text-themetext mb-5 w-full font-medium">{title}</h4>
                 <div className={`text-ui-600 text-base mb-8 ${bodyFullSize && "-mx-6"}`}>{children}</div>
                 <div className={`w-full flex items-center ${action ? "justify-between" : "justify-around"}`}>
                     <button
