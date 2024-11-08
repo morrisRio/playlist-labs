@@ -139,7 +139,7 @@ function SeedCarousel() {
     const bgGradient = `linear-gradient(to right, ${twUi900} 0%, transparent 20%, transparent 80%, ${twUi900} 100%)`;
     return (
         <div className="relative flex flex-col gap-4">
-            <div className="absolute size-full z-10" style={{ backgroundImage: bgGradient }}></div>
+            <div className="absolute size-full z-10 pointer-events-none" style={{ backgroundImage: bgGradient }}></div>
             <Marquee gradient={false} speed={65}>
                 <div className="flex gap-4 mr-4">
                     {Seeds.slice(0, 7).map((seed) => (

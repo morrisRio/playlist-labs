@@ -56,7 +56,7 @@ function Login() {
                 </div>
                 {/* Intro Text */}
                 <SeedCarousel></SeedCarousel>
-                <div className="px-8 mt-4 md:mt-8 md:max-w-[500px] md:mx-auto">
+                <div className="px-8 mt-4 md:mt-8 md:max-w-[500px] md:mx-auto mb-20">
                     <h2 className="font-medium mb-4">Embark on a Journey of Music Discovery</h2>
                     <p className="text-ui-400">
                         Feeling stuck in the same musical loop? playlistLabs lets you break free. Build custom playlists
