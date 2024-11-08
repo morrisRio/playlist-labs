@@ -47,7 +47,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
                         <div className="text-white w-[80px]">
                             <SpotifyFull />
                         </div>
-                        <span className="text-nowrap">Web API</span>
+                        <span className="text-nowrap">Web API</span>|
+                        <a href="/pages/about" className="text-nowrap underline">
+                            About
+                        </a>
                     </div>
                 </div>
             </body>
