@@ -43,9 +43,11 @@ function Login() {
                             <BsSpotify size="1.2rem" />
                             Log in with Spotify
                         </button>
-                        <div className="flex gap-2 items-center text-ui-400 mt-8">
-                            <MdArrowDownward />
-                            Scroll down to learn more
+                        <div className="flex gap-2 items-center text-ui-600 mt-2 mb-8 self-center md:self-start">
+                            <div className="animate-bounce">
+                                <MdArrowDownward />
+                            </div>
+                            Or scroll down to learn more
                         </div>
                     </div>
                     <div className="-m-16 flex-grow mb-0 max-md:order-1 md:max-w-[50vw] relative pointer-events-none">

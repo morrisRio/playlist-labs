@@ -47,7 +47,7 @@ function LoginDialog({ onClose }: LoginDialogProps) {
 
     return (
         <div
-            className={`items-center fixed inset-0 w-full h-screen max-sm:p-2 sm:p-6 flex justify-center bg-ui-950/40 backdrop-brightness-50 backdrop-saturate-50 z-40`}
+            className={`items-center fixed inset-0 w-full h-screen max-sm:p-2 sm:p-6 flex justify-center bg-ui-950/40 backdrop-brightness-50 backdrop-saturate-50 z-50`}
             onPointerDown={(e) => triggerClose(e)}
         >
             <div
