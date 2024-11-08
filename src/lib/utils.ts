@@ -25,7 +25,7 @@ export const getAppUrl = () => {
         } else if (process.env.VERCEL_ENV === "preview") {
             return process.env.VERCEL_URL;
         } else if (process.env.VERCEL_ENV === "production") {
-            return `https://${process.env.VERCEL_URL}`;
+            return `https://www.playlist-labs.com`;
         } else {
             throw new Error(
                 "Failed to find a a valid URL for the app. Add NEXTAUTH_URL to your environment variables."

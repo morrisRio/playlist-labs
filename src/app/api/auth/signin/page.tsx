@@ -1,15 +1,18 @@
 "use client";
-import { BsSpotify } from "react-icons/bs";
-import { signIn } from "next-auth/react";
+
 import Logo from "../../../../../public/logo-small.svg";
 import mockup from "../../../../../public/mockup.png";
-import Image from "next/image";
 import Rules from "../../../../../public/rules-v2.png";
 import Schedule from "../../../../../public/schedule-v2.png";
 import Library from "../../../../../public/library-v1.png";
-import LoginDialog from "@/components/legal/LoginDialog";
+
+import Image from "next/image";
 import { useState } from "react";
+
+import LoginDialog from "@/components/legal/LoginDialog";
 import SeedCarousel from "@/components/SeedCarousel";
+import { BsSpotify } from "react-icons/bs";
+import { MdArrowDownward } from "react-icons/md";
 
 function Login() {
     const [showDialog, setShowDialog] = useState(false);
@@ -40,6 +43,10 @@ function Login() {
                             <BsSpotify size="1.2rem" />
                             Log in with Spotify
                         </button>
+                        <div className="flex gap-2 items-center text-ui-400 mt-8">
+                            <MdArrowDownward />
+                            Scroll down to learn more
+                        </div>
                     </div>
                     <div className="-m-16 flex-grow mb-0 max-md:order-1 md:max-w-[50vw] relative pointer-events-none">
                         <Image src={mockup} alt="mockup" unoptimized />
