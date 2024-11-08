@@ -9,6 +9,7 @@ import Schedule from "../../../../../public/schedule-v2.png";
 import Library from "../../../../../public/library-v1.png";
 import LoginDialog from "@/components/legal/LoginDialog";
 import { useState } from "react";
+import SeedCarousel from "@/components/SeedCarousel";
 
 function Login() {
     const [showDialog, setShowDialog] = useState(false);
@@ -18,7 +19,7 @@ function Login() {
             {showDialog && <LoginDialog onClose={() => setShowDialog(false)} />}
             <div className="min-h-screen flex flex-col gap-4 py-8 sm:container sm:mx-auto max-sm:overflow-x-hidden max-w-full">
                 {/* hero section */}
-                <div className="flex max-md:flex-col gap-16 max-w-full items-center max-md:gap-4 md:h-screen">
+                <div className="flex max-md:flex-col gap-16 max-w-full items-center max-md:gap-4 md:h-screen mb-8">
                     <div className="flex flex-col px-8 gap-4 md:gap-6 sm:flex-grow md:order-2">
                         <div className="flex gap-2 md:gap-3 items-center mb-6">
                             <Logo className="size-4 md:size-5 -mb-1" />
@@ -45,7 +46,8 @@ function Login() {
                     </div>
                 </div>
                 {/* Intro Text */}
-                <div className="px-8 md:mt-56 md:max-w-[500px] md:mx-auto">
+                <SeedCarousel></SeedCarousel>
+                <div className="px-8 mt-4 md:mt-8 md:max-w-[500px] md:mx-auto">
                     <h2 className="font-medium mb-4">Embark on a Journey of Music Discovery</h2>
                     <p className="text-ui-400">
                         Feeling stuck in the same musical loop? playlistLabs lets you break free. Build custom playlists

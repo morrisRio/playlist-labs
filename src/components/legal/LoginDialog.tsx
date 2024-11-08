@@ -65,10 +65,12 @@ function LoginDialog({ onClose }: LoginDialogProps) {
                             This app is currently in Beta. To access it, you&#39;ll need to apply for registration. If
                             you haven&#39;t done so yet, please send an inquiry inlcuding the email address you use for
                             your Spotify account to{" "}
-                            <a href="mailto:register@playlist-labs.com" className="underline text-amber-500">
+                            <a
+                                href="mailto:register@playlist-labs.com"
+                                className="underline text-amber-500 text-nowrap"
+                            >
                                 register@playlist-labs.com
                             </a>
-                            ,
                         </div>
                     </div>
                     <h5 className={`mt-6 font-semibold text-themetext`}>Legal Notice</h5>
@@ -77,7 +79,10 @@ function LoginDialog({ onClose }: LoginDialogProps) {
                         not affiliated with Spotify in any way. We just use their API to let you create custom playlists
                         directly within your Spotify library.
                     </p>
-                    <h5 className={`mt-6 font-semibold text-themetext`}>Privacy Policy</h5>
+                    <p className="text-sm">
+                        We take responsibility for this page and disclaim any liability on the part of third parties.
+                    </p>
+                    <h5 className={`mt-6 font-semibold text-themetext`}>Terms of Use</h5>
                     <p className="text-sm">
                         By continuing, you agree to our data handling practices, which include only storing the
                         information necessary to make the app work smoothly. We respect your privacy and don&#39;t

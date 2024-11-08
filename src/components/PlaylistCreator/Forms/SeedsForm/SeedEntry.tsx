@@ -9,17 +9,19 @@ import { RiMusic2Fill } from "react-icons/ri";
 import { MdRemoveCircleOutline, MdAddCircleOutline, MdOpenInNew } from "react-icons/md";
 
 import SpotifyLogo from "../../../../../public/spotify.svg";
+import { text } from "stream/consumers";
 
 //using marquee. Docs:
 //https://www.react-fast-marquee.com/documentation
 
 type SeedEntryProps = {
     seedObj: Seed;
-    onRemove: (id: string) => void;
+    onRemove?: (id: string) => void;
     onAdd?: (seed: Seed) => void;
     card?: boolean;
     added?: boolean;
     isAboveTheFold?: boolean;
+    display?: boolean;
 };
 
 export function SeedEntry({
@@ -29,12 +31,16 @@ export function SeedEntry({
     card = false,
     added = false,
     isAboveTheFold,
+    display = false,
 }: SeedEntryProps): JSX.Element {
+    //display is true for seeds on landing page
+
     const { description, title, thumbnail, type } = seedObj;
 
     let imgSize = "size-14";
     let imgRound = type === "artist" ? "rounded-full" : "rounded-lg";
     let seedCard = "";
+    let textSize = "text-base";
 
     if (card) {
         imgRound = type === "artist" ? "rounded-full" : "rounded-l-lg";
@@ -45,6 +51,12 @@ export function SeedEntry({
     if (added && !card) {
         seedCard = `bg-ui-900 shadow-[0_0_0_1px] shadow-ui-700 rounded-lg`;
         imgRound = type === "artist" ? "rounded-full" : "rounded-l-lg";
+    }
+
+    if (display) {
+        seedCard = "bg-ui-900 border border-ui-700 rounded-lg w-64 pr-3";
+        imgSize = type === "artist" ? "size-14 m-2" : "size-[4rem]";
+        textSize = "text-sm";
     }
 
     const imgClass = `${imgSize} ${imgRound}`;
@@ -78,27 +90,27 @@ export function SeedEntry({
             <div className="flex-auto overflow-hidden">
                 {card ? (
                     <>
-                        <p className="text-base whitespace-nowrap overflow-hidden truncate">{title}</p>
-                        <p className={`text-ui-600 text-base whitespace-nowrap truncate`}>{description}</p>
+                        <p className={`whitespace-nowrap overflow-hidden truncate ${textSize}`}>{title}</p>
+                        <p className={`text-ui-600 whitespace-nowrap truncate ${textSize}`}>{description}</p>
                     </>
                 ) : (
                     <>
                         <SmartMarquee divider>
-                            <p className="text-base whitespace-nowrap">{title}</p>
+                            <p className={`${textSize} whitespace-nowrap`}>{title}</p>
                         </SmartMarquee>
                         <SmartMarquee divider>
-                            <p className={`text-ui-600 text-base`}>{description}</p>
+                            <p className={`text-ui-600 ${textSize}`}>{description}</p>
                         </SmartMarquee>
                     </>
                 )}
             </div>
             {seedObj.type !== "genre" && (
                 <a href={linkToSpotify} target="_blank" className="h-[21px] flex gap-1 items-center text-themetext/65">
-                    {!card && <SpotifyLogo className="size-5 text-white"></SpotifyLogo>}
-                    <MdOpenInNew></MdOpenInNew>
+                    {!card || (display && <SpotifyLogo className="size-5 text-white"></SpotifyLogo>)}
+                    {!display && <MdOpenInNew></MdOpenInNew>}
                 </a>
             )}
-            {added && (
+            {added && onRemove && (
                 <button className="justify-end mr-4" onClick={() => onRemove(seedObj.id)} type="button">
                     <MdRemoveCircleOutline size="1.5rem" className="text-themetext/65" />
                 </button>

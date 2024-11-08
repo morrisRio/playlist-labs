@@ -150,6 +150,8 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
         }
 
         try {
+            console.log("searchResults", searchResults);
+            console.log("searchResults", topItems);
             return (showSearch ? searchResults : topItems).map((seed: Seed, index: number) => (
                 <SeedEntry
                     seedObj={seed}
