@@ -6,8 +6,6 @@ import { sleep } from "@/lib/utils";
 export function useSwrTokenRefresh<T>(url: string | null): SWRResponse<T, Error> {
     const { update: updateSession } = useSession();
 
-    //TODO: production remove accesToken from session
-
     const fetcher: Fetcher<T> = useCallback(async (fetchUrl: string) => {
         const res = await fetch(fetchUrl);
         if (!res.ok) {
@@ -29,15 +27,13 @@ export function useSwrTokenRefresh<T>(url: string | null): SWRResponse<T, Error>
             revalidateIfStale: false,
             keepPreviousData: true,
             onErrorRetry: async (error, key, config, revalidate, { retryCount }) => {
-                console.log("retrying", error, retryCount);
-
                 if (error.status === 404) {
-                    console.log("Resource not found: ", error.message);
+                    console.error("Resource not found: ", error.message);
                     return;
                 }
 
                 if (error.status === 401) {
-                    console.log("Unauthorized, trying to refresh");
+                    console.error("Unauthorized, trying to refresh");
                     await updateSession();
                     // Add a small delay to ensure session update is processed
                     await sleep(500);

@@ -13,13 +13,13 @@ export async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
     debugLog("PATHNAME: ", pathname);
 
-    if (pathname.includes("/api/auth") || token) {
+    if (pathname.includes("/api/auth") || pathname.includes("/pages/about") || token) {
         debugLog("===============================TOKEN FOUND OR AUTH API, CONTINUE");
         return NextResponse.next();
     }
 
     debugLog("NO TOKEN, REDIRECTING TO SIGN IN");
-    //TODO: PRODUCTION: SET PRODUCTION URL
+
     setDebugMode(false);
     return NextResponse.redirect(getAppUrl() + "/api/auth/signin");
 }

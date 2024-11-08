@@ -633,7 +633,7 @@ export const emptyPlaylist = {
 
 //TODO: MIGRATION: remove after full migration
 //i will leave this here for now. Migration is fully done but i want to keep this as it was kinda fun to write
-//so much trhill refactoring a live database, felt like a surgeon
+//so much thrill refactoring a live database, felt like a surgeon
 //i should maybe go get a life lol
 // export const convertIdArraytoPlaylistVersion = (
 //     trackHistory: string[] | PlaylistVersion[],
