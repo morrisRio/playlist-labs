@@ -1,5 +1,6 @@
 "use client";
 import { useState, useLayoutEffect, useRef } from "react";
+
 import Marquee from "react-fast-marquee";
 
 import { twUi900 } from "@/lib/utils";
@@ -8,6 +9,9 @@ interface SmartMarqueeProps {
     children: React.ReactNode;
     divider?: boolean;
 }
+
+//using marquee. Docs:
+//https://www.react-fast-marquee.com/documentation
 
 function SmartMarquee({ children, divider = false }: SmartMarqueeProps) {
     const bgGradient = `linear-gradient(to right, ${twUi900} 0%, transparent 10%, transparent 90%, ${twUi900} 100%)`;

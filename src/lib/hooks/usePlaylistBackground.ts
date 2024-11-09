@@ -271,7 +271,7 @@ const usePlaylistBackground = ({ hue, triggerProgress, coverUrl }: PlaylistBackg
                 filter: backgroundFilter,
             },
         };
-    }, [hue, imageGradient, backgroundFilter, triggerProgress]);
+    }, [hue, imageGradient, backgroundFilter, backgroundHeaderFilter]);
 
     return gradients;
 };

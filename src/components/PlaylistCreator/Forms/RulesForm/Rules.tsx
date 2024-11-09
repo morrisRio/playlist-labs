@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { MdAddCircleOutline } from "react-icons/md";
 
-import { Rule } from "@/types/spotify";
-import RuleModal from "./RuleModal";
 import { RuleEntry } from "./RuleEntry";
+import RuleModal from "./RuleModal";
+import { Rule } from "@/types/spotify";
 
+import { MdAddCircleOutline } from "react-icons/md";
 interface RulesProps {
     rules: Rule[];
     onAdd: (rule: Rule) => void;

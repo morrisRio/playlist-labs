@@ -1,15 +1,17 @@
-import PlaylistEntry from "@/components/PlaylistEntry";
-import Profile from "@/components/Modals/Profile";
-import { MdAdd } from "react-icons/md";
-import { PlaylistData } from "@/types/spotify";
-
-import Logo from "../../public/logo-small-v2.svg";
-
 import { auth } from "@/lib/serverUtils";
 import { redirect } from "next/navigation";
+
 import { dbGetUsersPlaylists } from "@/lib/db/dbActions";
+
 import ClientSessionProvider from "@/components/ClientSessionProvider";
 import TransitionLink from "@/components/TransitionLink";
+import PlaylistEntry from "@/components/PlaylistEntry";
+import Profile from "@/components/Modals/Profile";
+
+import { PlaylistData } from "@/types/spotify";
+
+import Logo from "../../public/logo-v2.svg";
+import { MdAdd } from "react-icons/md";
 
 export default async function Home() {
     let playlistData: PlaylistData[] | null = null;

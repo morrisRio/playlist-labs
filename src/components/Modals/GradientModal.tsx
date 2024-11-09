@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import UniModal from "@/components/Modals/UniModal";
 import { getCssHueGradient } from "@/lib/utils";
 

@@ -1,6 +1,8 @@
-import PlaylistEditor from "@/components/PlaylistCreator/PlaylistEditor";
-import { auth } from "@/lib/serverUtils";
 import { redirect } from "next/navigation";
+
+import { auth } from "@/lib/serverUtils";
+
+import PlaylistEditor from "@/components/PlaylistCreator/PlaylistEditor";
 import ClientSessionProvider from "@/components/ClientSessionProvider";
 
 export default async function createPlaylist() {

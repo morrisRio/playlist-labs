@@ -15,6 +15,7 @@ interface restoreVersionBody {
     version_index: number;
 }
 
+//TODO: fidelity: add versions: preparation for versions
 export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
         setDebugMode(false);
@@ -54,8 +55,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
                 { status: 500 }
             );
         }
-
-        console.log("full data: ", playlistData);
 
         const playlistVersion = playlistData.data.trackHistory[validIndex].tracks;
 

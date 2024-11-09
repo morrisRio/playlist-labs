@@ -1,9 +1,8 @@
 "use client";
-import { useState, FormEvent, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { preload, useSWRConfig } from "swr";
 
-import TrackHistory from "./TrackHistory";
 import PlaylistHeader from "./PlaylistHeader";
 import PreferencesForm from "./Forms/PreferencesForm";
 import Rules from "@/components/PlaylistCreator/Forms/RulesForm/Rules";

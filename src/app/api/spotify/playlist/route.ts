@@ -2,16 +2,12 @@ import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { revalidateTag } from "next/cache";
 
-import { spotifyPost, spotifyPut } from "@/lib/serverUtils";
-import {
-    getRecommendations,
-    createPlaylistDescription,
-    trackIdsToQuery,
-    regeneratePlaylist,
-    regenerateRes,
-} from "@/lib/spotifyUtils";
-import { dbCreatePlaylist, dbGetOneUserPlaylist, dbUpdatePlaylist } from "@/lib/db/dbActions";
-import { debugLog, setDebugMode, createCanvasGradient } from "@/lib/utils";
+import { getToken } from "next-auth/jwt";
+
+import { createCanvas, loadImage } from "@napi-rs/canvas";
+
+import { resolve } from "path";
+
 import {
     sanitizeAndValidatePreferences,
     sanitizeBoolean,
@@ -20,12 +16,12 @@ import {
     vsPlaylistRefreshData,
 } from "@/lib/securityUtils";
 
+import { spotifyPost, spotifyPut } from "@/lib/serverUtils";
+import { getRecommendations, createPlaylistDescription, trackIdsToQuery, regeneratePlaylist } from "@/lib/spotifyUtils";
+import { debugLog, setDebugMode, createCanvasGradient } from "@/lib/utils";
+import { dbCreatePlaylist, dbGetOneUserPlaylist, dbUpdatePlaylist } from "@/lib/db/dbActions";
+
 import { MongoPlaylistData, PlaylistData, Preferences, Rule, Seed } from "@/types/spotify";
-
-import { getToken } from "next-auth/jwt";
-import { createCanvas, loadImage } from "@napi-rs/canvas";
-
-import { resolve } from "path";
 
 //needs to be here because of the canvas dependency leading to bundler issues if not in api route, for the same reason we load the image here
 const generateCoverImage = async (hue: number): Promise<string> => {
@@ -34,7 +30,7 @@ const generateCoverImage = async (hue: number): Promise<string> => {
 
     const dirRelativeToPublicFolder = ".";
     const dir = resolve("./public", dirRelativeToPublicFolder);
-    const pathToLogo = dir + "/logo-small-v2.svg";
+    const pathToLogo = dir + "/logo-v2.svg";
     const logo = await loadImage(pathToLogo);
 
     createCanvasGradient(canvas, hue, logo);
@@ -82,12 +78,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         const { preferences, seeds, rules } = validation.sanitizedData;
 
         debugLog("API: PLAYLIST POST - creating new playlist ", preferences);
-        debugLog("API: data received", validation.sanitizedData);
+        debugLog("API: PLAYLIST POST - data received", validation.sanitizedData);
 
-        //add the token to the request for the api call
         const token = await getToken({ req });
         if (!token) {
-            console.error("No token found");
+            console.error("API: PLAYLIST POST - Error: No token found");
             return NextResponse.json({ message: "Unauthorized." }, { status: 401 });
         }
 
@@ -101,7 +96,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         };
 
         //make the api call to create the playlist and save the id for the created playlist
-        debugLog(" - creating the playlist");
+        debugLog("API: PLAYLIST POST - creating the playlist");
 
         const validatePlaylist = (data: any) => {
             if (!data.id || typeof data.id !== "string") {
@@ -122,7 +117,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         }
 
         const { id: idToWriteTo } = newPlaylistRes;
-        debugLog(" - created playlist with id: " + idToWriteTo);
+        debugLog("API: PLAYLIST POST - created playlist with id: " + idToWriteTo);
 
         //get the recommendations and add them to the body for the api call that adds the tracks to the playlist
         const recommandationIds = await getRecommendations(accessToken, preferences.amount, seeds, rules);
@@ -151,13 +146,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             return NextResponse.json({ message }, { status });
         }
 
-        debugLog("API: Added Tracks to Playlist:", addRes);
+        debugLog("API: PLAYLIST POST - Added Tracks to Playlist:", addRes);
 
         //add the cover image to the playlist
         const hue = preferences.hue || Math.floor(Math.random() * 360);
         delete preferences.hue;
         await updatePlaylistCover(hue, idToWriteTo, accessToken).catch((error) => {
-            console.error("Failed to update Cover Image", error);
+            console.error("API: PLAYLIST POST - Failed to update Cover Image", error);
         });
 
         //add playlist to user document DB
@@ -180,16 +175,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         revalidateTag("playlists");
         return NextResponse.json(idToWriteTo, { status: 201 });
     } catch (error) {
-        console.error("Failed to create Playlist", error);
+        console.error("API: PLAYLIST POST - Failed to create Playlist", error);
         return NextResponse.json({ message: "Failed to create Playlist" }, { status: 500 });
     }
 }
 
-//TODO: check if playlist exists in spotify (could be deleted by user) -> if there is no playlist id mathing the one in db call post
 export async function PUT(req: NextRequest): Promise<NextResponse> {
     try {
         setDebugMode(false);
-        debugLog("API: PLAYLIST PUT - updating playlist ================================================");
+        debugLog("API: PLAYLIST PUT - updating playlist");
 
         //get the access token from the request
         const token = await getToken({ req });
@@ -201,9 +195,9 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
         //get the data from the request
         const rawData = await req.json();
-        debugLog("API: data received", rawData);
+        debugLog("API: PLAYLIST PUT - data received", rawData);
         const newSongSettings = sanitizeBoolean(rawData.newSongsSettings);
-        debugLog("API: newSongSettings", newSongSettings);
+        debugLog("API: PLAYLIST PUT - newSongSettings", newSongSettings);
 
         let playlist_id: string;
         let preferences: Preferences | undefined;
@@ -239,7 +233,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
         //update cover if hue is provided
         if (preferences && preferences.hue !== undefined) {
             await updatePlaylistCover(preferences.hue, playlist_id, accessToken).catch((error) => {
-                console.error("Failed to update Cover Image: ", error);
+                console.error("API: PLAYLIST PUT - Failed to update Cover Image: ", error);
             });
             delete preferences.hue;
         }
@@ -283,6 +277,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
                 rules,
                 trackHistory: update.data.newTrackHistory,
             });
+
             if (!dbSuccess) {
                 console.error("Failed to save updated Playlist Data");
                 return NextResponse.json({ message: "Failed to save updated Playlist Data" }, { status: 500 });
@@ -335,7 +330,7 @@ export async function PATCH(req: NextRequest): Promise<NextResponse> {
         const token = await getToken({ req });
 
         if (!token) {
-            console.error("No token found");
+            console.error("API: PLAYLIST PATCH - No token found");
             return NextResponse.json({ message: "Unauthorized." }, { status: 401 });
         }
 
@@ -377,7 +372,7 @@ export async function PATCH(req: NextRequest): Promise<NextResponse> {
 
         if (preferences.hue !== undefined) {
             await updatePlaylistCover(preferences.hue, playlist_id, accessToken).catch((error) => {
-                console.error("Failed to update Cover Image: ", error);
+                console.error("API: PLAYLIST PATCH - Failed to update Cover Image: ", error);
             });
             delete preferences.hue;
         }
@@ -419,7 +414,7 @@ export async function PATCH(req: NextRequest): Promise<NextResponse> {
 
         return NextResponse.json(playlist_id, { status: 200 });
     } catch (error: any) {
-        console.error("Failed to update Playlist", error);
+        console.error("API: PLAYLIST PATCH - Failed to update Playlist", error);
         return NextResponse.json({ message: "Failed to update Playlist" }, { status: 500 });
     }
 }

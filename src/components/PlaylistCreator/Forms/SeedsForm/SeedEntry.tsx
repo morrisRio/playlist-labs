@@ -9,10 +9,6 @@ import { RiMusic2Fill } from "react-icons/ri";
 import { MdRemoveCircleOutline, MdAddCircleOutline, MdOpenInNew } from "react-icons/md";
 
 import SpotifyLogo from "../../../../../public/spotify.svg";
-import { text } from "stream/consumers";
-
-//using marquee. Docs:
-//https://www.react-fast-marquee.com/documentation
 
 type SeedEntryProps = {
     seedObj: Seed;

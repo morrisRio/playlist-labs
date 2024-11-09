@@ -1,8 +1,10 @@
 import { NextAuthOptions, Account, User } from "next-auth";
-import SpotifyProvider from "next-auth/providers/spotify";
-import { dbGetAccountByUserId, dbRegisterUser } from "@/lib/db/dbActions";
 import { JWT } from "next-auth/jwt";
+import SpotifyProvider from "next-auth/providers/spotify";
+
+import { dbGetAccountByUserId, dbRegisterUser } from "@/lib/db/dbActions";
 import { debugLog, setDebugMode } from "./utils";
+
 import { MongoAccount } from "@/types/spotify";
 
 //scopes for future use
@@ -153,10 +155,6 @@ export const authOptions: NextAuthOptions = {
         async session({ session, token }) {
             session.user.id = token.userId;
             session.expires = token.accessTokenExpires;
-
-            //TODO: remove accesToken from session, this is for debugging only
-            //@ts-ignore
-            session.accessToken = token.accessToken;
             return session;
         },
     },

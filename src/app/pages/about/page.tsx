@@ -2,9 +2,10 @@
 
 import { CSSProperties, useState } from "react";
 import Image from "next/image";
-import Logo from "../../../../public/logo-small-v2.svg";
-import Obi from "../../../../public/obi-wan.webp";
 import Link from "next/link";
+
+import Logo from "../../../../public/logo-v2.svg";
+import Obi from "../../../../public/obi-wan.webp";
 
 export default function About() {
     const [showObi, setShowObi] = useState(false);

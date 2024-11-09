@@ -1,6 +1,5 @@
 import { twUi700, twUi500 } from "@/lib/utils";
 
-<MdKeyboardArrowDown />;
 import { MdInfoOutline, MdKeyboardArrowDown } from "react-icons/md";
 
 interface PreferencesProps {

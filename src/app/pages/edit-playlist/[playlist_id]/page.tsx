@@ -1,9 +1,12 @@
-import { auth } from "@/lib/serverUtils";
-import { PlaylistData } from "@/types/spotify";
-import PlaylistEditor from "@/components/PlaylistCreator/PlaylistEditor";
-import { dbGetOnePlaylistData } from "@/lib/db/dbActions";
 import { redirect } from "next/navigation";
+
+import { auth } from "@/lib/serverUtils";
+import { dbGetOnePlaylistData } from "@/lib/db/dbActions";
+
+import { PlaylistData } from "@/types/spotify";
+
 import ClientSessionProvider from "@/components/ClientSessionProvider";
+import PlaylistEditor from "@/components/PlaylistCreator/PlaylistEditor";
 
 async function EditPlaylist({ params }: { params: { playlist_id: string } }) {
     const { playlist_id } = params;

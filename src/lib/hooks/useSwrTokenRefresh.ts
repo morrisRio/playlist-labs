@@ -1,6 +1,7 @@
-import useSWR, { Fetcher, SWRConfiguration, SWRResponse } from "swr";
 import { useSession } from "next-auth/react";
 import { useCallback, useMemo } from "react";
+import useSWR, { Fetcher, SWRConfiguration, SWRResponse } from "swr";
+
 import { sleep } from "@/lib/utils";
 
 export function useSwrTokenRefresh<T>(url: string | null): SWRResponse<T, Error> {
@@ -22,7 +23,6 @@ export function useSwrTokenRefresh<T>(url: string | null): SWRResponse<T, Error>
     const options: SWRConfiguration = useMemo(
         () => ({
             revalidateOnMount: true,
-            // Only revalidate on specific conditions
             revalidateOnFocus: false,
             revalidateIfStale: false,
             keepPreviousData: true,

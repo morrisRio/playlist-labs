@@ -1,6 +1,6 @@
 "use client";
 
-//TODO: implement this
+//TODO: fidelity: implement custom error page
 
 import Broken from "../../../../public/broken-logo.svg";
 import { useEffect } from "react";

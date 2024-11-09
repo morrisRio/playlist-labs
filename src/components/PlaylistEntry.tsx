@@ -1,17 +1,16 @@
 "use client";
-
-import { PlaylistData } from "@/types/spotify";
-import TransitionLink from "@/components/TransitionLink";
-import SmartMarquee from "@/components/SmartMarquee";
-
-import { MdChevronRight } from "react-icons/md";
 import Image from "next/image";
 
+import TransitionLink from "@/components/TransitionLink";
+import SmartMarquee from "@/components/SmartMarquee";
+import useSwrTokenRefresh from "@/lib/hooks/useSwrTokenRefresh";
+
+import { PlaylistData } from "@/types/spotify";
+
+import { MdChevronRight } from "react-icons/md";
 import Lottie from "lottie-react";
 import Loading from "@/lib/lotties/loading.json";
-import Logo from "../../public/logo.svg";
-
-import useSwrTokenRefresh from "@/lib/hooks/useSwrTokenRefresh";
+import Logo from "../../public/broken-logo.svg";
 
 interface PlaylistEntryProps {
     playlist: PlaylistData;

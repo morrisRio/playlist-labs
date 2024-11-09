@@ -1,7 +1,8 @@
-import React from "react";
 import Marquee from "react-fast-marquee";
-import { Seed } from "@/types/spotify";
+
 import SeedEntry from "./PlaylistCreator/Forms/SeedsForm/SeedEntry";
+import { Seed } from "@/types/spotify";
+
 import { twUi900 } from "@/lib/utils";
 
 const Seeds: Seed[] = [

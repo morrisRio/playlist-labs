@@ -1,13 +1,14 @@
 "use client";
-import { CgProfile } from "react-icons/cg";
-
-/* eslint-disable @next/next/no-img-element */
-import { MdLogout, MdOutlineDelete } from "react-icons/md";
-import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
-import UniModal from "@/components/Modals/UniModal";
-import ContextMenu from "./Context";
+import { signOut, useSession } from "next-auth/react";
+
 import { dbDeleteUser } from "@/lib/db/dbActions";
+
+import ContextMenu from "./Context";
+import UniModal from "@/components/Modals/UniModal";
+
+import { CgProfile } from "react-icons/cg";
+import { MdLogout, MdOutlineDelete } from "react-icons/md";
 
 const Profile = () => {
     const { data: session } = useSession();

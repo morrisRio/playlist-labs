@@ -1,9 +1,11 @@
 "use server";
 
-import { authOptions } from "@/lib/auth";
 import type { GetServerSidePropsContext, NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
-import { debugLog, getAppUrl, setDebugMode } from "@/lib/utils";
+
+import { authOptions } from "@/lib/auth";
+import { debugLog } from "@/lib/utils";
+
 import { ErrorRes } from "@/types/spotify";
 
 /* helper function for getServerSession() to avoid passing authOptions around */

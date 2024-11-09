@@ -1,14 +1,16 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { spotifyGet } from "@/lib/serverUtils";
+
 import { getToken } from "next-auth/jwt";
-import { getSeedsFromItems } from "@/lib/spotifyUtils";
-import { allGenresSeeds } from "@/lib/spotifyConstants";
-import { Seed } from "@/types/spotify";
-import { Track, Artist } from "@/types/spotify";
+
 import { distance } from "fastest-levenshtein";
+import { spotifyGet } from "@/lib/serverUtils";
+import { getSeedsFromItems } from "@/lib/spotifyUtils";
 import { debugLog, setDebugMode } from "@/lib/utils";
 
+import { allGenresSeeds } from "@/lib/spotifyConstants";
+
+import { Track, Artist, Seed } from "@/types/spotify";
 interface SearchResults {
     artists: { items: Artist[] };
     tracks: { items: Track[] };
@@ -16,19 +18,20 @@ interface SearchResults {
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
-        const q = req.nextUrl.searchParams.get("q");
         setDebugMode(false);
 
-        debugLog("GETTING TOKEN");
+        const q = req.nextUrl.searchParams.get("q");
 
         //add the token to the request for the api call
         const token = await getToken({ req });
         if (!token || !token.accessToken) {
-            console.error("No token found");
+            console.error("API: SEARCH GET - No token found");
             return new NextResponse("No token found", { status: 401 });
         }
 
         const accessToken = token.accessToken;
+
+        debugLog("API: SEARCH GET - Getting search results for", q);
 
         let genreSeeds: Seed[] = [];
         if (q) {
@@ -36,8 +39,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
                 return distance(genre.title.substring(0, q.length), q) < 2;
             });
         }
-
-        debugLog("GETTING THE ITEMS");
 
         // make the api call to search for tracks and artists
         const data = (await spotifyGet(
@@ -55,7 +56,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         //sort them with the lehvenstein distance algorithm according to the search query
         const results = [...genreSeeds, ...trackSeeds, ...artistSeeds];
 
-        // TODO: OPTIMIZING remember to check for timeout
         const resultsRanked = results.map((item: any) => {
             return {
                 ...item,

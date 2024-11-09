@@ -1,6 +1,6 @@
 "use client";
 
-import Logo from "../../../../../public/logo-small.svg";
+import Logo from "../../../../../public/logo-v2.svg";
 import mockup from "../../../../../public/mockup.png";
 import Rules from "../../../../../public/rules-v2.png";
 import Schedule from "../../../../../public/schedule-v2.png";
@@ -26,7 +26,7 @@ function Login() {
                     <div className="flex flex-col px-8 gap-4 md:gap-6 sm:flex-grow md:order-2">
                         <div className="flex gap-2 md:gap-3 items-center mb-6">
                             <Logo className="size-4 md:size-5 -mb-1" />
-                            <h3 className="text-base md:text-lg">playlistLabs</h3>
+                            <h3 className="text-base md:text-lg font-regular">playlistLabs</h3>
                         </div>
                         <h1 className="md:text-5xl font-medium">
                             Discover Your <br /> Next Favorite Song. <br />
@@ -56,7 +56,7 @@ function Login() {
                 </div>
                 {/* Intro Text */}
                 <SeedCarousel></SeedCarousel>
-                <div className="px-8 mt-4 md:mt-8 md:max-w-[500px] md:mx-auto mb-20">
+                <div className="px-8 mt-4 md:mt-8 md:max-w-[500px] md:mx-auto mb-10 md:mb-24">
                     <h2 className="font-medium mb-4">Embark on a Journey of Music Discovery</h2>
                     <p className="text-ui-400">
                         Feeling stuck in the same musical loop? playlistLabs lets you break free. Build custom playlists

@@ -1,6 +1,7 @@
 import { ServerApiVersion } from "mongodb";
 import mongoose from "mongoose";
-import { debugLog, setDebugMode } from "@/lib/utils";
+
+import { debugLog } from "@/lib/utils";
 
 const MONGODB_URI = process.env.MONGODB_URI!;
 

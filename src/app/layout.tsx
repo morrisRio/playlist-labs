@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import "./globals.css";
 import NextTopLoader from "nextjs-toploader";
+
 import { twUi500 } from "@/lib/utils";
+
+import "./globals.css";
 import SpotifyFull from "../../public/spotify-full.svg";
 
 const ibmPlexSans = localFont({

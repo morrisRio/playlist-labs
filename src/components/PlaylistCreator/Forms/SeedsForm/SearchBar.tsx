@@ -12,15 +12,7 @@ const debounce = (func: (arg0: string) => void, delay: number) => {
     };
 };
 
-function SearchBar({
-    setSearch,
-    onEscape,
-    onEnter,
-}: {
-    setSearch: (value: string) => void;
-    onEscape?: () => void;
-    onEnter?: () => void;
-}) {
+function SearchBar({ setSearch, onEscape }: { setSearch: (value: string) => void; onEscape?: () => void }) {
     const inputRef = useRef<HTMLInputElement>(null);
 
     const [query, setQuery] = useState("");

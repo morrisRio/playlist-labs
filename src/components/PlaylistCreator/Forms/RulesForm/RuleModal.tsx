@@ -1,13 +1,11 @@
 import { useEffect } from "react";
 
 import { RuleEntry } from "./RuleEntry";
-
 import { allRules } from "@/lib/spotifyConstants";
-import { Rule } from "@/types/spotify";
-
-import { MdOutlineArrowBackIos } from "react-icons/md";
-
 import { useEscapeKey } from "@/lib/hooks/useEscapeKey";
+
+import { Rule } from "@/types/spotify";
+import { MdOutlineArrowBackIos } from "react-icons/md";
 
 interface RuleModalProps {
     onAdd: (rule: Rule) => void;

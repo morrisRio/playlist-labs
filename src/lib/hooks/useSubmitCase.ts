@@ -1,5 +1,5 @@
 import { PlaylistData, Preferences, Rule, Seed } from "@/types/spotify";
-import { useState, useCallback, RefObject, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 import { MdShuffle } from "react-icons/md";
 import { BsStars } from "react-icons/bs";
@@ -36,7 +36,6 @@ export const useSubmitCase = ({
     const hasChanged = useCallback((a: any, b: any) => JSON.stringify(a) !== JSON.stringify(b), []);
 
     const settingsToBeSaved = useMemo(() => {
-        console.log("settingsToBeSaved triggered");
         return hasChanged(
             {
                 name: preferences.name,
@@ -54,7 +53,6 @@ export const useSubmitCase = ({
     }, [preferences, initialState.preferences, hasChanged]);
 
     const settingsToBeApplied = useMemo(() => {
-        console.log("settingsToBeApplied triggered");
         return hasChanged(
             {
                 amount: preferences.amount,

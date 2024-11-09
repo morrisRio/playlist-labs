@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo, use } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import useSWR from "swr";
 import type { Key, SWRConfiguration, SWRResponse } from "swr";
 
@@ -150,8 +150,6 @@ function SeedModal({ onAdd, onRemove, onClose, seeds }: SeedModalProps) {
         }
 
         try {
-            console.log("searchResults", searchResults);
-            console.log("searchResults", topItems);
             return (showSearch ? searchResults : topItems).map((seed: Seed, index: number) => (
                 <SeedEntry
                     seedObj={seed}

@@ -18,20 +18,12 @@ export async function GET(
         debugLog("API: GETTING THE PLAYLIST COVER IMAGE");
         const token = await getToken({ req });
         if (!token) {
-            console.error("No token found");
-            debugLog("API: END OF GET-----------------------");
+            console.error("API: GET IMAGE - No token found");
             return NextResponse.json({ error: "No token found" }, { status: 401 });
         }
 
         const { accessToken } = token;
-        debugLog("API: GET - TOKEN FROM REQ:", accessToken);
-
-        //This is the debug routine for testing the error handling
-        // if (accessToken === "error4")
-        //     return NextResponse.json("https://upload.wikimedia.org/wikipedia/commons/1/1f/SMirC-thumbsup.svg", {
-        //         status: 200,
-        //     });
-        // return NextResponse.json({ error: "Wrong Token: " + accessToken }, { status: 401 });
+        debugLog("API: GET IMAGE - Token from request:", accessToken);
 
         const playlistId = params.id;
 
@@ -50,15 +42,13 @@ export async function GET(
         );
 
         if (imageResponseData.error) {
-            debugLog("API - error", imageResponseData.error);
-            debugLog("API: END OF GET -----------------------");
+            debugLog("API: GET IMAGE - Error:", imageResponseData.error);
             const { message, status } = imageResponseData.error;
             return NextResponse.json({ message }, { status });
         }
 
         const { url } = imageResponseData[0];
-        debugLog("API: SUCCESS", url);
-        debugLog("API: END OF GET -----------------------");
+        debugLog("API: GET IMAGE - SUCCESS", url);
 
         return NextResponse.json(url, { status: 200 });
     } catch (error: any) {
