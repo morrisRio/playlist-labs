@@ -1,37 +1,95 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# playlistLabs - Spotify Discover Playlist Generator
+
+Take full control of new music recommendations and dive into fresh tracks with playlists that are made for you, by you.
+
+## Introduction
+
+**playlistLabs** is a Next.js web app that empowers users to create custom Spotify playlists based on set preferences and automatically refreshes them at a specified frequency. It leverages the **Spotify Web API**, **Vercel Cron Jobs**, and a **MongoDB** database (modeled with Mongoose) to offer a tailored, dynamic music discovery experience.
+
+**Inspiration**: This app was inspired by the overwhelming amount of mid lofi hip-hop and and random 'The Three Investigators' episodes in my Spotify Discover Weekly playlists.
+
+## Features
+
+-   **Customizable Playlists**: Users can create playlists by selecting up to five "seed" preferences (artists, tracks, genres) and by setting rules for track characteristics (e.g., danceability, mood, tempo).
+-   **Automated Updates**: Set your playlist to refresh at specific intervals, ensuring it stays fresh with the latest recommendations.
+-   **Integrated with Spotify API**: Full Spotify API integration allows users to connect directly to their Spotify account for seamless playlist creation and updates.
+-   **Coming Soon**: Playlist version review and restoration for tracking playlist history (backend prepared, frontend work in progress).
 
 ## Getting Started
 
-First, run the development server:
+To set up and run llaylistLabs locally, follow these steps.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### Prerequisites
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. **Spotify Developer Account**:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+    - Create a [Spotify Developer Account](https://developer.spotify.com/dashboard/applications) to obtain a **Client ID** and **Client Secret**.
+    - Add your NextAuth callback URL to the callback urls:
+        - Go to your app settings in the Spotify Dashboard
+        - Add `http://localhost:3000/api/auth/callback/spotify` to the Redirect URIs
+        - Save the changes
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+2. **MongoDB Database**:
+    - Set up a MongoDB database (e.g., via MongoDB Atlas) and acquire the connection URI (include your username and password).
 
-## Learn More
+### Installation
 
-To learn more about Next.js, take a look at the following resources:
+1. **Clone the repository**:
 
--   [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
--   [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+    ```bash
+    git clone https://github.com/yourusername/playlistlabs.git
+    cd playlistlabs
+    ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+2. **Install dependencies**:
 
-## Deploy on Vercel
+    ```bash
+    npm install
+    ```
 
-To deploy on Vercel you should follow these steps:
+3. **Environment Variables**:
 
-Install install playwright-core chrome-aws-lambda in a way that 50mb file limit is not exceeded
-[Tutorial on getting it to work on Vercel](https://ndo.dev/posts/link-screenshot)
+    - Create a `.env` file based on the provided `.env.example`, adding your Spotify credentials, MongoDB URI and NextAuth secet.
+    - You can generate a secret using the following command in your terminal
+
+    ```bash
+    openssl rand -base64 64
+    ```
+
+4. **Run the development server**:
+    ```bash
+    npm run dev
+    ```
+    - Open [http://localhost:3000](http://localhost:3000) in your browser to view the app.
+
+## Tech Stack
+
+-   **Frontend**: Next.js with the App Router, Tailwind CSS
+-   **API/Backend**: NextAuth.js for authentication, SWR for data fetching, MongoDB for storage
+-   **Deployment**: Hosted on Vercel, with Vercel Cron Jobs for scheduled playlist updates
+
+## Roadmap
+
+-   **Playlist Versioning**: Future versions will include the ability to review and restore past playlist versions, allowing users to track the history of their playlist changes.
+-   **User Feedback & Suggestions**: As this app is currently in beta, feedback is welcomed to improve the experience.
+
+## Contributing
+
+Contributions are welcome!
+
+1. Fork the Repository
+2. Create a Feature Branch (`git checkout -b feature/YourFeature`)
+3. Commit Your Changes
+4. Push to Branch (`git push origin feature/YourFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+## Contact
+
+For questions or feedback, please contact the maintainer:
+
+-   Email: hello@playlist-labs.com
+-   GitHub: morrisRio
