@@ -46,6 +46,7 @@ export const authOptions: NextAuthOptions = {
     },
     callbacks: {
         async signIn({ user, account }: { user: User; account: Account | null }): Promise<string | boolean> {
+            setDebugMode(false);
             if (!user || !account) {
                 console.error("SIGNIN_ERROR: NO_USER_PROVIDED");
                 return false;

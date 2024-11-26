@@ -33,9 +33,21 @@ export const connectMongoDB = async () => {
             deprecationErrors: true,
         },
     };
+    console.log("DB: Connecting to MongoDB");
+    console.log("DB: MONGODB_URI: ", MONGODB_URI);
 
     if (process.env.VERCEL_ENV === "production") {
-        return await mongoose.connect(MONGODB_URI, options);
+        const connectionPromise = mongoose.connect(MONGODB_URI, options).then((mongoose) => {
+            return mongoose;
+        });
+        let connection;
+        try {
+            connection = await connectionPromise;
+        } catch (e) {
+            debugLog("DB: Error connecting to MongoDB: ", e);
+            throw e;
+        }
+        return connection;
     } else {
         if (cached.conn) {
             return cached.conn;
