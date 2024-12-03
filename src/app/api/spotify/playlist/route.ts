@@ -182,7 +182,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
 export async function PUT(req: NextRequest): Promise<NextResponse> {
     try {
-        setDebugMode(false);
+        setDebugMode(true);
         debugLog("API: PLAYLIST PUT - updating playlist");
 
         //get the access token from the request
@@ -214,6 +214,8 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
             if (!id) {
                 return NextResponse.json({ message: "No Playlist ID provided" }, { status: 400 });
             }
+            //assign the data to the variables set before
+            //we opt for this approach to use the same variables later on, for new settings and refresh
             playlist_id = id;
             preferences = prefs;
             seeds = seedlings;
@@ -242,12 +244,12 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
         //for new settings only the track history is needed,
         //TODO: COULD be optimized to only get the track history in this case
         const dbUserPlaylistData = await dbGetOneUserPlaylist(userId, playlist_id);
-
         if (dbUserPlaylistData.error || !dbUserPlaylistData.data || dbUserPlaylistData.data.playlists.length === 0) {
             return NextResponse.json({ message: "Failed to get playlist data from database." }, { status: 500 });
         }
 
         const dbPlaylistData = dbUserPlaylistData.data.playlists[0] as MongoPlaylistData;
+        debugLog("API: PLAYLIST PUT - dbUserPlaylistData: ", dbPlaylistData);
 
         //get new recommendations and add them to the playlist
         if (newSongSettings && preferences && seeds) {

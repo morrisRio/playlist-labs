@@ -57,22 +57,6 @@ function LoginDialog({ onClose }: LoginDialogProps) {
                 <h3 className="font-medium">Before you Continue</h3>
 
                 <div className="max-h-full overflow-y-auto p-4 -mx-6 border-y border-ui-700 bg-ui-850 flex flex-col gap-2 text-ui-500">
-                    <div className="flex max-sm:flex-col text-amber-600 border border-amber-800 p-4 rounded-lg bg-amber-950/30 gap-4 items-center relative text-base">
-                        <div className="max-md:mx-2 md:my-2">
-                            <MdInfoOutline size="20px" />
-                        </div>
-                        <div className="max-sm:pt-4 max-sm:border-t max-sm:border-t-amber-800  sm:pl-4 sm:border-l sm:border-l-amber-800">
-                            This app is currently in Beta. To access it, you&#39;ll need to apply for registration. If
-                            you haven&#39;t done so yet, please send an inquiry inlcuding the email address you use for
-                            your Spotify account to{" "}
-                            <a
-                                href="mailto:register@playlist-labs.com"
-                                className="underline text-amber-500 text-nowrap"
-                            >
-                                register@playlist-labs.com
-                            </a>
-                        </div>
-                    </div>
                     <h5 className={`mt-6 font-semibold text-themetext`}>Legal Notice</h5>
                     <p className="text-sm">
                         playlistLabs is a free web application designed to enhance your Spotify experience. We&#39;re
@@ -119,24 +103,29 @@ function LoginDialog({ onClose }: LoginDialogProps) {
                     </div>
                 </div>
 
-                <div className="flex justify-center items-center sm:justify-end gap-4 sm:gap-8 md:py-2 flex-col sm:flex-row">
-                    <button
-                        className={`sm:order-2 p-3 px-4 min-h-12 ${
-                            showLoading ? "bg-themetext-nerfed text-ui-800" : "bg-themetext text-ui-950"
-                        }  rounded-full flex gap-3 items-center hover:bg-themetext/90`}
-                        onClick={handleLogin}
-                    >
-                        <div className="size-5">
-                            {showLoading ? (
-                                <div className="-m-5">
-                                    <Lottie animationData={Loading}></Lottie>
-                                </div>
-                            ) : (
-                                <BsSpotify size="20px" />
-                            )}
-                        </div>
-                        Continue with Spotify
-                    </button>
+                <div className="flex justify-center items-center sm:justify-end gap-4 sm:gap-8 md:pb-8 md:pt-2 flex-col sm:flex-row">
+                    <div className="relative flex sm:order-2 text-ui-600">
+                        <button
+                            className={` p-3 px-4 min-h-12 ${
+                                showLoading ? "bg-themetext-nerfed text-ui-800" : "bg-themetext text-ui-950"
+                            }  rounded-full flex gap-3 items-center hover:bg-themetext/90`}
+                            onClick={handleLogin}
+                        >
+                            <div className="size-5">
+                                {showLoading ? (
+                                    <div className="-m-5">
+                                        <Lottie animationData={Loading}></Lottie>
+                                    </div>
+                                ) : (
+                                    <BsSpotify size="20px" />
+                                )}
+                            </div>
+                            Continue with Spotify
+                        </button>
+                        <p className="absolute -bottom-8 left-1/2 -translate-x-1/2">
+                            {"("} Try Demo {")"}
+                        </p>
+                    </div>
                     <button
                         className="sm:order-1 min-h-12 p-2 px-8 min-w-32 bg-ui-900 text-base rounded-full text-center hover:bg-ui-800 border border-ui-700"
                         onClick={() => onClose()}

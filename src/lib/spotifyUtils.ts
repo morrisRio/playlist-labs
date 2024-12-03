@@ -300,7 +300,6 @@ interface MongoRule {
  * @returns An array of Rule objects with matched rule names and corresponding values.
  */
 export const completeRules = (rules: MongoRule[]): Rule[] => {
-    setDebugMode(false);
     if (rules.length === 0) {
         debugLog("returning empty rules array");
         return [] as Rule[];
@@ -474,7 +473,8 @@ export const getRecommendations = async (
         const trackRes: TrackRes = await spotifyGet(
             `https://api.spotify.com/v1/recommendations?${limitQuery}${seedQuery}${ruleQuery}`,
             accessToken,
-            validateTrackRes
+            validateTrackRes,
+            true
         );
 
         if ("error" in trackRes) {
