@@ -3,10 +3,14 @@ import mongoose from "mongoose";
 
 import { debugLog } from "@/lib/utils";
 
-const MONGODB_URI = process.env.MONGODB_URI!;
+const MONGODB_URI = process.env.DEMO ? process.env.DEMO_MONGO_URI! : process.env.MONGODB_URI!;
 
 if (!MONGODB_URI) {
-    throw new Error("Please define the MONGODB_URI environment variable inside .env.local");
+    if (process.env.DEMO) {
+        throw new Error("Please define the DEMO_MONGO_URI environment variable inside .env.local");
+    } else {
+        throw new Error("Please define the MONGODB_URI environment variable inside .env.local");
+    }
 }
 
 declare global {

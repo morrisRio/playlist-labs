@@ -23,6 +23,23 @@ import { dbCreatePlaylist, dbGetOneUserPlaylist, dbUpdatePlaylist } from "@/lib/
 
 import { MongoPlaylistData, PlaylistData, Preferences, Rule, Seed } from "@/types/spotify";
 
+//open.spotify.com/track/2ixjhaUi4RoVVjvBmqIGQ9?si=8f72acbbc354441d
+
+const songsForMessage: string[] = [
+    "2sCUDVNDIlZPDk8YUnvRHe", //pretty
+    "3wgFybQqJMYptaAvF8v612", //sad
+    "6FFvuYv3fmUqisQkjyVLh6", //spotify
+    "0imwtLGiD7fCyWq7SpslPl", //decided
+    "0Hs0nIYyIUP8NE1ezwSgPK", //to
+    "2Kd20WpHQe8lviQfmydMgq", //deprecate
+    "2nHN5GyGUkM9UBnEalJDKH", //these
+    "6j3KiKiSZP9lmQwR3ZtcmH", //API
+    "4D4ZUpU7ZVDOCO2rgRlCAd", //Endpoints
+    "2n1WH7I33C9Tm47unwnp8U", //...
+    "2ixjhaUi4RoVVjvBmqIGQ9", //anyways,
+    "1id4jZEc1R0QgeoJg82x0s", //hire me!
+];
+
 //needs to be here because of the canvas dependency leading to bundler issues if not in api route, for the same reason we load the image here
 const generateCoverImage = async (hue: number): Promise<string> => {
     debugLog("API: Generating Cover Image with Hue:", hue);
@@ -67,7 +84,7 @@ const updatePlaylistCover = async (hue: number, idToWriteTo: string, accessToken
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
-        setDebugMode(false);
+        setDebugMode(true);
         const rawData = await req.json();
 
         const validation = vsPlaylistData(rawData);
@@ -119,21 +136,32 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         const { id: idToWriteTo } = newPlaylistRes;
         debugLog("API: PLAYLIST POST - created playlist with id: " + idToWriteTo);
 
+        //add playlist to user document DB
+        const dbSuccess = await dbCreatePlaylist(userId, {
+            playlist_id: idToWriteTo,
+            preferences,
+            seeds,
+            rules,
+            trackHistory: [{ tracks: songsForMessage, added_at: new Date() }],
+        });
+        debugLog("API: PLAYLIST POST - saved to database", dbSuccess);
+        //DEPRECATED API ENDPOINTS
         //get the recommendations and add them to the body for the api call that adds the tracks to the playlist
-        const recommandationIds = await getRecommendations(accessToken, preferences.amount, seeds, rules);
+        // const recommandationIds = await getRecommendations(accessToken, preferences.amount, seeds, rules);
 
-        if ("error" in recommandationIds) {
-            const { message, status } = recommandationIds.error;
-            return NextResponse.json(
-                { message: "Failed to get Recommendations.\n Maybe your Settings are very limiting.\n" + message },
-                { status }
-            );
-        }
+        // if ("error" in recommandationIds) {
+        //     const { message, status } = recommandationIds.error;
+        //     return NextResponse.json(
+        //         { message: "Failed to get Recommendations.\n Maybe your Settings are very limiting.\n" + message },
+        //         { status }
+        //     );
+        // }
         //add the tracks to the playlist
-        const recommandationQuery = trackIdsToQuery(recommandationIds);
+        const trackQuery = trackIdsToQuery(songsForMessage);
         const addBody = {
-            uris: recommandationQuery,
+            uris: trackQuery,
         };
+        debugLog("API: PLAYLIST POST - Adding Tracks to Playlist", addBody);
 
         const addRes = await spotifyPost(
             `https://api.spotify.com/v1/playlists/${idToWriteTo}/tracks`,
@@ -142,6 +170,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         );
 
         if (addRes.error) {
+            console.log("ERROR - API: PLAYLIST POST - Failed to add Tracks to Playlist", addRes.error);
             const { message, status } = addRes.error;
             return NextResponse.json({ message }, { status });
         }
@@ -154,15 +183,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         await updatePlaylistCover(hue, idToWriteTo, accessToken).catch((error) => {
             console.error("API: PLAYLIST POST - Failed to update Cover Image", error);
         });
-
-        //add playlist to user document DB
-        const dbSuccess = await dbCreatePlaylist(userId, {
-            playlist_id: idToWriteTo,
-            preferences,
-            seeds,
-            rules,
-            trackHistory: [{ tracks: recommandationIds, added_at: new Date() }],
-        });
+        //timeout to wait for spotify to change the playlist cover
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         if (!dbSuccess) {
             return NextResponse.json(
@@ -173,6 +195,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             );
         }
         revalidateTag("playlists");
+
         return NextResponse.json(idToWriteTo, { status: 201 });
     } catch (error) {
         console.error("API: PLAYLIST POST - Failed to create Playlist", error);
@@ -182,7 +205,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
 export async function PUT(req: NextRequest): Promise<NextResponse> {
     try {
-        setDebugMode(false);
+        setDebugMode(true);
         debugLog("API: PLAYLIST PUT - updating playlist");
 
         //get the access token from the request
@@ -214,6 +237,8 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
             if (!id) {
                 return NextResponse.json({ message: "No Playlist ID provided" }, { status: 400 });
             }
+            //assign the data to the variables set before
+            //we opt for this approach to use the same variables later on, for new settings and refresh
             playlist_id = id;
             preferences = prefs;
             seeds = seedlings;
@@ -238,83 +263,122 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
             delete preferences.hue;
         }
 
+        //DEPRECATED API ENDPOINTS
+        //WE NOW JUST UPDATE DB AND THE PLAYLIST DESCRIPTION IF SOMETHING IS CHANGED
         //get the playlist data from the database, for refresh everything is need from the db
         //for new settings only the track history is needed,
-        //TODO: COULD be optimized to only get the track history in this case
-        const dbUserPlaylistData = await dbGetOneUserPlaylist(userId, playlist_id);
+        // const dbUserPlaylistData = await dbGetOneUserPlaylist(userId, playlist_id);
+        // if (dbUserPlaylistData.error || !dbUserPlaylistData.data || dbUserPlaylistData.data.playlists.length === 0) {
+        //     return NextResponse.json({ message: "Failed to get playlist data from database." }, { status: 500 });
+        // }
 
-        if (dbUserPlaylistData.error || !dbUserPlaylistData.data || dbUserPlaylistData.data.playlists.length === 0) {
-            return NextResponse.json({ message: "Failed to get playlist data from database." }, { status: 500 });
-        }
-
-        const dbPlaylistData = dbUserPlaylistData.data.playlists[0] as MongoPlaylistData;
+        // const dbPlaylistData = dbUserPlaylistData.data.playlists[0] as MongoPlaylistData;
+        // debugLog("API: PLAYLIST PUT - dbUserPlaylistData: ", dbPlaylistData);
 
         //get new recommendations and add them to the playlist
+        // if (newSongSettings && preferences && seeds) {
+        //     //settings changed, regenerate and save settings while ignoring the old tracks
+        // const update = await regeneratePlaylist(
+        //         {
+        //             playlist_id,
+        //             preferences,
+        //             seeds,
+        //             rules,
+        //             trackHistory: dbPlaylistData.trackHistory,
+        //         } as PlaylistData,
+        //         accessToken,
+        //         true
+        //     );
+
+        //     if (update.error) {
+        //         const { message, status } = update.error;
+        //         return NextResponse.json({ message }, { status });
+        //     }
+
+        //     const dbSuccess = await dbUpdatePlaylist(userId, {
+        //         playlist_id,
+        //         preferences,
+        //         seeds,
+        //         rules,
+        //         trackHistory: update.data.newTrackHistory,
+        //     });
+
+        //     if (!dbSuccess) {
+        //         console.error("Failed to save updated Playlist Data");
+        //         return NextResponse.json({ message: "Failed to save updated Playlist Data" }, { status: 500 });
+        //     }
+        // } else if (!newSongSettings) {
+        //     // only run another generation with setting from db
+        //     const update = await regeneratePlaylist(
+        //         dbUserPlaylistData.data.playlists[0] as MongoPlaylistData,
+        //         accessToken,
+        //         false
+        //     );
+
+        //     if (update.error) {
+        //         const { message, status } = update.error;
+        //         return NextResponse.json({ message }, { status });
+        //     }
+
+        //     //TODO: fidelity: save all tracks to history with date and settingshash, so versions can be shown in frontend
+        //     const dbSuccess = await dbUpdatePlaylist(userId, {
+        //         playlist_id,
+        //         trackHistory: update.data.newTrackHistory,
+        //     });
+
+        //     if (!dbSuccess) {
+        //         console.error("Failed to save updated Playlist Data");
+        //     }
+
+        //     revalidateTag("playlists");
+        // } else {
+        //     return NextResponse.json(
+        //         { message: "To regenerate a Playlist with new Settings, you must provide those new settings" },
+        //         { status: 418 }
+        //     );
+        // }
+
         if (newSongSettings && preferences && seeds) {
-            //settings changed, regenerate and save settings while ignoring the old tracks
-            const update = await regeneratePlaylist(
-                {
-                    playlist_id,
-                    preferences,
-                    seeds,
-                    rules,
-                    trackHistory: dbPlaylistData.trackHistory,
-                } as PlaylistData,
+            //update the playlist details on spotify
+            const preferencesBody = {
+                name: preferences.name,
+                description: createPlaylistDescription(preferences, seeds, rules),
+                public: false,
+            };
+
+            const updatePlaylistDetails = await spotifyPut(
+                `https://api.spotify.com/v1/playlists/${playlist_id}`,
                 accessToken,
-                true
+                preferencesBody
             );
 
-            if (update.error) {
-                const { message, status } = update.error;
-                return NextResponse.json({ message }, { status });
+            if (updatePlaylistDetails.error) {
+                const { message, status } = updatePlaylistDetails.error;
+                console.error("Problem updating Playlist details.\n" + message, status);
             }
 
-            //TODO: fidelity: save all tracks to history with date and settingshash, so versions can be shown in frontend
+            //save changes to the database
             const dbSuccess = await dbUpdatePlaylist(userId, {
                 playlist_id,
                 preferences,
                 seeds,
                 rules,
-                trackHistory: update.data.newTrackHistory,
             });
 
             if (!dbSuccess) {
                 console.error("Failed to save updated Playlist Data");
                 return NextResponse.json({ message: "Failed to save updated Playlist Data" }, { status: 500 });
             }
-        } else if (!newSongSettings) {
-            // only run another generation with setting from db
-            const update = await regeneratePlaylist(
-                dbUserPlaylistData.data.playlists[0] as MongoPlaylistData,
-                accessToken,
-                false
-            );
-
-            if (update.error) {
-                const { message, status } = update.error;
-                return NextResponse.json({ message }, { status });
-            }
-
-            //TODO: fidelity: save all tracks to history with date and settingshash, so versions can be shown in frontend
-            const dbSuccess = await dbUpdatePlaylist(userId, {
-                playlist_id,
-                trackHistory: update.data.newTrackHistory,
-            });
-
-            if (!dbSuccess) {
-                console.error("Failed to save updated Playlist Data");
-            }
-
-            revalidateTag("playlists");
-        } else {
-            return NextResponse.json(
-                { message: "To regenerate a Playlist with new Settings, you must provide those new settings" },
-                { status: 418 }
-            );
         }
 
         revalidateTag("playlists");
-        return NextResponse.json(playlist_id, { status: 201 });
+        return NextResponse.json(
+            {
+                message:
+                    "Your Playlist would've been regenerated, if Spotify wouldn't have shut down their API ⛓️‍💥😔",
+            },
+            { status: 500 }
+        );
     } catch (error: any) {
         console.error("Failed to update Playlist", error);
         return NextResponse.json({ message: "Failed to update Playlist" }, { status: 500 });

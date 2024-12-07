@@ -1,3 +1,11 @@
+> ⚠️ **IMPORTANT NOTICE**
+>
+> Spotify has announced the deprecation of several key features in their Web API, effective **27th November**. Unfortunately, they provided limited details regarding this change.
+>
+> 🔗 For more (but not much) information, see their announcement: [Introducing some changes to our Web API](https://community.spotify.com/t5/Spotify-for-Developers/Changes-to-Web-API/td-p/6540414).
+>
+> ❤️ Love supporting artists? Consider trying Apple Music, which reportedly pays **double the royalties** to artists: [Subscribe to Apple Music](https://music.apple.com/us/subscribe).
+
 # playlistLabs - Spotify Discover Playlist Generator
 
 Take full control of new music recommendations and dive into fresh tracks with playlists that are made for you, by you.
@@ -37,7 +45,7 @@ To set up and run llaylistLabs locally, follow these steps.
 1. **Clone the repository**:
 
     ```bash
-    git clone https://github.com/yourusername/playlistlabs.git
+    git clone https://github.com/morrisRio/playlistlabs.git
     cd playlistlabs
     ```
 

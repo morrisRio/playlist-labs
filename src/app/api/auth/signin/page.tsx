@@ -5,6 +5,7 @@ import mockup from "../../../../../public/mockup.png";
 import Rules from "../../../../../public/rules-v2.png";
 import Schedule from "../../../../../public/schedule-v2.png";
 import Library from "../../../../../public/library-v1.png";
+import UniModal from "@/components/Modals/UniModal";
 
 import Image from "next/image";
 import { useState } from "react";
@@ -12,13 +13,72 @@ import { useState } from "react";
 import LoginDialog from "@/components/legal/LoginDialog";
 import SeedCarousel from "@/components/SeedCarousel";
 import { BsSpotify } from "react-icons/bs";
-import { MdArrowDownward } from "react-icons/md";
+import { MdArrowDownward, MdInfoOutline } from "react-icons/md";
 
 function Login() {
     const [showDialog, setShowDialog] = useState(false);
+    const [showDisclaimer, setShowDisclaimer] = useState(false);
+    const [showBanner, setShowBanner] = useState(true);
 
     return (
         <>
+            {showBanner && (
+                <div className="flex mx-auto mt-8 md:-mb-16 max-sm:flex-col text-amber-500 border border-amber-600 p-4 rounded-lg bg-amber-950/30 gap-4 items-center text-base sticky z-30">
+                    <div className="max-md:mx-2 md:my-2">
+                        <MdInfoOutline size="20px" />
+                    </div>
+                    <div className="max-sm:pt-4 max-sm:border-t max-sm:border-t-amber-700  sm:pl-4 sm:border-l sm:border-l-amber-700">
+                        Spotify has deprecated several core features of their Web API as of November 27th. This is a
+                        demo of the original functionality. While at it, consider checking out{" "}
+                        <a
+                            href="https://music.apple.com/us/subscribe"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-semibold underline hover:text-amber-700"
+                        >
+                            {" "}
+                            Apple Music
+                        </a>{" "}
+                        or{" "}
+                        <a
+                            href="https://soundcloud.com/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-semibold underline hover:text-amber-700"
+                        >
+                            SoundCloud
+                        </a>
+                        .
+                    </div>
+                </div>
+            )}
+            {showDisclaimer && (
+                <UniModal
+                    title="⚠️ Spotify said no"
+                    onClose={() => setShowDisclaimer(false)}
+                    action={() => {
+                        setShowDisclaimer(false);
+                        setShowDialog(true);
+                    }}
+                    actionTitle="Continue to Demo"
+                >
+                    <div className="p-6 font-sans text-ui-400 overflow-y-auto">
+                        <h2 className="text-2xl font-bold mb-3">Notice: Limited Functionality</h2>
+                        <p className="mb-2">
+                            <strong className="text-themetext">
+                                Due to Spotify&#39;s decision to deprecate several core features of their Web API as of{" "}
+                                November 27th , this app can no longer create or manage playlists dynamically.
+                            </strong>
+                            <br />
+                            <br />
+                            To demonstrate its original functionality, i&#39;ve included a{" "}
+                            <strong className="text-themetext">demo mode</strong> showcasing pre-created playlists from
+                            when the app was fully operational.
+                        </p>
+                        <p className="mb-4">Thank you for your understanding, and we hope you enjoy the demo!</p>
+                    </div>
+                </UniModal>
+            )}
             {showDialog && <LoginDialog onClose={() => setShowDialog(false)} />}
             <div className="min-h-screen flex flex-col gap-4 py-8 sm:container sm:mx-auto max-sm:overflow-x-hidden max-w-full">
                 {/* hero section */}
@@ -38,7 +98,7 @@ function Login() {
                         </p>
                         <button
                             className="p-3 px-4 bg-themetext/90 text-ui-950 rounded-full flex gap-3 items-center  self-start max-md:self-end mt-10 z-30 cursor-pointer"
-                            onClick={() => setShowDialog(true)}
+                            onClick={() => setShowDisclaimer(true)}
                         >
                             <BsSpotify size="1.2rem" />
                             Log in with Spotify
@@ -113,7 +173,7 @@ function Login() {
                         <p className="text-ui-400">Get started now!</p>
                         <button
                             className="p-3 px-6 bg-themetext/90 text-ui-950 rounded-full flex gap-3 items-center"
-                            onClick={() => setShowDialog(true)}
+                            onClick={() => setShowDisclaimer(true)}
                         >
                             <BsSpotify size="1.2rem" />
                             Log in with Spotify

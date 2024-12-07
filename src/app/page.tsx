@@ -17,7 +17,7 @@ export default async function Home() {
     let playlistData: PlaylistData[] | null = null;
 
     const session = await auth("page");
-
+    console.log("session: ", session);
     if (!session || !session.user || !session.user.id) {
         console.error("No session found");
         redirect("/api/auth/signin");

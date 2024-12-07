@@ -2,8 +2,6 @@
 import { useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 
-import { dbDeleteUser } from "@/lib/db/dbActions";
-
 import ContextMenu from "./Context";
 import UniModal from "@/components/Modals/UniModal";
 
@@ -15,14 +13,7 @@ const Profile = () => {
 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [showInfoModal, setShowInfoModal] = useState(false);
-
-    const deleteAccount = async () => {
-        if (await dbDeleteUser()) signOut();
-        else {
-            setShowInfoModal(true);
-            console.error("Error deleting user");
-        }
-    };
+    const [showNoModal, setShowNoModal] = useState(false);
 
     const UserImage = (
         <div className="relative">
@@ -38,27 +29,10 @@ const Profile = () => {
 
     return (
         <>
-            {showInfoModal && (
-                <UniModal
-                    title="Problem Deleting Account"
-                    action={deleteAccount}
-                    actionTitle="Try Again"
-                    onClose={() => setShowInfoModal(false)}
-                >
-                    <p>
-                        There was a problem deleting your account. Please try again. <br />
-                        <br />
-                        If the problem persists please contact me at{" "}
-                        <a className="text-themetext/90" href="mailto:contact@maurice-rio.de">
-                            contact&#64;maurice-rio.de
-                        </a>
-                    </p>
-                </UniModal>
-            )}
             {showConfirmModal && (
                 <UniModal
                     title="Delete Account"
-                    action={deleteAccount}
+                    action={() => setShowNoModal(true)}
                     actionTitle="Delete"
                     actionDanger={true}
                     onClose={() => setShowConfirmModal(false)}
@@ -70,6 +44,20 @@ const Profile = () => {
                         <br />
                         For security reasons we won&apos;t delete generated playlists on Spotify.
                     </p>
+                    <br />
+                    <p className="text-ui-700">In Demo Mode, you can&apos;t delete the account. </p>
+                </UniModal>
+            )}
+            {showNoModal && (
+                <UniModal
+                    title="You really can't delete this"
+                    onClose={() => setShowNoModal(false)}
+                    closeTitle="Ok, sorry"
+                >
+                    <p>
+                        I appreciate you looking around, but trust me, i won&#39;t let you delete the Demo Account{" "}
+                        <br />
+                    </p>
                 </UniModal>
             )}
             <ContextMenu contextTitle={session?.user?.name || "no title"} contextIcon={UserImage}>
@@ -78,7 +66,7 @@ const Profile = () => {
                     Sign Out
                 </button>
                 <button
-                    className="text-red-800"
+                    className="text-red-800/40"
                     onPointerDown={() => {
                         setShowConfirmModal(true);
                     }}
@@ -86,6 +74,7 @@ const Profile = () => {
                     <MdOutlineDelete />
                     Delete Account
                 </button>
+                <p className="text-xs text-ui-700">{"(Can't delete Demo Account)"}</p>
             </ContextMenu>
         </>
     );
