@@ -12,6 +12,8 @@ import User from "@/models/userModel";
 import UserModel from "@/models/userModel";
 import AccountModel from "@/models/accountModel";
 
+import exampleUser from "@/lib/db/exampleUser";
+
 type DbRes<T> =
     | {
           data: T;
@@ -101,6 +103,8 @@ export async function dbRegisterUser(
             console.error("Error creating Account:", error.message);
         }
     }
+
+    setupExampleUser(name || userId, userId);
 
     return userSuccess || accountSuccess;
 }
@@ -300,18 +304,28 @@ export async function dbDeletePlaylist(playlistId: string): Promise<boolean> {
     }
 }
 
-export async function dbDeleteUser(): Promise<boolean> {
-    //redundant authentication
-    const session = await auth();
-    const userId = session?.user.id;
-    await connectMongoDB();
+export async function setupExampleUser(userId: string, name: string): Promise<boolean> {
+    const playlistData = exampleUser.playlists;
     try {
-        const resultUser = await UserModel.deleteOne({ spotify_id: userId });
-        const resultAccount = await AccountModel.deleteOne({ spotify_id: userId });
-        if (!resultUser.acknowledged && !resultAccount.acknowledged) throw new Error("Change not acknowledged in DB");
+        const result = await UserModel.updateOne({ spotify_id: userId }, { $addToSet: { playlists: playlistData } });
+
+        if (!result.acknowledged) throw new Error("Error adding playlist to user");
         return true;
     } catch (error) {
-        console.error("Error deleting user:", error);
+        console.error("Error Adding new playlist:", error);
+        return false;
+    }
+}
+
+export async function dbResetDemoPlaylists(): Promise<boolean> {
+    await connectMongoDB();
+    try {
+        const result = await UserModel.updateOne({ spotify_id: "karate_morris" }, { playlists: exampleUser.playlists });
+
+        if (!result.acknowledged) throw new Error("Error adding playlist to user");
+        return true;
+    } catch (error) {
+        console.error("Error Adding new playlist:", error);
         return false;
     }
 }

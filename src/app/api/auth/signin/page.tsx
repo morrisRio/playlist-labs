@@ -23,7 +23,7 @@ function Login() {
     return (
         <>
             {showBanner && (
-                <div className="flex mx-auto mt-8 -mb-16 max-sm:flex-col text-amber-500 border border-amber-600 p-4 rounded-lg bg-amber-950/30 gap-4 items-center text-base sticky z-50">
+                <div className="flex mx-auto mt-8 md:-mb-16 max-sm:flex-col text-amber-500 border border-amber-600 p-4 rounded-lg bg-amber-950/30 gap-4 items-center text-base sticky z-30">
                     <div className="max-md:mx-2 md:my-2">
                         <MdInfoOutline size="20px" />
                     </div>
@@ -62,9 +62,9 @@ function Login() {
                     }}
                     actionTitle="Continue to Demo"
                 >
-                    <div className="p-6 font-sans text-ui-400">
-                        <h2 className="text-2xl font-bold mb-4">Notice: Limited Functionality</h2>
-                        <p className="mb-4">
+                    <div className="p-6 font-sans text-ui-400 overflow-y-auto">
+                        <h2 className="text-2xl font-bold mb-3">Notice: Limited Functionality</h2>
+                        <p className="mb-2">
                             <strong className="text-themetext">
                                 Due to Spotify&#39;s decision to deprecate several core features of their Web API as of{" "}
                                 November 27th , this app can no longer create or manage playlists dynamically.
@@ -75,33 +75,7 @@ function Login() {
                             <strong className="text-themetext">demo mode</strong> showcasing pre-created playlists from
                             when the app was fully operational.
                         </p>
-                        <p className="mb-4">
-                            While appreciating Spotify&#39;s contributions to the developer community, this decision has
-                            left many projects — and developers — with limited options. If you&#39;re looking for a
-                            platform that better supports both innovation and artists, consider exploring alternatives
-                            like
-                            <a
-                                href="https://music.apple.com/us/subscribe"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-500 hover:underline"
-                            >
-                                {" "}
-                                Apple Music
-                            </a>
-                            ,
-                            <a
-                                href="https://soundcloud.com/"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-500 hover:underline"
-                            >
-                                {" "}
-                                SoundCloud
-                            </a>
-                            , or other artist-focused services.
-                        </p>
-                        <p className="mb-6">Thank you for your understanding, and we hope you enjoy the demo!</p>
+                        <p className="mb-4">Thank you for your understanding, and we hope you enjoy the demo!</p>
                     </div>
                 </UniModal>
             )}

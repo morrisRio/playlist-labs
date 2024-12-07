@@ -2,12 +2,10 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { signIn } from "next-auth/react";
-
 import Lottie from "lottie-react";
 import Loading from "@/lib/lotties/loading-dark.json";
 import { BsSpotify } from "react-icons/bs";
-import { MdInfoOutline } from "react-icons/md";
+import { NextResponse } from "next/server";
 
 interface LoginDialogProps {
     onClose: () => void;
@@ -15,9 +13,25 @@ interface LoginDialogProps {
 
 function LoginDialog({ onClose }: LoginDialogProps) {
     const [showLoading, setShowLoading] = useState(false);
-    const handleLogin = () => {
+    const handleDemoSignIn = async () => {
         setShowLoading(true);
-        signIn("spotify", { callbackUrl: "/" });
+        try {
+            const res = await fetch("/api/auth/signin/demo", {
+                method: "POST",
+            });
+            if (res.ok) {
+                const targetUrl = res.url || "/";
+                console.log("Demo user signed in successfully. Redirecting to:", targetUrl);
+                window.location.href = targetUrl; // Redirect to the server-provided URL
+            } else {
+                alert("Failed to sign in as demo user.");
+            }
+        } catch (error) {
+            console.error("Error during demo sign-in:", error);
+            alert("An error occurred during demo sign-in.");
+        } finally {
+            setShowLoading(false);
+        }
     };
 
     const triggerClose = (e: React.PointerEvent) => {
@@ -109,7 +123,7 @@ function LoginDialog({ onClose }: LoginDialogProps) {
                             className={` p-3 px-4 min-h-12 ${
                                 showLoading ? "bg-themetext-nerfed text-ui-800" : "bg-themetext text-ui-950"
                             }  rounded-full flex gap-3 items-center hover:bg-themetext/90`}
-                            onClick={handleLogin}
+                            onClick={handleDemoSignIn}
                         >
                             <div className="size-5">
                                 {showLoading ? (
