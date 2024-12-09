@@ -332,7 +332,7 @@ export async function dbResetDemoPlaylists(): Promise<boolean> {
     }
 }
 
-async function dbLogAction(action: string, success: boolean, info: any) {
+export async function dbLogAction(action: string, success: boolean, info: any) {
     const logEntry = new LogModel({
         action,
         success,

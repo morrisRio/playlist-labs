@@ -117,8 +117,8 @@ function LoginDialog({ onClose }: LoginDialogProps) {
                     </div>
                 </div>
 
-                <div className="flex justify-center items-center sm:justify-end gap-4 sm:gap-8 md:pb-8 md:pt-2 flex-col sm:flex-row">
-                    <div className="relative flex sm:order-2 text-ui-600">
+                <div className="flex justify-start items-center sm:justify-end gap-4 sm:items-start sm:gap-8 md:pb-8 md:pt-2 flex-col sm:flex-row">
+                    <div className="relative flex sm:order-2 text-ui-600 items-center flex-col gap-2">
                         <button
                             className={` p-3 px-4 min-h-12 ${
                                 showLoading ? "bg-themetext-nerfed text-ui-800" : "bg-themetext text-ui-950"
@@ -136,7 +136,7 @@ function LoginDialog({ onClose }: LoginDialogProps) {
                             </div>
                             Continue with Spotify
                         </button>
-                        <p className="absolute -bottom-8 left-1/2 -translate-x-1/2">
+                        <p>
                             {"("} Try Demo {")"}
                         </p>
                     </div>

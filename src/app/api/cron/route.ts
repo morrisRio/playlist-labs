@@ -1,12 +1,18 @@
 //get every playlist and update it if needed‚
 import { NextResponse, NextRequest } from "next/server";
-import { dbGetAccountByUserId, dbResetDemoPlaylists } from "@/lib/db/dbActions";
-import { debugLog, setDebugMode } from "@/lib/utils";
+import { dbGetAccountByUserId, dbResetDemoPlaylists, dbLogAction } from "@/lib/db/dbActions";
+import { createCanvasGradient, debugLog, setDebugMode } from "@/lib/utils";
 import { refreshAccessToken, updateAccountTokenInDb } from "@/lib/auth";
 
-import exampleUser from "@/lib/db/exampleUser";
+import { exampleUser, ExamplePlaylist } from "@/lib/db/exampleUser";
+import { createPlaylistDescription, trackIdsToQuery } from "@/lib/spotifyUtils";
+import { spotifyPost, spotifyPut } from "@/lib/serverUtils";
+import { createCanvas, loadImage } from "@napi-rs/canvas";
+import { resolve } from "path";
 
-export async function POST(req: NextRequest) {
+export const dynamic = "force-dynamic";
+
+export async function GET(req: NextRequest) {
     try {
         setDebugMode(true);
 
@@ -51,17 +57,7 @@ export async function POST(req: NextRequest) {
         }
 
         for (const playlist of exampleUser.playlists) {
-            await fetch("/api/spotify/playlist/restore-version", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${freshAccessToken}`,
-                },
-                body: JSON.stringify({
-                    playlist_id: playlist.playlist_id,
-                    version_index: playlist.historyToRestore,
-                }),
-            });
+            restoreDemoPlaylistVersion(playlist, freshAccessToken);
         }
 
         dbResetDemoPlaylists();
@@ -71,15 +67,113 @@ export async function POST(req: NextRequest) {
     } catch (error: any) {
         console.error("CRON: error in POST request", error);
 
-        dbLogAction("CRON", "error", false, error.message);
+        dbLogAction("CRON", false, error.message);
 
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
 
-function dbLogAction(arg0: string, arg1: string, arg2: boolean, message: any) {
-    throw new Error("Function not implemented.");
+async function restoreDemoPlaylistVersion(playlist: ExamplePlaylist, accessToken: string) {
+    const trackToRestore = playlist.trackHistory[playlist.historyToRestore].tracks;
+
+    //turn into query string
+    const addQuery = trackIdsToQuery(trackToRestore);
+    const addBody = {
+        uris: addQuery,
+    };
+
+    //empty the playlist
+    const flushRes = await spotifyPut(
+        `https://api.spotify.com/v1/playlists/${playlist.playlist_id}/tracks`,
+        accessToken,
+        {
+            uris: [],
+        }
+    );
+
+    if (flushRes.error) {
+        const { message, status } = flushRes.error;
+        return NextResponse.json({ message }, { status });
+    }
+
+    debugLog("API: Flushed Playlist:", flushRes);
+
+    //add the tracks to the playlist
+    const addRes = await spotifyPost(
+        `https://api.spotify.com/v1/playlists/${playlist.playlist_id}/tracks`,
+        accessToken,
+        addBody
+    );
+
+    if (addRes.error) {
+        const { message, status } = addRes.error;
+        return NextResponse.json({ message }, { status });
+    }
+
+    const { playlist_id, preferences, seeds, rules } = playlist;
+    //update the description
+    const preferencesBody = {
+        name: preferences.name,
+        description: createPlaylistDescription(preferences, seeds, rules),
+        public: false,
+    };
+
+    const updatePlaylistDetails = await spotifyPut(
+        `https://api.spotify.com/v1/playlists/${playlist_id}`,
+        accessToken,
+        preferencesBody
+    );
+
+    if (updatePlaylistDetails.error) {
+        const { message, status } = updatePlaylistDetails.error;
+        console.error("Problem updating Playlist details.\n" + message, status);
+    }
+
+    //restore the cover image
+    await updatePlaylistCover(preferences.hue, playlist_id, accessToken);
 }
+
+//needs to be here because of the canvas dependency leading to bundler issues if not in api route, for the same reason we load the image here
+const generateCoverImage = async (hue: number): Promise<string> => {
+    debugLog("API: Generating Cover Image with Hue:", hue);
+    const canvas = createCanvas(640, 640);
+
+    const dirRelativeToPublicFolder = ".";
+    const dir = resolve("./public", dirRelativeToPublicFolder);
+    const pathToLogo = dir + "/logo-v2.svg";
+    const logo = await loadImage(pathToLogo);
+
+    createCanvasGradient(canvas, hue, logo);
+    const buffer = canvas.toDataURL("image/jpeg");
+    const base64JpegData = buffer.replace(/^data:image\/\w+;base64,/, "");
+    return base64JpegData;
+};
+
+const updatePlaylistCover = async (hue: number, idToWriteTo: string, accessToken: string): Promise<void> => {
+    const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("Playlist cover update timed out after 10s")), 10 * 60 * 1000); //10 minutes
+    });
+
+    try {
+        await Promise.race([
+            (async () => {
+                const coverImageData = await generateCoverImage(hue);
+                debugLog("API: Generated Cover Image. Sending to Spotify");
+                const res = await spotifyPut(
+                    `https://api.spotify.com/v1/playlists/${idToWriteTo}/images`,
+                    accessToken,
+                    coverImageData,
+                    { "Content-Type": "image/jpeg" }
+                );
+                debugLog("API: Added Cover Image to Playlist:", res);
+            })(),
+            timeoutPromise,
+        ]);
+    } catch (error) {
+        console.error("Failed to update playlist cover:", error);
+        throw error;
+    }
+};
 //DEPRECATED
 // import { dbGetAccountByUserId, dbGetAllUsers, dbUpdatePlaylist } from "@/lib/db/dbActions";
 // import { refreshAccessToken, updateAccountTokenInDb } from "@/lib/auth";

@@ -1,3 +1,5 @@
+import { Rule } from "@/types/spotify";
+
 export const exampleUser = {
     name: "karate_morris",
     spotify_id: "karate_morris",
@@ -8,6 +10,7 @@ export const exampleUser = {
             preferences: {
                 name: "Developing Flow",
                 frequency: "weekly",
+                hue: 60,
                 amount: 50,
                 on: 0,
             },
@@ -28,8 +31,17 @@ export const exampleUser = {
                 },
             ],
             rules: [
-                { name: "Instrumentalness", value: 72 },
-                { name: "Mood", value: [85.3216338575932, 27.083333333333332] },
+                { name: "Instrumentalness", value: 72, range: ["0", "100"], description: "desc", type: "range" },
+                {
+                    name: "Mood",
+                    value: [85.3216338575932, 27.083333333333332],
+                    range: [
+                        ["negative", "positive"],
+                        ["intense", "mild"],
+                    ],
+                    description: "desc",
+                    type: "axis",
+                },
             ],
             trackHistory: [
                 {
@@ -206,6 +218,7 @@ export const exampleUser = {
             preferences: {
                 name: "CozyRhythms",
                 frequency: "daily",
+                hue: 260,
                 amount: 30,
                 on: 0,
             },
@@ -238,6 +251,12 @@ export const exampleUser = {
                 {
                     name: "Mood",
                     value: [18.640350877192983, 48.717948717948715],
+                    range: [
+                        ["negative", "positive"],
+                        ["intense", "mild"],
+                    ],
+                    description: "desc",
+                    type: "axis",
                 },
             ],
             trackHistory: [
@@ -360,6 +379,7 @@ export const exampleUser = {
             preferences: {
                 name: "Shower Party",
                 frequency: "daily",
+                hue: 180,
                 amount: 5,
                 on: 0,
             },
@@ -394,8 +414,17 @@ export const exampleUser = {
                 },
             ],
             rules: [
-                { name: "Danceability", value: 99 },
-                { name: "Mood", value: [81.43129712752713, 19.326938726963142] },
+                { name: "Danceability", value: 99, range: ["0", "100"], description: "desc", type: "range" },
+                {
+                    name: "Mood",
+                    value: [81.43129712752713, 19.326938726963142],
+                    range: [
+                        ["negative", "positive"],
+                        ["intense", "mild"],
+                    ],
+                    description: "desc",
+                    type: "axis",
+                },
             ],
             trackHistory: [
                 {
@@ -488,6 +517,7 @@ export const exampleUser = {
             preferences: {
                 name: "Boom-Bap-Ballin",
                 frequency: "monthly",
+                hue: 360,
                 amount: 50,
                 on: 0,
             },
@@ -521,7 +551,15 @@ export const exampleUser = {
                     thumbnail: "https://i.scdn.co/image/ab67616d00001e02d552416cafb8792b442655b2",
                 },
             ],
-            rules: [{ name: "Tempo", value: 90 }],
+            rules: [
+                {
+                    name: "Tempo",
+                    value: 90,
+                    range: [40, 250],
+                    description: "desc",
+                    type: "range",
+                },
+            ],
             trackHistory: [
                 {
                     tracks: [
@@ -637,7 +675,18 @@ export const exampleUser = {
             historyToRestore: 1,
             _id: "671fd986157ef611f38eddca",
         },
-    ],
+    ] as ExamplePlaylist[],
+};
+
+export type ExamplePlaylist = {
+    playlist_id: string;
+    lastUpdated: Date;
+    preferences: { name: string; frequency: string; hue: number; amount: number; on: number };
+    seeds: { id: string; type: string; title: string; description: string; thumbnail: string }[];
+    rules: Rule[];
+    trackHistory: { tracks: string[]; added_at: number }[];
+    historyToRestore: number;
+    _id: string;
 };
 
 export default exampleUser;
