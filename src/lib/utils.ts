@@ -21,10 +21,15 @@ export const debugLog = (...args: any) => {
 export const getAppUrl = () => {
     try {
         if (process.env.NEXTAUTH_URL) {
+            //dev mode
             return process.env.NEXTAUTH_URL;
         } else if (process.env.VERCEL_ENV === "preview") {
-            return process.env.VERCEL_URL;
+            //preview mode
+            console.log("preview: Vercel URL: ", process.env.VERCEL_URL);
+            return "https://" + process.env.VERCEL_URL;
         } else if (process.env.VERCEL_ENV === "production") {
+            //production mode
+            console.log("production: Vercel URL: https://www.playlist-labs.com");
             return `https://www.playlist-labs.com`;
         } else {
             throw new Error(
