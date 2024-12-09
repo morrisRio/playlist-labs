@@ -1,11 +1,15 @@
 import { NextAuthOptions, Account, User } from "next-auth";
-import { JWT } from "next-auth/jwt";
+import { encode, JWT } from "next-auth/jwt";
 import SpotifyProvider from "next-auth/providers/spotify";
 
+import { setCookie } from "nookies";
+
 import { dbGetAccountByUserId, dbRegisterUser } from "@/lib/db/dbActions";
-import { debugLog, setDebugMode } from "./utils";
+import { debugLog, getAppUrl, setDebugMode } from "./utils";
 
 import { MongoAccount } from "@/types/spotify";
+import { NextApiResponse } from "next";
+import { NextRequest, NextResponse } from "next/server";
 
 //scopes for future use
 // "user-read-playback-position",
@@ -46,7 +50,9 @@ export const authOptions: NextAuthOptions = {
     },
     callbacks: {
         async signIn({ user, account }: { user: User; account: Account | null }): Promise<string | boolean> {
+
             setDebugMode(false);
+
             if (!user || !account) {
                 console.error("SIGNIN_ERROR: NO_USER_PROVIDED");
                 return false;
@@ -72,7 +78,7 @@ export const authOptions: NextAuthOptions = {
         },
 
         async jwt({ token, account }: { token: JWT; account: Account | null; user: User }): Promise<JWT> {
-            setDebugMode(false);
+            setDebugMode(true);
             const startTime = new Date().getMilliseconds();
             debugLog(startTime, "JWT CALLBACK START =========================================");
 
@@ -231,4 +237,99 @@ export async function refreshAccessToken(token: JWT) {
         console.error("CATCHED REFRESH TOKEN ERROR", error);
         return null;
     }
+}
+
+//================================================================================================
+//DMEO MODE:
+
+async function formatDemoToken(demoAccount: MongoAccount): Promise<JWT> {
+    // assign account to token
+
+    const demoAccountToken = {
+        userId: "karate_morris",
+        name: "Demo User",
+        accessToken: demoAccount.access_token,
+        refreshToken: demoAccount.refresh_token,
+        accessTokenExpires: demoAccount.token_expires,
+    } as JWT;
+
+    return demoAccountToken;
+}
+
+//get the access token for loggin in and refresh it if necessary
+async function getRecentDemoToken(): Promise<JWT> {
+    // Fetch demo user from the database
+    const dbResDemoAccount = await dbGetAccountByUserId("karate_morris");
+
+    if (!dbResDemoAccount || !dbResDemoAccount.data) {
+        console.error("Failed to fetch demo user account");
+        throw new Error("Failed to fetch demo user account");
+    }
+    console.log("GOT DEMO ACCOUNT: ", dbResDemoAccount.data);
+    const demoToken = await formatDemoToken(dbResDemoAccount.data);
+    console.log("formatted token: ", demoToken);
+
+    // Check if the access token is expired
+    const isTokenExpired = demoToken.accessTokenExpires && Date.now() / 1000 >= demoToken.accessTokenExpires - 60;
+
+    if (!isTokenExpired) {
+        // Return existing token if valid
+        console.log("Demo user token is still valid");
+        return demoToken;
+    }
+
+    // Refresh the access token if expired
+    const refreshedToken = await refreshDemoAccessToken(demoToken);
+
+    if (!refreshedToken || !refreshedToken.accessToken) {
+        throw new Error("Failed to refresh demo user token");
+    }
+
+    // Update the database with the new tokens
+    updateAccountTokenInDb(dbResDemoAccount.data, refreshedToken);
+
+    return demoToken;
+}
+
+export async function demoSignIn(req: NextRequest) {
+    try {
+        console.log("SIGNING IN DEMO USER", req.headers.get("x-real-ip"));
+
+        const demoUser = await getRecentDemoToken(); // Fetch demo user's token
+
+        const encodedDemoToken = await encode({
+            token: {
+                userId: demoUser.userId,
+                name: demoUser.name,
+                accessToken: demoUser.accessToken,
+                refreshToken: demoUser.refreshToken,
+                accessTokenExpires: demoUser.accessTokenExpires,
+            },
+            secret: process.env.NEXTAUTH_SECRET || "",
+            maxAge: 30 * 24 * 60 * 60, // 30 days
+        });
+
+        const secureCookie = process.env.NODE_ENV === "production";
+        const cookieName = secureCookie ? "__Secure-next-auth.session-token" : "next-auth.session-token";
+
+        //TODO: persist rquested resource if the initial request was not to the signin page
+        const response = NextResponse.redirect(getAppUrl() || "/");
+        response.cookies.set(cookieName, encodedDemoToken, {
+            httpOnly: true,
+            secure: secureCookie,
+            path: "/",
+            maxAge: 30 * 24 * 60 * 60, // 30 days
+        });
+
+        console.log("Success: Cookie set, redirecting to app URL");
+        return response;
+    } catch (error) {
+        console.error("Demo sign-in failed:", error);
+        return NextResponse.json({ message: "Demo sign-in failed" }, { status: 500 });
+    }
+}
+
+async function refreshDemoAccessToken(token: JWT) {
+    console.log("REFRESHING DEMO TOKEN", token.accessToken);
+    return await refreshAccessToken(token);
 }
