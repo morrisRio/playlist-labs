@@ -8,9 +8,9 @@ import { debugLog } from "@/lib/utils";
 
 import { PlaylistData, MongoPlaylistData, MongoAccount, Preferences, PlaylistUpdate } from "@/types/spotify";
 
-import User from "@/models/userModel";
 import UserModel from "@/models/userModel";
 import AccountModel from "@/models/accountModel";
+import LogModel from "@/models/logModel";
 
 import exampleUser from "@/lib/db/exampleUser";
 
@@ -134,7 +134,7 @@ export async function dbGetUsersPlaylists(userId: string): Promise<DbRes<Playlis
     await connectMongoDB();
     try {
         debugLog("searching for user", userId);
-        const user = (await User.findOne({ spotify_id: userId }, { _id: 0 }).lean()) as MongoUserData;
+        const user = (await UserModel.findOne({ spotify_id: userId }, { _id: 0 }).lean()) as MongoUserData;
 
         if (!user) {
             throw new Error("User not found");
@@ -171,7 +171,7 @@ export async function dbGetOnePlaylistData(userId: string, playlistId: string): 
     try {
         await connectMongoDB();
         // projection to only get the playlist with the id
-        const { playlists } = (await User.findOne(
+        const { playlists } = (await UserModel.findOne(
             { spotify_id: userId },
             {
                 playlists: {
@@ -198,7 +198,7 @@ export async function dbGetOneUserPlaylist(userId: string, playlistId: string): 
         await connectMongoDB();
 
         // projection to only get the playlist with the id
-        const userDoc = await User.findOne(
+        const userDoc = await UserModel.findOne(
             { spotify_id: userId },
             {
                 playlists: {
@@ -322,10 +322,22 @@ export async function dbResetDemoPlaylists(): Promise<boolean> {
     try {
         const result = await UserModel.updateOne({ spotify_id: "karate_morris" }, { playlists: exampleUser.playlists });
 
+        dbLogAction("Reset Demo Playlists", result.acknowledged, result);
+
         if (!result.acknowledged) throw new Error("Error adding playlist to user");
         return true;
     } catch (error) {
         console.error("Error Adding new playlist:", error);
         return false;
     }
+}
+
+async function dbLogAction(action: string, success: boolean, info: any) {
+    const logEntry = new LogModel({
+        action,
+        success,
+        info,
+    });
+    await logEntry.save();
+    console.log("Log saved:", logEntry);
 }

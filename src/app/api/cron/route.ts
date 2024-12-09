@@ -1,6 +1,85 @@
 //get every playlist and update it if needed‚
 import { NextResponse, NextRequest } from "next/server";
-import { dbResetDemoPlaylists } from "@/lib/db/dbActions";
+import { dbGetAccountByUserId, dbResetDemoPlaylists } from "@/lib/db/dbActions";
+import { debugLog, setDebugMode } from "@/lib/utils";
+import { refreshAccessToken, updateAccountTokenInDb } from "@/lib/auth";
+
+import exampleUser from "@/lib/db/exampleUser";
+
+export async function POST(req: NextRequest) {
+    try {
+        setDebugMode(true);
+
+        if (req.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
+            console.error(
+                process.env.CRON_SECRET ? `CRON SECRET: ${process.env.CRON_SECRET}` : "CRON_SECRET not found"
+            );
+            console.error("secrets dont match");
+            console.error("authHeader: ", req.headers.get("Authorization"));
+            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+        }
+
+        // get access tokens
+        const accountFromDB = await dbGetAccountByUserId("karate_morris");
+        if (accountFromDB.error || accountFromDB.data === null) {
+            console.error("No account found for user karate_morris");
+            return;
+        }
+        const accountDB = accountFromDB.data;
+
+        let {
+            access_token: freshAccessToken,
+            refresh_token: freshRefreshToken,
+            token_expires: freshTokenExpires,
+        } = accountDB;
+        debugLog("CRON: current access_token:", freshAccessToken.slice(0, 10) + "...");
+        if (accountDB.token_expires < Date.now() / 1000) {
+            debugLog("CRON: token expired, refreshing");
+            let refreshToken = await refreshAccessToken({
+                accessToken: freshAccessToken,
+                refreshToken: freshRefreshToken,
+                userId: "karate_morris",
+                accessTokenExpires: freshTokenExpires,
+            });
+            if (refreshToken) {
+                debugLog("CRON: new token saved to db:", refreshToken.accessToken.slice(0, 10) + "...");
+                freshAccessToken = refreshToken.accessToken;
+                freshRefreshToken = refreshToken.refreshToken;
+                freshTokenExpires = refreshToken.accessTokenExpires;
+                updateAccountTokenInDb(accountDB, refreshToken);
+            }
+        }
+
+        for (const playlist of exampleUser.playlists) {
+            await fetch("/api/spotify/playlist/restore-version", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${freshAccessToken}`,
+                },
+                body: JSON.stringify({
+                    playlist_id: playlist.playlist_id,
+                    version_index: playlist.historyToRestore,
+                }),
+            });
+        }
+
+        dbResetDemoPlaylists();
+        console.log("Demo playlists reset");
+
+        return NextResponse.json({ success: true });
+    } catch (error: any) {
+        console.error("CRON: error in POST request", error);
+
+        dbLogAction("CRON", "error", false, error.message);
+
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}
+
+function dbLogAction(arg0: string, arg1: string, arg2: boolean, message: any) {
+    throw new Error("Function not implemented.");
+}
 //DEPRECATED
 // import { dbGetAccountByUserId, dbGetAllUsers, dbUpdatePlaylist } from "@/lib/db/dbActions";
 // import { refreshAccessToken, updateAccountTokenInDb } from "@/lib/auth";
@@ -85,22 +164,3 @@ import { dbResetDemoPlaylists } from "@/lib/db/dbActions";
 //         return NextResponse.json({ error: error.message }, { status: 500 });
 //     }
 // }
-
-export async function POST(req: NextRequest) {
-    try {
-        if (req.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
-            console.error(
-                process.env.CRON_SECRET ? `CRON SECRET: ${process.env.CRON_SECRET}` : "CRON_SECRET not found"
-            );
-            console.error("secrets dont match");
-            console.error("authHeader: ", req.headers.get("Authorization"));
-            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-        }
-        dbResetDemoPlaylists();
-        console.log("Demo playlists reset");
-        return NextResponse.json({ success: true });
-    } catch (error: any) {
-        console.error("CRON: error in POST request", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-}
